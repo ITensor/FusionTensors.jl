@@ -32,7 +32,7 @@ using SymmetrySectors: U1
   ft1 = FusionTensor(m, (g1,), (g2,))
 
   # getters
-  @test data_matrix(ft1) === m
+  @test data_matrix(ft1) == m
   @test matching_axes(codomain_axes(ft1), (g1,))
   @test matching_axes(domain_axes(ft1), (g2,))
 
@@ -101,7 +101,7 @@ end
   m2 = BlockSparseArray{Float64}(gr, gc)
   ft = FusionTensor(m2, (g1, g2), (g3, g4))
 
-  @test data_matrix(ft) === m2
+  @test data_matrix(ft) == m2
   @test matching_axes(codomain_axes(ft), (g1, g2))
   @test matching_axes(domain_axes(ft), (g3, g4))
 

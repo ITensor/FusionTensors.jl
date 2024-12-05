@@ -79,24 +79,7 @@ function to_blockindexrange(b1::BlockIndexRange{1}, b2::BlockIndexRange{1})
   return Block(Block.(t))[BlockSparseArrays.to_block_indices.(t)...]
 end
 
-# TBD choose one
 function intersect_sectors(left::FusedAxes, right::FusedAxes)
-  shared_sectors = intersect(blocklabels(left), blocklabels(right))
-  blockindexrange_vec = mapreduce(vcat, shared_sectors) do s
-    codomain_trees = filter(f -> root_sector(f) == s, keys(trees_to_ranges_mapping(left)))
-    domain_trees = filter(f -> root_sector(f) == s, keys(trees_to_ranges_mapping(right)))
-    return vec(
-      collect(
-        (f1, f2) => to_blockindexrange(
-          trees_to_ranges_mapping(left)[f1], trees_to_ranges_mapping(left)[f2]
-        ) for f1 in codomain_trees, f2 in domain_trees
-      ),
-    )
-  end
-  return Dict(blockindexrange_vec)
-end
-
-function intersect_sectors2(left::FusedAxes, right::FusedAxes)
   return Dict(
     map(
       t -> first.(t) => to_blockindexrange(last.(t)...),
