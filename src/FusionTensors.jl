@@ -8,6 +8,7 @@ using BlockArrays:
   Block,
   BlockArray,
   BlockedArray,
+  BlockIndexRange,
   BlockMatrix,
   blockedrange,
   blocklength,

@@ -35,6 +35,15 @@ function FusedAxes{S}(::Tuple{}) where {S<:AbstractSector}
   return FusedAxes((), fused_axis, trees_to_ranges_mapping)
 end
 
+function FusedAxes{S}(
+  outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
+) where {S<:AbstractSector}
+  fusion_trees_mult = fusion_trees_external_multiplicites(outer_legs)
+
+  fused_leg, range_mapping = compute_inner_ranges(fusion_trees_mult)
+  return FusedAxes(outer_legs, fused_leg, range_mapping)
+end
+
 function fusion_trees_external_multiplicites(
   outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
 )
@@ -45,15 +54,6 @@ function fusion_trees_external_multiplicites(
     block_mult = prod(ntuple(i -> blocklengths(outer_legs[i])[it[i]], N))
     return build_trees(block_sectors, tree_arrows) .=> block_mult
   end
-end
-
-function FusedAxes{S}(
-  outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
-) where {S<:AbstractSector}
-  fusion_trees_mult = fusion_trees_external_multiplicites(outer_legs)
-
-  fused_leg, range_mapping = compute_inner_ranges(fusion_trees_mult)
-  return FusedAxes(outer_legs, fused_leg, range_mapping)
 end
 
 function compute_inner_ranges(
@@ -74,28 +74,36 @@ function compute_inner_ranges(
   return fused_leg, range_mapping
 end
 
-function Base.intersect(left::FusedAxes, right::FusedAxes)
-  left_labels = blocklabels(left)
-  right_labels = blocklabels(right)
-  return find_shared_indices(left_labels, right_labels)
+function to_blockindexrange(b1::BlockIndexRange{1}, b2::BlockIndexRange{1})
+  t = (b1, b2)
+  return Block(Block.(t))[BlockSparseArrays.to_block_indices.(t)...]
 end
 
-function allowed_outer_blocks_sectors(
-  left::FusedAxes, right::FusedAxes, shared_indices::AbstractVector
-)
-  left_labels = blocklabels(left)
-  left_indices = first.(shared_indices)
-  right_indices = last.(shared_indices)
-  @assert left_labels[left_indices] == blocklabels(right)[right_indices]
-  reduced_left = .!isempty.(index_matrix(left)[:, left_indices])
-  reduced_right = .!isempty.(index_matrix(right)[:, right_indices])
-
-  block_sectors = Dict{NTuple{ndims(left) + ndims(right),Int},Vector{eltype(left_labels)}}()
-  for i in axes(reduced_left, 1), j in axes(reduced_right, 1)
-    intersection = findall(>(0), reduced_left[i, :] .* reduced_right[j, :])
-    isempty(intersection) && continue
-    full_block = (unravel_index(i, left)..., unravel_index(j, right)...)
-    block_sectors[full_block] = left_labels[left_indices[intersection]]
+# TBD choose one
+function intersect_sectors(left::FusedAxes, right::FusedAxes)
+  shared_sectors = intersect(blocklabels(left), blocklabels(right))
+  blockindexrange_vec = mapreduce(vcat, shared_sectors) do s
+    codomain_trees = filter(f -> root_sector(f) == s, keys(trees_to_ranges_mapping(left)))
+    domain_trees = filter(f -> root_sector(f) == s, keys(trees_to_ranges_mapping(right)))
+    return vec(
+      collect(
+        (f1, f2) => to_blockindexrange(
+          trees_to_ranges_mapping(left)[f1], trees_to_ranges_mapping(left)[f2]
+        ) for f1 in codomain_trees, f2 in domain_trees
+      ),
+    )
   end
-  return block_sectors
+  return Dict(blockindexrange_vec)
+end
+
+function intersect_sectors2(left::FusedAxes, right::FusedAxes)
+  return Dict(
+    map(
+      t -> first.(t) => to_blockindexrange(last.(t)...),
+      Iterators.filter(
+        t -> root_sector(first(t[1])) == root_sector(first(t[2])),
+        Iterators.product(trees_to_ranges_mapping(left), trees_to_ranges_mapping(right)),
+      ),
+    ),
+  )
 end
