@@ -88,6 +88,13 @@ function Base.eachindex(::FusionTensor)
   throw(codomainError("eachindex", "eachindex not defined for FusionTensor"))
 end
 
+function Base.getindex(ft::FusionTensor, trees::Tuple{<:FusionTree,<:FusionTree})
+  return data_matrix(ft)[trees_block_mapping(ft)[trees]]
+end
+function Base.getindex(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+  return ft[(f1, f2)]
+end
+
 Base.ndims(::FusionTensor{T,N}) where {T,N} = N
 
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)

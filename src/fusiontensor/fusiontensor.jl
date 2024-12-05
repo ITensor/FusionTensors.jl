@@ -6,7 +6,7 @@ struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,
   data_matrix::Mat
   codomain_axes::CoDomainAxes
   domain_axes::DomainAxes
-  tree_to_block_mapping::Mapping
+  trees_block_mapping::Mapping
 
   # inner constructor to impose constraints on types
   # TBD replace codomain_legs with FusedAxes(codomain_legs)?
@@ -14,11 +14,11 @@ struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,
     mat::AbstractMatrix,
     codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
     domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-    tree_to_block_mapping::Dict,
+    trees_block_mapping::Dict,
   )
     S = sector_type(axes(mat, 1))
     @assert sector_type(axes(mat, 2)) === S
-    @assert keytype(tree_to_block_mapping) <: Tuple{<:FusionTree{S},<:FusionTree{S}}
+    @assert keytype(trees_block_mapping) <: Tuple{<:FusionTree{S},<:FusionTree{S}}
     @assert all(sector_type.(codomain_legs) .=== S)
     @assert all(sector_type.(domain_legs) .=== S)
     return new{
@@ -27,9 +27,9 @@ struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,
       typeof(codomain_legs),
       typeof(domain_legs),
       typeof(mat),
-      typeof(tree_to_block_mapping),
+      typeof(trees_block_mapping),
     }(
-      mat, codomain_legs, domain_legs, tree_to_block_mapping
+      mat, codomain_legs, domain_legs, trees_block_mapping
     )
   end
 end
@@ -38,7 +38,7 @@ end
 data_matrix(ft::FusionTensor) = ft.data_matrix
 codomain_axes(ft::FusionTensor) = ft.codomain_axes
 domain_axes(ft::FusionTensor) = ft.domain_axes
-tree_to_block_mapping(ft::FusionTensor) = ft.tree_to_block_mapping
+trees_block_mapping(ft::FusionTensor) = ft.trees_block_mapping
 
 # misc access
 ndims_codomain(ft::FusionTensor) = length(codomain_axes(ft))
