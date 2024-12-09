@@ -47,7 +47,24 @@ ndims_domain(ft::FusionTensor) = length(domain_axes(ft))
 matrix_size(ft::FusionTensor) = quantum_dimension.(axes(data_matrix(ft)))
 matrix_row_axis(ft::FusionTensor) = first(axes(data_matrix(ft)))
 matrix_column_axis(ft::FusionTensor) = last(axes(data_matrix(ft)))
+
+# GradedUnitRanges interface
 GradedUnitRanges.sector_type(ft::FusionTensor) = sector_type(matrix_row_axis(ft))
+function GradedUnitRanges.findblock(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+  # find outer block corresponding to fusion trees
+  @assert ndims_codomain(ft) == length(f1)
+  @assert ndims_domain(ft) == length(f2)
+  @assert sector_type(ft) == sector_type(f1)
+  @assert sector_type(ft) == sector_type(f2)
+  b1 = ntuple(
+    i -> findfirst(==(leaves(f1)[i]), blocklabels(codomain_axes(ft)[i])), ndims_codomain(ft)
+  )
+  b2 = ntuple(
+    i -> findfirst(==(leaves(f2)[i]), blocklabels(dual(domain_axes(ft)[i]))),
+    ndims_domain(ft),
+  )
+  return Block(b1..., b2...)
+end
 
 function sanitize_axes(raw_legs)
   legs = unify_sector_type(raw_legs)
@@ -145,6 +162,7 @@ function initialize_allowed_sectors!(mat::AbstractBlockMatrix)
   end
 end
 
+# TODO move to tests
 function check_data_matrix_axes(
   mat::BlockSparseMatrix, codomain_legs::Tuple, domain_legs::Tuple
 )
@@ -157,6 +175,7 @@ function check_data_matrix_axes(mat::Adjoint, codomain_legs::Tuple, domain_legs:
   return check_data_matrix_axes(adjoint(mat), dual.(domain_legs), dual.(codomain_legs))
 end
 
+# TODO move to tests
 function check_sanity(ft::FusionTensor)
   nca = ndims_domain(ft)
   @assert nca == length(domain_axes(ft)) "ndims_domain does not match domain_axes"

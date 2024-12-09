@@ -53,9 +53,17 @@ Base.Array(ft::FusionTensor) = Array(cast_to_array(ft))
 
 # adjoint is costless: dual axes, swap codomain and domain, take data_matrix adjoint.
 # data_matrix coeff are not modified (beyond complex conjugation)
+transpose_mapping(d::Dict) = Dict([reverse(k) => transpose_mapping(v) for (k, v) in d])
+function transpose_mapping(b::BlockIndexRange{2})
+  new_block = Block(reverse(Tuple(Block(b))))
+  return new_block[reverse(b.indices)...]
+end
 function Base.adjoint(ft::FusionTensor)
   return FusionTensor(
-    adjoint(data_matrix(ft)), dual.(domain_axes(ft)), dual.(codomain_axes(ft))
+    adjoint(data_matrix(ft)),
+    dual.(domain_axes(ft)),
+    dual.(codomain_axes(ft)),
+    transpose_mapping(trees_block_mapping(ft)),
   )
 end
 
@@ -88,11 +96,21 @@ function Base.eachindex(::FusionTensor)
   throw(codomainError("eachindex", "eachindex not defined for FusionTensor"))
 end
 
-function Base.getindex(ft::FusionTensor, trees::Tuple{<:FusionTree,<:FusionTree})
-  return data_matrix(ft)[trees_block_mapping(ft)[trees]]
-end
+Base.getindex(ft::FusionTensor, f1f2::Tuple{<:FusionTree,<:FusionTree}) = ft[f1f2...]
 function Base.getindex(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
-  return ft[(f1, f2)]
+  return data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]
+end
+
+function Base.setindex!(
+  ft::FusionTensor, m::AbstractMatrix, f1f2::Tuple{<:FusionTree,<:FusionTree}
+)
+  return setindex!(ft, m, f1f2...)
+end
+# TBD any way to replace explicit definition with better handling of @views?
+function Base.setindex!(ft::FusionTensor, m::AbstractMatrix, f1::FusionTree, f2::FusionTree)
+  #return setindex!(data_matrix(ft), m, trees_block_mapping(ft)[f1, f2])
+  # workaround for setindex(::BlockSparseArray) issue
+  return data_matrix(ft)[trees_block_mapping(ft)[f1, f2]] .= m
 end
 
 Base.ndims(::FusionTensor{T,N}) where {T,N} = N
@@ -124,3 +142,8 @@ function Base.show(io::IO, ::MIME"text/plain", ft::FusionTensor)
 end
 
 Base.size(ft::FusionTensor) = quantum_dimension.(axes(ft))
+
+Base.view(ft::FusionTensor, f1f2::Tuple{<:FusionTree,<:FusionTree}) = view(ft, f1f2...)
+function Base.view(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+  return view(data_matrix(ft), trees_block_mapping(ft)[f1, f2])
+end

@@ -38,20 +38,20 @@ end
 function FusedAxes{S}(
   outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
 ) where {S<:AbstractSector}
-  fusion_trees_mult = fusion_trees_external_multiplicites(outer_legs)
+  fusion_trees_mult = fusion_trees_external_multiplicities(outer_legs)
 
   fused_leg, range_mapping = compute_inner_ranges(fusion_trees_mult)
   return FusedAxes(outer_legs, fused_leg, range_mapping)
 end
 
-function fusion_trees_external_multiplicites(
+function fusion_trees_external_multiplicities(
   outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
 )
   N = length(outer_legs)
   tree_arrows = isdual.(outer_legs)
   return mapreduce(vcat, CartesianIndices(blocklength.(outer_legs))) do it
-    block_sectors = ntuple(i -> blocklabels(outer_legs[i])[it[i]], N)
-    block_mult = prod(ntuple(i -> blocklengths(outer_legs[i])[it[i]], N))
+    block_sectors = map((g, i) -> blocklabels(g)[i], outer_legs, Tuple(it))
+    block_mult = mapreduce((g, i) -> blocklengths(g)[i], *, outer_legs, Tuple(it); init=1)
     return build_trees(block_sectors, tree_arrows) .=> block_mult
   end
 end

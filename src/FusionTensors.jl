@@ -29,6 +29,7 @@ using GradedUnitRanges:
   blocklabels,
   blockmergesort,
   dual,
+  findblock,
   fusion_product,
   gradedrange,
   isdual,
@@ -37,7 +38,19 @@ using GradedUnitRanges:
   space_isequal,
   unlabel_blocks
 using SymmetrySectors:
-  AbstractSector, TrivialSector, block_dimensions, istrivial, quantum_dimension, trivial
+  ⊗,
+  AbelianStyle,
+  AbstractSector,
+  NotAbelianStyle,
+  SectorProduct,
+  SymmetrySectors,
+  SymmetryStyle,
+  TrivialSector,
+  arguments,
+  block_dimensions,
+  istrivial,
+  quantum_dimension,
+  trivial
 using TensorAlgebra:
   TensorAlgebra,
   Algorithm,
@@ -49,7 +62,6 @@ using TensorAlgebra:
 
 include("fusion_trees/fusiontree.jl")
 include("fusion_trees/clebsch_gordan_tensors.jl")
-include("fusion_trees/fusion_tree_tensors.jl")
 
 include("fusiontensor/fusedaxes.jl")
 include("fusiontensor/fusiontensor.jl")

@@ -32,8 +32,19 @@ function clebsch_gordan_tensor(
   return cgt
 end
 
-function clebsch_gordan_tensor(s1::O2, s2::O2, s3::O2, ::Int)
-  return clebsch_gordan_tensor(s1, s2, s3)  # no inner multiplicity
+function clebsch_gordan_tensor(s1::S, s2::S, s3::S, outer_mult_index::Int) where {S}
+  return clebsch_gordan_tensor(SymmetryStyle(S), s1, s2, s3, outer_mult_index)
+end
+
+function clebsch_gordan_tensor(
+  ::AbelianStyle, s1::S, s2::S, s3::S, outer_mult_index::Int
+) where {S}
+  @assert outer_mult_index == 1
+  return s1 ⊗ s2 == s3 ? ones((1, 1, 1)) : zeros((1, 1, 1))
+end
+
+function clebsch_gordan_tensor(::NotAbelianStyle, s1::O2, s2::O2, s3::O2, ::Int)
+  return clebsch_gordan_tensor(s1, s2, s3)  # no outer multiplicity
 end
 
 function clebsch_gordan_tensor(s1::O2, s2::O2, s3::O2)
@@ -78,8 +89,8 @@ function clebsch_gordan_tensor(s1::O2, s2::O2, s3::O2)
   return cgt
 end
 
-function clebsch_gordan_tensor(s1::SU{2}, s2::SU{2}, s3::SU{2}, ::Int)
-  return clebsch_gordan_tensor(s1, s2, s3)  # no inner multiplicity
+function clebsch_gordan_tensor(::NotAbelianStyle, s1::SU{2}, s2::SU{2}, s3::SU{2}, ::Int)
+  return clebsch_gordan_tensor(s1, s2, s3)  # no outer multiplicity
 end
 
 function clebsch_gordan_tensor(s1::SU{2}, s2::SU{2}, s3::SU{2})
@@ -99,7 +110,9 @@ function clebsch_gordan_tensor(s1::SU{2}, s2::SU{2}, s3::SU{2})
   return cgtensor
 end
 
-function clebsch_gordan_tensor(s1::SU{3}, s2::SU{3}, s3::SU{3}, inner_mult_index::Int)
+function clebsch_gordan_tensor(
+  ::NotAbelianStyle, s1::SU{3}, s2::SU{3}, s3::SU{3}, outer_mult_index::Int
+)
   d1 = quantum_dimension(s1)
   d2 = quantum_dimension(s2)
   d3 = quantum_dimension(s3)
