@@ -13,9 +13,7 @@ end
 # impose matching type and number of axes at compile time
 # impose matching axes at run time
 function Base.:*(left::FusionTensor, right::FusionTensor)
-  if !matching_dual(domain_axes(left), codomain_axes(right))
-    throw(codomainError("Incompatible tensor axes"))
-  end
+  @asssert matching_dual(domain_axes(left), codomain_axes(right))
   new_data_matrix = data_matrix(left) * data_matrix(right)
   return FusionTensor(new_data_matrix, codomain_axes(left), domain_axes(right))
 end
@@ -25,9 +23,7 @@ Base.:+(ft::FusionTensor) = ft
 # tensor addition is a block data_matrix add.
 # impose matching axes, allow different eltypes
 function Base.:+(left::FusionTensor, right::FusionTensor)
-  if !matching_axes(axes(left), axes(right))
-    throw(codomainError("Incompatible tensor axes"))
-  end
+  @assert !matching_axes(axes(left), axes(right))
   new_data_matrix = data_matrix(left) + data_matrix(right)
   return FusionTensor(new_data_matrix, codomain_axes(left), domain_axes(left))
 end
@@ -38,9 +34,7 @@ function Base.:-(ft::FusionTensor)
 end
 
 function Base.:-(left::FusionTensor, right::FusionTensor)
-  if !matching_axes(axes(left), axes(right))
-    throw(codomainError("Incompatible tensor axes"))
-  end
+  @assert matching_axes(axes(left), axes(right))
   new_data_matrix = data_matrix(left) - data_matrix(right)
   return FusionTensor(new_data_matrix, codomain_axes(left), domain_axes(left))
 end
@@ -70,9 +64,7 @@ end
 Base.axes(ft::FusionTensor) = (codomain_axes(ft)..., domain_axes(ft)...)
 
 # conj is defined as coefficient wise complex conjugation, without axis dual
-# same object for real element type
-Base.conj(ft::FusionTensor{<:Real}) = ft
-
+Base.conj(ft::FusionTensor{<:Real}) = ft   # same object for real element type
 function Base.conj(ft::FusionTensor)
   return FusionTensor(conj(data_matrix(ft)), codomain_axes(ft), domain_axes(ft))
 end
@@ -92,9 +84,7 @@ function Base.deepcopy(ft::FusionTensor)
 end
 
 # eachindex is automatically defined for AbstractArray. We do not want it.
-function Base.eachindex(::FusionTensor)
-  throw(codomainError("eachindex", "eachindex not defined for FusionTensor"))
-end
+Base.eachindex(::FusionTensor) = error("eachindex not defined for FusionTensor")
 
 Base.getindex(ft::FusionTensor, f1f2::Tuple{<:FusionTree,<:FusionTree}) = ft[f1f2...]
 function Base.getindex(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
