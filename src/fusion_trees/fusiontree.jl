@@ -5,7 +5,7 @@
 
 using GradedUnitRanges:
   AbstractGradedUnitRange, GradedUnitRanges, fusion_product, isdual, sector_type
-using SymmetrySectors: AbstractSector, SectorProduct, SymmetrySectors, arguments, trivial
+using SymmetrySectors: ×, AbstractSector, SectorProduct, SymmetrySectors, arguments, trivial
 using TensorAlgebra: flatten_tuples
 
 #
