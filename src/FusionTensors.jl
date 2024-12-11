@@ -52,9 +52,9 @@ using SymmetrySectors:
   quantum_dimension,
   trivial
 using TensorAlgebra:
-  TensorAlgebra,
-  Algorithm,
   BlockedPermutation,
+  Matricize,
+  TensorAlgebra,
   blockedperm,
   blockpermute,
   contract,

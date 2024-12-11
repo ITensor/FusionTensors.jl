@@ -22,19 +22,19 @@ using TensorAlgebra: contract
 
   ft3 = ft1 * ft2  # tensor contraction
   @test isnothing(check_sanity(ft3))
-  @test domain_axes(ft3) === domain_axes(ft1)
-  @test codomain_axes(ft3) === codomain_axes(ft2)
+  @test domain_axes(ft3) === domain_axes(ft2)
+  @test codomain_axes(ft3) === codomain_axes(ft1)
 
   # test LinearAlgebra.mul! with in-place matrix product
   LinearAlgebra.mul!(ft3, ft1, ft2)
   @test isnothing(check_sanity(ft3))
-  @test domain_axes(ft3) === domain_axes(ft1)
-  @test codomain_axes(ft3) === codomain_axes(ft2)
+  @test domain_axes(ft3) === domain_axes(ft2)
+  @test codomain_axes(ft3) === codomain_axes(ft1)
 
   LinearAlgebra.mul!(ft3, ft1, ft2, 1.0, 1.0)
   @test isnothing(check_sanity(ft2))
-  @test domain_axes(ft3) === domain_axes(ft1)
-  @test codomain_axes(ft3) === codomain_axes(ft2)
+  @test domain_axes(ft3) === domain_axes(ft2)
+  @test codomain_axes(ft3) === codomain_axes(ft1)
 end
 
 @testset "TensorAlgebra interface" begin
@@ -50,8 +50,8 @@ end
   ft4, legs = contract(ft1, (1, 2, 3, 4), ft2, (3, 4, 5))
   @test legs == (1, 2, 5)
   @test isnothing(check_sanity(ft4))
-  @test domain_axes(ft4) === domain_axes(ft1)
-  @test codomain_axes(ft4) === codomain_axes(ft2)
+  @test domain_axes(ft4) === domain_axes(ft2)
+  @test codomain_axes(ft4) === codomain_axes(ft1)
 
   ft5 = contract((1, 2, 5), ft1, (1, 2, 3, 4), ft2, (3, 4, 5))
   @test isnothing(check_sanity(ft5))
@@ -59,8 +59,7 @@ end
   # biperm is not allowed
   @test_broken contract(((1, 2), (5,)), ft1, (1, 2, 3, 4), ft2, (3, 4, 5))
 
-  # issue with 0 axis
-  @test_broken permutedims(ft1, (), (1, 2, 3, 4)) * permutedims(ft3, (3, 4, 1, 2), ()) isa
+  @test permutedims(ft1, (), (1, 2, 3, 4)) * permutedims(ft3, (3, 4, 1, 2), ()) isa
     FusionTensor{Float64,0}
   @test_broken contract(ft1, (1, 2, 3, 4), ft3, (3, 4, 1, 2))
 end

@@ -25,7 +25,7 @@ end
 # as it calls _mul!, which I should not overload.
 # TBD I can also overload higher up and do not allow use of different algorithms
 function TensorAlgebra.contract!(
-  alg::Algorithm,
+  alg::Matricize,
   a_dest::FusionTensor,
   biperm_dest::BlockedPermutation,
   a1::FusionTensor,
