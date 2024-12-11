@@ -13,11 +13,12 @@ using FusionTensors:
   matrix_row_axis,
   matrix_size,
   ndims_domain,
-  ndims_codomain,
-  check_sanity
+  ndims_codomain
 using GradedUnitRanges:
   blockmergesort, dual, flip, fusion_product, gradedrange, space_isequal
 using SymmetrySectors: U1
+
+include("shared.jl")
 
 @testset "Fusion matrix" begin
   g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])

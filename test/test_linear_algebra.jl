@@ -5,9 +5,11 @@ using Test: @test, @testset
 using BlockArrays: BlockArrays
 
 using BlockSparseArrays: BlockSparseArrays
-using FusionTensors: FusionTensor, check_sanity
+using FusionTensors: FusionTensor
 using GradedUnitRanges: dual, gradedrange
 using SymmetrySectors: U1, SU2, TrivialSector
+
+include("shared.jl")
 
 @testset "LinearAlgebra interface" begin
   sds22 = [

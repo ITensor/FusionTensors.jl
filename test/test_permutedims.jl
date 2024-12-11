@@ -3,7 +3,6 @@ using Test: @test, @testset, @test_broken
 
 using FusionTensors:
   FusionTensor,
-  check_sanity,
   data_matrix,
   matching_axes,
   matrix_column_axis,
@@ -14,6 +13,8 @@ using FusionTensors:
 using GradedUnitRanges: dual, gradedrange, space_isequal
 using SymmetrySectors: O2, U1, SectorProduct, SU2
 using TensorAlgebra: blockedperm
+
+include("shared.jl")
 
 @testset "Abelian permutedims" begin
   @testset "dummy" begin

@@ -1,12 +1,11 @@
 @eval module $(gensym())
 using Test: @test, @testset
-using LinearAlgebra: LinearAlgebra
+using LinearAlgebra: I
 
 using BlockArrays: BlockArrays
 
 using FusionTensors: fusion_tree_tensors
 using GradedUnitRanges: blocklabels, fusion_product
-using LabelledNumbers: unlabel
 using SymmetrySectors: SectorProduct, SU, SU2, TrivialSector, U1, Z, quantum_dimension
 
 @testset "Trivial fusion trees" begin
@@ -56,7 +55,7 @@ end
 
   tree_irreps_pairs2 = fusion_tree_tensors((SU2(1 / 2),), (false,))
   @test first.(tree_irreps_pairs2) == [SU2(1 / 2)]
-  @test last.(tree_irreps_pairs2) == [reshape(LinearAlgebra.I(2), (2, 2, 1))]
+  @test last.(tree_irreps_pairs2) == [reshape(I(2), (2, 2, 1))]
 
   tree_irreps_pairs3 = fusion_tree_tensors((SU2(1 / 2),), (true,))
   @test first.(tree_irreps_pairs3) == [SU2(1 / 2)]
@@ -76,7 +75,7 @@ end
     (hole, hole, hole, s12), (false, false, false, false)
   )
   @test first.(tree_irreps_pairs1) == [SectorProduct(; N=U1(3), S=SU2(1 / 2))]
-  @test last.(tree_irreps_pairs1) == [reshape(LinearAlgebra.I(2), (1, 1, 1, 2, 2, 1))]
+  @test last.(tree_irreps_pairs1) == [reshape(I(2), (1, 1, 1, 2, 2, 1))]
 
   s3 = SectorProduct(SU((1, 0)), SU((1,)), U1(1))
   irreps = (s3, s3, s3)
@@ -86,7 +85,7 @@ end
   rep = fusion_product(irreps...)
   @test blocklabels(rep) == tree_irreps
   @test quantum_dimension.(tree_irreps) == size.(trees, 4)
-  @test unlabel.(BlockArrays.blocklengths(rep)) == size.(trees, 5)
+  @test BlockArrays.blocklengths(rep) == size.(trees, 5)
 
   s_nt = SectorProduct(; A=SU((1, 0)), B=SU((1,)), C=U1(1))
   irreps_nt = (s_nt, s_nt, s_nt)
@@ -95,6 +94,6 @@ end
   rep_nt = reduce(fusion_product, irreps_nt)
   @test blocklabels(rep_nt) == tree_irreps_nt
   @test quantum_dimension.(tree_irreps_nt) == size.(trees_nt, 4)
-  @test unlabel.(BlockArrays.blocklengths(rep_nt)) == size.(trees_nt, 5)
+  @test BlockArrays.blocklengths(rep_nt) == size.(trees_nt, 5)
 end
 end

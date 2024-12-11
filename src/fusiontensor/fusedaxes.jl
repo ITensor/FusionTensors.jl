@@ -2,7 +2,8 @@
 
 using BlockArrays: Block, BlockIndexRange, blocklength, blocklengths
 
-using GradedUnitRanges: AbstractGradedUnitRange, blocklabels, blockmergesort, gradedrange
+using GradedUnitRanges:
+  AbstractGradedUnitRange, GradedUnitRanges, blocklabels, blockmergesort, gradedrange
 using SymmetrySectors: AbstractSector, trivial
 
 struct FusedAxes{A,B,C}

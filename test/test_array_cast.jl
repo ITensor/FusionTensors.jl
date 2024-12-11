@@ -4,9 +4,11 @@ using Test: @test, @testset, @test_broken
 
 using BlockArrays: Block, blocksize
 
-using FusionTensors: FusionTensor, check_sanity, data_matrix
+using FusionTensors: FusionTensor, data_matrix
 using GradedUnitRanges: dual, fusion_product, gradedrange
 using SymmetrySectors: O2, SectorProduct, SU2, TrivialSector, U1
+
+include("shared.jl")
 
 @testset "Trivial FusionTensor" begin
   @testset "trivial matrix" begin

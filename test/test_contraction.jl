@@ -1,12 +1,14 @@
 @eval module $(gensym())
-using LinearAlgebra: LinearAlgebra
+using LinearAlgebra: mul!
 using Test: @test, @testset, @test_broken
 
 using BlockSparseArrays: BlockSparseArray
-using FusionTensors: FusionTensor, domain_axes, codomain_axes, check_sanity
+using FusionTensors: FusionTensor, domain_axes, codomain_axes
 using GradedUnitRanges: dual, gradedrange
 using SymmetrySectors: U1
 using TensorAlgebra: contract
+
+include("shared.jl")
 
 @testset "contraction" begin
   g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
@@ -26,12 +28,12 @@ using TensorAlgebra: contract
   @test codomain_axes(ft3) === codomain_axes(ft1)
 
   # test LinearAlgebra.mul! with in-place matrix product
-  LinearAlgebra.mul!(ft3, ft1, ft2)
+  mul!(ft3, ft1, ft2)
   @test isnothing(check_sanity(ft3))
   @test domain_axes(ft3) === domain_axes(ft2)
   @test codomain_axes(ft3) === codomain_axes(ft1)
 
-  LinearAlgebra.mul!(ft3, ft1, ft2, 1.0, 1.0)
+  mul!(ft3, ft1, ft2, 1.0, 1.0)
   @test isnothing(check_sanity(ft2))
   @test domain_axes(ft3) === domain_axes(ft2)
   @test codomain_axes(ft3) === codomain_axes(ft1)

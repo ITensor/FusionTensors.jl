@@ -1,13 +1,10 @@
 # This file defines struct FusionTensor and constructors
 
-using LinearAlgebra: Adjoint
-
 using BlockArrays: AbstractBlockMatrix, BlockArrays, blocklength, findblock
 
-using BlockSparseArrays:
-  AbstractBlockSparseMatrix, BlockSparseArray, BlockSparseMatrix, block_stored_indices
+using BlockSparseArrays: AbstractBlockSparseMatrix, BlockSparseArray, block_stored_indices
 using GradedUnitRanges:
-  AbstractGradedUnitRange, blocklabels, dual, sector_type, space_isequal
+  AbstractGradedUnitRange, blocklabels, dual, isdual, sector_type, space_isequal
 using SymmetrySectors: SectorProduct, TrivialSector
 
 struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,N}
@@ -174,49 +171,6 @@ function initialize_allowed_sectors!(mat::AbstractBlockMatrix)
   for rc in zip(row_block_indices, col_block_indices)
     mat[Block(rc)] = mat[Block(rc)]
   end
-end
-
-# TODO move to tests
-function check_data_matrix_axes(
-  mat::BlockSparseMatrix, codomain_legs::Tuple, domain_legs::Tuple
-)
-  ft0 = FusionTensor(Float64, codomain_legs, domain_legs)
-  @assert space_isequal(matrix_row_axis(ft0), axes(mat, 1))
-  @assert space_isequal(matrix_column_axis(ft0), axes(mat, 2))
-end
-
-function check_data_matrix_axes(mat::Adjoint, codomain_legs::Tuple, domain_legs::Tuple)
-  return check_data_matrix_axes(adjoint(mat), dual.(domain_legs), dual.(codomain_legs))
-end
-
-# TODO move to tests
-function check_sanity(ft::FusionTensor)
-  nca = ndims_domain(ft)
-  @assert nca == length(domain_axes(ft)) "ndims_domain does not match domain_axes"
-  @assert nca <= ndims(ft) "invalid ndims_domain"
-
-  nda = ndims_codomain(ft)
-  @assert nda == length(codomain_axes(ft)) "ndims_codomain does not match codomain_axes"
-  @assert nda <= ndims(ft) "invalid ndims_codomain"
-  @assert nda + nca == ndims(ft) "invalid ndims"
-
-  @assert length(axes(ft)) == ndims(ft) "ndims does not match axes"
-  @assert matching_axes(axes(ft)[begin:nda], codomain_axes(ft)) "axes do not match codomain_axes"
-  @assert matching_axes(axes(ft)[(nda + 1):end], domain_axes(ft)) "axes do not match domain_axes"
-
-  m = data_matrix(ft)
-  @assert ndims(m) == 2 "invalid data_matrix ndims"
-  row_axis = matrix_row_axis(ft)
-  column_axis = matrix_column_axis(ft)
-  @assert row_axis === axes(m, 1) "invalid row_axis"
-  @assert column_axis === axes(m, 2) "invalid column_axis"
-  check_data_matrix_axes(data_matrix(ft), codomain_axes(ft), domain_axes(ft))
-
-  for b in block_stored_indices(m)
-    it = Int.(Tuple(b))
-    @assert blocklabels(row_axis)[it[1]] == blocklabels(dual(column_axis))[it[2]] "forbidden block"
-  end
-  return nothing
 end
 
 matching_dual(axes1::Tuple, axes2::Tuple) = matching_axes(axes1, dual.(axes2))
