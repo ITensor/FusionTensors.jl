@@ -1,9 +1,9 @@
 # This file defines interface to cast from and to generic array
 
-using BlockArrays: AbstractBlockArray, BlockedArray, blockedrange, findblock
+using BlockArrays: AbstractBlockArray, BlockedArray, blockedrange, blocklengths, findblock
 
-using BlockSparseArrays: BlockSparseArrays
-using GradedUnitRanges: AbstractGradedUnitRange
+using BlockSparseArrays: BlockSparseArrays, BlockSparseArray
+using GradedUnitRanges: AbstractGradedUnitRange, blocklabels
 using SymmetrySectors: block_dimensions, quantum_dimension
 using TensorAlgebra: contract
 

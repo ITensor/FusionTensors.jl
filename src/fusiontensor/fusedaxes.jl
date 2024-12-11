@@ -2,6 +2,7 @@
 
 using BlockArrays: Block, BlockIndexRange, blocklength, blocklengths
 
+using BlockSparseArrays: to_block_indices
 using GradedUnitRanges:
   AbstractGradedUnitRange, GradedUnitRanges, blocklabels, blockmergesort, gradedrange
 using SymmetrySectors: AbstractSector, trivial
@@ -68,7 +69,7 @@ function compute_inner_ranges(
   fused_leg = blockmergesort(
     gradedrange(root_sector.(first.(fusion_trees_mult)) .=> last.(fusion_trees_mult))
   )
-  range_mapping = Dict{typeof(first(first(fusion_trees_mult))),typeof(Block(1)[1:1])}()
+  range_mapping = Dict{fieldtype(eltype(fusion_trees_mult), 1),typeof(Block(1)[1:1])}()
   fused_sectors = blocklabels(fused_leg)
   shifts = ones(Int, blocklength(fused_leg))
   for (f, m) in fusion_trees_mult
@@ -82,7 +83,7 @@ end
 
 function to_blockindexrange(b1::BlockIndexRange{1}, b2::BlockIndexRange{1})
   t = (b1, b2)
-  return Block(Block.(t))[BlockSparseArrays.to_block_indices.(t)...]
+  return Block(Block.(t))[to_block_indices.(t)...]
 end
 
 function intersect_sectors(left::FusedAxes, right::FusedAxes)
