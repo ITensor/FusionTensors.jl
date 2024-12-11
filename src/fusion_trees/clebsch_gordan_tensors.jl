@@ -5,7 +5,21 @@
 using HalfIntegers: half
 using WignerSymbols: clebschgordan
 
-using SymmetrySectors: ⊗, AbstractSector, O2, SU, sector_label, zero_odd
+using GradedUnitRanges: dual, fusion_product
+using SymmetrySectors:
+  ⊗,
+  AbelianStyle,
+  AbstractSector,
+  NotAbelianStyle,
+  SymmetryStyle,
+  O2,
+  SU,
+  istrivial,
+  quantum_dimension,
+  sector_label,
+  trivial,
+  zero_odd
+using TensorAlgebra: contract
 
 function symbol_1j(s::AbstractSector)
   cgt = clebsch_gordan_tensor(s, dual(s), trivial(s), 1)
@@ -23,11 +37,11 @@ function clebsch_gordan_tensor(
   cgt = clebsch_gordan_tensor(s1, s2, s3, inner_mult_index)
   if arrow1
     flip1 = symbol_1j(s1)
-    cgt = TensorAlgebra.contract((1, 2, 3), flip1, (4, 1), cgt, (4, 2, 3))
+    cgt = contract((1, 2, 3), flip1, (4, 1), cgt, (4, 2, 3))
   end
   if arrow2
     flip2 = symbol_1j(s2)
-    cgt = TensorAlgebra.contract((1, 2, 3), flip2, (4, 2), cgt, (1, 4, 3))
+    cgt = contract((1, 2, 3), flip2, (4, 2), cgt, (1, 4, 3))
   end
   return cgt
 end

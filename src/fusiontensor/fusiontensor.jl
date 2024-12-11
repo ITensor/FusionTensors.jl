@@ -1,6 +1,14 @@
 # This file defines struct FusionTensor and constructors
 
-using BlockSparseArrays: block_stored_indices
+using LinearAlgebra: Adjoint
+
+using BlockArrays: AbstractBlockMatrix, BlockArrays, blocklength, findblock
+
+using BlockSparseArrays:
+  AbstractBlockSparseMatrix, BlockSparseArray, BlockSparseMatrix, block_stored_indices
+using GradedUnitRanges:
+  AbstractGradedUnitRange, blocklabels, dual, sector_type, space_isequal
+using SymmetrySectors: SectorProduct, TrivialSector
 
 struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,N}
   data_matrix::Mat
@@ -54,7 +62,9 @@ end
 
 # GradedUnitRanges interface
 GradedUnitRanges.sector_type(ft::FusionTensor) = sector_type(matrix_row_axis(ft))
-function GradedUnitRanges.findblock(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+
+# BlockArrays interface
+function BlockArrays.findblock(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
   # find outer block corresponding to fusion trees
   @assert ndims_codomain(ft) == length(f1)
   @assert ndims_domain(ft) == length(f2)

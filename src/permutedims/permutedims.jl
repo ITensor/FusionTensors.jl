@@ -1,5 +1,9 @@
 # This file defines permutedims for a FusionTensor
 
+using BlockArrays: blocklengths
+
+using TensorAlgebra: BlockedPermutation, blockedperm, blockpermute
+
 # permutedims with 1 tuple of 2 separate tuples
 function fusiontensor_permutedims(ft::FusionTensor, new_leg_indices::Tuple{Tuple,Tuple})
   return fusiontensor_permutedims(ft, new_leg_indices...)

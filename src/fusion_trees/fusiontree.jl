@@ -3,6 +3,11 @@
 # TBD
 # compatibility with TensorKit conventions?
 
+using GradedUnitRanges:
+  AbstractGradedUnitRange, GradedUnitRanges, fusion_product, isdual, sector_type
+using SymmetrySectors: AbstractSector, SectorProduct, SymmetrySectors, arguments, trivial
+using TensorAlgebra: flatten_tuples
+
 #
 # A fusion tree fuses N sectors sec1, secN  onto one sector fused_sec. A given set of
 # sectors and arrow directions (as defined by a given outer block) contains several fusion
@@ -196,7 +201,7 @@ FusionTree(sect::AbstractSector, arrow::Bool) = FusionTree((sect,), (arrow,), se
 function braid_tuples(t1::Tuple{Vararg{<:Any,N}}, t2::Tuple{Vararg{<:Any,N}}) where {N}
   t12 = (t1, t2)
   nested = ntuple(i -> getindex.(t12, i), N)
-  return TensorAlgebra.flatten_tuples(nested)
+  return flatten_tuples(nested)
 end
 
 function grow_tree(

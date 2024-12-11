@@ -1,5 +1,13 @@
 # This file defines linalg for FusionTensor
 
+using LinearAlgebra: LinearAlgebra, mul!, norm, tr
+
+using BlockArrays: Block, blocks
+
+using BlockSparseArrays: stored_indices
+using GradedUnitRanges: blocklabels
+using SymmetrySectors: quantum_dimension
+
 # allow to contract with different eltype and let BlockSparseArray ensure compatibility
 # impose matching type and number of axes at compile time
 # impose matching axes at run time
@@ -29,7 +37,7 @@ function LinearAlgebra.mul!(
   if !matching_axes(domain_axes(C), domain_axes(B))
     throw(codomainError("Incompatible tensor axes for C and B"))
   end
-  LinearAlgebra.mul!(data_matrix(C), data_matrix(A), data_matrix(B), α, β)
+  mul!(data_matrix(C), data_matrix(A), data_matrix(B), α, β)
   return C
 end
 
@@ -57,14 +65,14 @@ function LinearAlgebra.tr(ft::FusionTensor)
 end
 
 function LinearAlgebra.qr(ft::FusionTensor)
-  qmat, rmat = BlockSparseArrays.block_qr(data_matrix(ft))
+  qmat, rmat = block_qr(data_matrix(ft))
   qtens = FusionTensor(qmat, codomain_axes(ft), (axes(qmat)[1],))
   rtens = FusionTensor(rmat, (axes(rmat)[0],), domain_axes(ft))
   return qtens, rtens
 end
 
 function LinearAlgebra.svd(ft::FusionTensor)
-  umat, s, vmat = BlockSparseArrays.block_svd(data_matrix(ft))
+  umat, s, vmat = block_svd(data_matrix(ft))
   utens = FusionTensor(umat, codomain_axes(ft), (axes(umat)[1],))
   stens = FusionTensor(s, (axes(umat)[1],), (axes(vmat)[0],))
   vtens = FusionTensor(vmat, (axes(vmat)[0],), domain_axes(ft))

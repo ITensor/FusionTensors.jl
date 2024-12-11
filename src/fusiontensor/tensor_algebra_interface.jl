@@ -1,5 +1,11 @@
 # This file defines TensorAlgebra interface for a FusionTensor
 
+using LinearAlgebra: mul!
+
+using BlockArrays: Block
+
+using TensorAlgebra: BlockedPermutation, Matricize, TensorAlgebra
+
 # TBD how to deal with inner contraction = no ouput axis?
 function TensorAlgebra.allocate_output(
   ::typeof(contract),
@@ -37,6 +43,6 @@ function TensorAlgebra.contract!(
 )
   a1_perm = permutedims(a1, biperm1)
   a2_perm = permutedims(a2, biperm2)
-  LinearAlgebra.mul!(a_dest, a1_perm, a2_perm, α, β)
+  mul!(a_dest, a1_perm, a2_perm, α, β)
   return a_dest
 end

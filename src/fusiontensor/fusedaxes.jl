@@ -1,5 +1,10 @@
 # This file defines helper functions to access FusionTensor internal structures
 
+using BlockArrays: Block, BlockIndexRange, blocklength, blocklengths
+
+using GradedUnitRanges: AbstractGradedUnitRange, blocklabels, blockmergesort, gradedrange
+using SymmetrySectors: AbstractSector, trivial
+
 struct FusedAxes{A,B,C}
   outer_axes::A
   fused_axis::B

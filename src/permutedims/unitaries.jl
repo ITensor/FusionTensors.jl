@@ -1,5 +1,10 @@
 # This file defines unitaries to be used in permutedims
 
+using BlockArrays: Block, findblock
+using LRUCache: LRU
+
+using SymmetrySectors: quantum_dimension
+
 const unitary_cache = LRU{Any,AbstractMatrix}(; maxsize=10000)
 
 # ======================================  Interface  =======================================

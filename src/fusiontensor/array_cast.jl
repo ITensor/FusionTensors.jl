@@ -1,5 +1,12 @@
 # This file defines interface to cast from and to generic array
 
+using BlockArrays: AbstractBlockArray, BlockedArray, blockedrange, findblock
+
+using BlockSparseArrays: BlockSparseArrays
+using GradedUnitRanges: AbstractGradedUnitRange
+using SymmetrySectors: block_dimensions, quantum_dimension
+using TensorAlgebra: contract
+
 # =================================  High level interface  =================================
 
 #### cast from array to symmetric
