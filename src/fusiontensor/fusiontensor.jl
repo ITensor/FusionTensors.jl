@@ -47,6 +47,10 @@ ndims_domain(ft::FusionTensor) = length(domain_axes(ft))
 matrix_size(ft::FusionTensor) = quantum_dimension.(axes(data_matrix(ft)))
 matrix_row_axis(ft::FusionTensor) = first(axes(data_matrix(ft)))
 matrix_column_axis(ft::FusionTensor) = last(axes(data_matrix(ft)))
+function charge_block_size(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+  b = Tuple(findblock(ft, f1, f2))
+  return ntuple(i -> Int(length(axes(ft)[i][b[i]])), ndims(ft))
+end
 
 # GradedUnitRanges interface
 GradedUnitRanges.sector_type(ft::FusionTensor) = sector_type(matrix_row_axis(ft))

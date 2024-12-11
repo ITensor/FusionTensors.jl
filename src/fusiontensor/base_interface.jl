@@ -102,19 +102,17 @@ Base.eachindex(::FusionTensor) = error("eachindex not defined for FusionTensor")
 
 Base.getindex(ft::FusionTensor, f1f2::Tuple{<:FusionTree,<:FusionTree}) = ft[f1f2...]
 function Base.getindex(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
-  return data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]
+  charge_matrix = data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]
+  return reshape(charge_matrix, charge_block_size(ft, f1, f2))
 end
 
 function Base.setindex!(
-  ft::FusionTensor, m::AbstractMatrix, f1f2::Tuple{<:FusionTree,<:FusionTree}
+  ft::FusionTensor, a::AbstractArray, f1f2::Tuple{<:FusionTree,<:FusionTree}
 )
-  return setindex!(ft, m, f1f2...)
+  return setindex!(ft, a, f1f2...)
 end
-# TBD any way to replace explicit definition with better handling of @views?
-function Base.setindex!(ft::FusionTensor, m::AbstractMatrix, f1::FusionTree, f2::FusionTree)
-  #return setindex!(data_matrix(ft), m, trees_block_mapping(ft)[f1, f2])
-  # workaround for setindex(::BlockSparseArray) issue
-  return data_matrix(ft)[trees_block_mapping(ft)[f1, f2]] .= m
+function Base.setindex!(ft::FusionTensor, a::AbstractArray, f1::FusionTree, f2::FusionTree)
+  return view(ft, f1, f2) .= a
 end
 
 Base.ndims(::FusionTensor{T,N}) where {T,N} = N
@@ -154,5 +152,6 @@ Base.size(ft::FusionTensor) = quantum_dimension.(axes(ft))
 
 Base.view(ft::FusionTensor, f1f2::Tuple{<:FusionTree,<:FusionTree}) = view(ft, f1f2...)
 function Base.view(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
-  return view(data_matrix(ft), trees_block_mapping(ft)[f1, f2])
+  charge_matrix = view(data_matrix(ft), trees_block_mapping(ft)[f1, f2])
+  return reshape(charge_matrix, charge_block_size(ft, f1, f2))
 end

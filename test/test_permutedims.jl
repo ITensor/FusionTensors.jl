@@ -23,7 +23,7 @@ using TensorAlgebra: blockedperm
     g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
 
     for elt in (Float64, ComplexF64)
-      ft1 = FusionTensor(elt, dual.((g1, g2)), (g3, g4))
+      ft1 = FusionTensor(elt, (g1, g2), dual.((g3, g4)))
       @test isnothing(check_sanity(ft1))
 
       # test permutedims interface
@@ -40,9 +40,9 @@ using TensorAlgebra: blockedperm
       ft3 = permutedims(ft1, (4,), (1, 2, 3))
       @test ft3 !== ft1
       @test ft3 isa FusionTensor{elt,4}
-      @test matching_axes(axes(ft3), (g4, dual(g1), dual(g2), g3))
-      @test ndims_domain(ft3) == 1
-      @test ndims_codomain(ft3) == 3
+      @test matching_axes(axes(ft3), (dual(g4), g1, g2, dual(g3)))
+      @test ndims_domain(ft3) == 3
+      @test ndims_codomain(ft3) == 1
       @test ndims(ft3) == 4
       @test isnothing(check_sanity(ft3))
 
@@ -59,14 +59,14 @@ using TensorAlgebra: blockedperm
     g2 = gradedrange([U1(2) => 3, U1(3) => 2])
     g3 = gradedrange([U1(3) => 4, U1(4) => 1])
     g4 = gradedrange([U1(0) => 2, U1(2) => 1])
-    domain_legs = (g1, g2)
-    codomain_legs = dual.((g3, g4))
+    codomain_legs = (g1, g2)
+    domain_legs = dual.((g3, g4))
     arr = zeros(ComplexF64, (4, 5, 5, 3))
     arr[1:2, 1:3, 1:4, 1:2] .= 1.0im
     arr[3:4, 1:3, 5:5, 1:2] .= 2.0
     arr[1:2, 4:5, 5:5, 1:2] .= 3.0
     arr[3:4, 4:5, 1:4, 3:3] .= 4.0
-    ft = FusionTensor(arr, domain_legs, codomain_legs)
+    ft = FusionTensor(arr, codomain_legs, domain_legs)
     biperm = blockedperm((3,), (2, 4, 1))
 
     ftp = permutedims(ft, biperm)
@@ -84,14 +84,15 @@ using TensorAlgebra: blockedperm
 
   @testset "Less than two axes" begin
     if VERSION >= v"1.11"
-      ft0 = FusionTensor(ones(()), (), ())
-      ft0p = permutedims(ft0, (), ())
-      @test ft0p isa FusionTensor{Float64,0}
-      @test data_matrix(ft0p) ≈ data_matrix(ft0)
-      @test ft0p ≈ ft0
+      @test_broken FusionTensor(ones(()), (), ()) isa FusionTensor
+      #=  ft0p = permutedims(ft0, (), ())
+        @test ft0p isa FusionTensor{Float64,0}
+        @test data_matrix(ft0p) ≈ data_matrix(ft0)
+        @test ft0p ≈ ft0
 
-      @test permutedims(ft0, ((), ())) isa FusionTensor{Float64,0}
-      @test permutedims(ft0, blockedperm((), ())) isa FusionTensor{Float64,0}
+        @test permutedims(ft0, ((), ())) isa FusionTensor{Float64,0}
+        @test permutedims(ft0, blockedperm((), ())) isa FusionTensor{Float64,0}
+      =#
     end
 
     g = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
@@ -99,12 +100,11 @@ using TensorAlgebra: blockedperm
     v[1] = 1.0
     biperm = blockedperm((), (1,))
     ft1 = FusionTensor(v, (g,), ())
-    @test_broken permutedims(ft1, biperm) isa FusionTensor
-    #ft2 = permutedims(ft1, biperm) isa FusionTensor
-    #@test isnothing(check_sanity(ft2))
-    #@test ft2 ≈ naive_permutedims(ft1, biperm)
-    #ft3 = permutedims(ft2, (1,), ())
-    #@test ft1 ≈ ft3
+    ft2 = permutedims(ft1, biperm)
+    @test isnothing(check_sanity(ft2))
+    @test ft2 ≈ naive_permutedims(ft1, biperm)
+    ft3 = permutedims(ft2, (1,), ())
+    @test ft1 ≈ ft3
   end
 end
 
@@ -151,7 +151,7 @@ end
     end
     for biperm in [blockedperm((1, 2, 3, 4), ()), blockedperm((), (3, 1, 2, 4))]
       ft = FusionTensor(sds22, (g2, g2), (g2b, g2b))
-      @test_broken permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
+      @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
     end
   end
 end

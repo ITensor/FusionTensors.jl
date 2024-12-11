@@ -43,8 +43,7 @@ function cast_from_array(
   ft = FusionTensor(eltype(blockarray), codomain_legs, domain_legs)
   for (f1, f2) in keys(trees_block_mapping(ft))
     b = findblock(ft, f1, f2)
-    charge_block = contract_fusion_trees(blockarray[b], f1, f2)
-    ft[f1, f2] = reshape(charge_block, size(ft[f1, f2]))
+    ft[f1, f2] = contract_fusion_trees(blockarray[b], f1, f2)
   end
   return ft
 end
