@@ -205,7 +205,7 @@ function check_sanity(ft::FusionTensor)
   return nothing
 end
 
-matching_dual(axes1::Tuple, axes2::Tuple) = matching_axes(dual.(axes1), axes2)
+matching_dual(axes1::Tuple, axes2::Tuple) = matching_axes(axes1, dual.(axes2))
 matching_axes(axes1::Tuple, axes2::Tuple) = false
 function matching_axes(axes1::T, axes2::T) where {T<:Tuple}
   return all(space_isequal.(axes1, axes2))

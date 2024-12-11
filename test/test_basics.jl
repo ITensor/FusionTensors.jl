@@ -1,5 +1,5 @@
 @eval module $(gensym())
-using Test: @test, @testset
+using Test: @test, @test_throws, @testset
 
 using BlockSparseArrays: BlockSparseArray
 using FusionTensors:
@@ -81,8 +81,7 @@ using SymmetrySectors: U1
   @test matching_axes(codomain_axes(ft3), codomain_axes(ft1))
   @test matching_axes(domain_axes(ft3), domain_axes(ft1))
 
-  ft4 = similar(ft1, Float32)
-  @test eltype(ft4) == Float64  # promoted
+  @test_throws AssertionError similar(ft1, Int)
 
   ft5 = similar(ft1, ComplexF32, ((g1, g1), (g2,)))
   @test isnothing(check_sanity(ft5))

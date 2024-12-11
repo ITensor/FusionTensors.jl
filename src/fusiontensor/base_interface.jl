@@ -1,19 +1,20 @@
 # This files defines Base functions for FusionTensor
 
 function Base.:*(x::Number, ft::FusionTensor)
-  return FusionTensor(x * data_matrix(ft), codomain_axes(ft), domain_axes(ft))
+  return FusionTensor(
+    x * data_matrix(ft), codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
+  )
 end
 
 function Base.:*(ft::FusionTensor, x::Number)
-  return FusionTensor(x * data_matrix(ft), codomain_axes(ft), domain_axes(ft))
+  return FusionTensor(
+    x * data_matrix(ft), codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
+  )
 end
 
 # tensor contraction is a block data_matrix product.
-# allow to contract with different eltype and let BlockSparseArray ensure compatibility
-# impose matching type and number of axes at compile time
-# impose matching axes at run time
 function Base.:*(left::FusionTensor, right::FusionTensor)
-  @asssert matching_dual(domain_axes(left), codomain_axes(right))
+  @assert matching_dual(domain_axes(left), codomain_axes(right))
   new_data_matrix = data_matrix(left) * data_matrix(right)
   return FusionTensor(new_data_matrix, codomain_axes(left), domain_axes(right))
 end
@@ -21,26 +22,33 @@ end
 Base.:+(ft::FusionTensor) = ft
 
 # tensor addition is a block data_matrix add.
-# impose matching axes, allow different eltypes
 function Base.:+(left::FusionTensor, right::FusionTensor)
-  @assert !matching_axes(axes(left), axes(right))
+  @assert matching_axes(axes(left), axes(right))
   new_data_matrix = data_matrix(left) + data_matrix(right)
-  return FusionTensor(new_data_matrix, codomain_axes(left), domain_axes(left))
+  return FusionTensor(
+    new_data_matrix, codomain_axes(left), domain_axes(left), trees_block_mapping(left)
+  )
 end
 
 function Base.:-(ft::FusionTensor)
   new_data_matrix = -data_matrix(ft)
-  return FusionTensor(new_data_matrix, codomain_axes(ft), domain_axes(ft))
+  return FusionTensor(
+    new_data_matrix, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
+  )
 end
 
 function Base.:-(left::FusionTensor, right::FusionTensor)
   @assert matching_axes(axes(left), axes(right))
   new_data_matrix = data_matrix(left) - data_matrix(right)
-  return FusionTensor(new_data_matrix, codomain_axes(left), domain_axes(left))
+  return FusionTensor(
+    new_data_matrix, codomain_axes(left), domain_axes(left), trees_block_mapping(left)
+  )
 end
 
 function Base.:/(ft::FusionTensor, x::Number)
-  return FusionTensor(data_matrix(ft) / x, codomain_axes(ft), domain_axes(ft))
+  return FusionTensor(
+    data_matrix(ft) / x, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
+  )
 end
 
 Base.Array(ft::FusionTensor) = Array(cast_to_array(ft))
@@ -66,21 +74,27 @@ Base.axes(ft::FusionTensor) = (codomain_axes(ft)..., domain_axes(ft)...)
 # conj is defined as coefficient wise complex conjugation, without axis dual
 Base.conj(ft::FusionTensor{<:Real}) = ft   # same object for real element type
 function Base.conj(ft::FusionTensor)
-  return FusionTensor(conj(data_matrix(ft)), codomain_axes(ft), domain_axes(ft))
+  return FusionTensor(
+    conj(data_matrix(ft)), codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
+  )
 end
 
 function Base.copy(ft::FusionTensor)
-  new_data_matrix = copy(data_matrix(ft))
-  new_codomain_axes = copy.(codomain_axes(ft))
-  new_domain_axes = copy.(domain_axes(ft))
-  return FusionTensor(new_data_matrix, new_codomain_axes, new_domain_axes)
+  return FusionTensor(
+    copy(data_matrix(ft)),
+    copy.(codomain_axes(ft)),
+    copy.(domain_axes(ft)),
+    copy(trees_block_mapping(ft)),
+  )
 end
 
 function Base.deepcopy(ft::FusionTensor)
-  new_data_matrix = deepcopy(data_matrix(ft))
-  new_codomain_axes = deepcopy.(codomain_axes(ft))
-  new_domain_axes = deepcopy.(domain_axes(ft))
-  return FusionTensor(new_data_matrix, new_codomain_axes, new_domain_axes)
+  return FusionTensor(
+    deepcopy(data_matrix(ft)),
+    deepcopy.(codomain_axes(ft)),
+    deepcopy.(domain_axes(ft)),
+    deepcopy(trees_block_mapping(ft)),
+  )
 end
 
 # eachindex is automatically defined for AbstractArray. We do not want it.
@@ -109,15 +123,20 @@ Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args.
 
 function Base.similar(ft::FusionTensor)
   mat = similar(data_matrix(ft))
-  return FusionTensor(mat, codomain_axes(ft), domain_axes(ft))
+  initialize_allowed_sectors!(mat)
+  return FusionTensor(mat, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft))
 end
 
-function Base.similar(ft::FusionTensor, elt::Type)
-  return FusionTensor(elt, codomain_axes(ft), domain_axes(ft))
+function Base.similar(ft::FusionTensor, ::Type{T}) where {T}
+  # fusion trees have Float64 eltype: need compatible type
+  @assert promote_type(T, Float64) === T
+  mat = similar(data_matrix(ft), T)
+  initialize_allowed_sectors!(mat)
+  return FusionTensor(mat, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft))
 end
 
-function Base.similar(::FusionTensor, elt::Type, new_axes::Tuple{<:Tuple,<:Tuple})
-  return FusionTensor(elt, new_axes[1], new_axes[2])
+function Base.similar(::FusionTensor, ::Type{T}, new_axes::Tuple{<:Tuple,<:Tuple}) where {T}
+  return FusionTensor(T, new_axes[1], new_axes[2])
 end
 
 Base.show(io::IO, ft::FusionTensor) = print(io, "$(ndims(ft))-dim FusionTensor")
