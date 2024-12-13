@@ -77,17 +77,30 @@ function BlockArrays.findblock(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
   return Block(b1..., b2...)
 end
 
-function sanitize_axes(raw_legs)
-  legs = unify_sector_type(raw_legs)
+sanitize_axes(::Tuple{}) = ()
+function sanitize_axes(raw_legs::Tuple{Vararg{AbstractGradedUnitRange}})
+  legs = unify_sector_type(typeof(first(raw_legs)), raw_legs)
   @assert all(check_unique_blocklabels.(legs))
   return legs
 end
 
-function unify_sector_type(legs::Tuple{Vararg{AbstractGradedUnitRange{LA}}}) where {LA}  # nothing to do
+function check_unique_blocklabels(g::AbstractGradedUnitRange)
+  return length(unique(blocklabels(g))) == blocklength(g)
+end
+
+function unify_sector_type(
+  ::Type{<:AbstractGradedUnitRange{LA}}, legs::Tuple{Vararg{AbstractGradedUnitRange{LA}}}
+) where {LA}  # nothing to do
   return legs
 end
 
-check_unique_blocklabels(g) = length(unique(blocklabels(g))) == blocklength(g)
+function unify_sector_type(
+  ::Type{<:AbstractGradedUnitRange}, legs::Tuple{Vararg{AbstractGradedUnitRange}}
+)
+  T = find_common_sector_type(legs)
+  unified_legs = map(g -> unify_sector_type(T, g), legs)
+  return unified_legs
+end
 
 # TODO move this to SymmetrySectors or GradedUnitRanges
 # merge with SymmetrySectors.map_blocklabels
@@ -95,12 +108,6 @@ function find_common_sector_type(sector_or_axes_enum)
   # fuse trivial sectors to produce unified type
   # avoid depending on SymmetrySectors internals
   return label_type(fusion_product(trivial.(sector_or_axes_enum)...))
-end
-
-function unify_sector_type(legs::Tuple{Vararg{AbstractGradedUnitRange}})
-  T = find_common_sector_type(legs)
-  unified_legs = map(g -> unify_sector_type(T, g), legs)
-  return unified_legs
 end
 
 function unify_sector_type(T::Type{<:SectorProduct}, g::AbstractGradedUnitRange)
@@ -150,7 +157,6 @@ function FusionTensor(data_type::Type, ::Tuple{}, ::Tuple{})
   return FusionTensor(mat, (), (), tree_to_block_mapping)
 end
 
-# init data_matrix
 function initialize_data_matrix(
   data_type::Type{<:Number}, codomain_fused_axes::FusedAxes, domain_fused_axes::FusedAxes
 )

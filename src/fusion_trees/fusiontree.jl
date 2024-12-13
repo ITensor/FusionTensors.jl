@@ -73,8 +73,7 @@ Base.length(::FusionTree{<:Any,N}) where {N} = N
 # GradedUnitRanges interface
 GradedUnitRanges.sector_type(::FusionTree{S}) where {S} = S
 
-function build_trees(legs::Vararg{AbstractGradedUnitRange{LA}}) where {LA}
-  # TBD when to impose LA to be the same for every leg?
+function build_trees(legs::Vararg{AbstractGradedUnitRange})
   tree_arrows = isdual.(legs)
   sectors = blocklabels.(legs)
   return mapreduce(vcat, CartesianIndices(blocklength.(legs))) do it
@@ -198,7 +197,7 @@ end
 # one leg
 FusionTree(sect::AbstractSector, arrow::Bool) = FusionTree((sect,), (arrow,), sect, (), ())
 
-function braid_tuples(t1::Tuple{Vararg{<:Any,N}}, t2::Tuple{Vararg{<:Any,N}}) where {N}
+function braid_tuples(t1::Tuple{Vararg{Any,N}}, t2::Tuple{Vararg{Any,N}}) where {N}
   t12 = (t1, t2)
   nested = ntuple(i -> getindex.(t12, i), N)
   return flatten_tuples(nested)
