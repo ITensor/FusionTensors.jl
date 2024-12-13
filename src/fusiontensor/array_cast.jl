@@ -157,16 +157,12 @@ end
 #-----------------------------------  cast to array ----------------------------------------
 function contract_fusion_trees(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
   N = ndims(ft)
-  charge_block = reshape(view(ft, f1, f2), :, 1)
+  charge_block = view(ft, f1, f2)
   p = contract_singlet_projector(f1, f2)
 
   # TODO use contract once it supports outer product
-  swapped = charge_block * reshape(p, 1, :)
-  b = findblock(ft, f1, f2)
-  block_shape = (
-    ntuple(i -> blocklengths(axes(ft, i))[Int(Tuple(b)[i])], N)...,
-    ntuple(i -> quantum_dimension(blocklabels(axes(ft, i))[Int(Tuple(b)[i])]), N)...,
-  )
+  swapped = reshape(charge_block, :, 1) * reshape(p, 1, :)
+  block_shape = (size(charge_block)..., size(p)...)
   perm = braid_tuples(ntuple(identity, N), ntuple(i -> i + N, N))
   split_array_block = permutedims(reshape(swapped, block_shape), perm)
 

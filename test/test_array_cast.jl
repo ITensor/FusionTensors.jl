@@ -313,8 +313,8 @@ end
       ],
       (2, 2, 2, 2),
     )
-    dense, domain_legs, codomain_legs = sds22, (g2b, g2b), (g2, g2)
-    ft = FusionTensor(dense, domain_legs, codomain_legs)
+    dense, codomain_legs, domain_legs = sds22, (g2, g2), (g2b, g2b)
+    ft = FusionTensor(dense, codomain_legs, domain_legs)
     @test norm(ft) ≈ √3 / 2
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
@@ -331,23 +331,23 @@ end
       (2, 2, 2, 2),
     )
     sds22b_codomain_legs = (g2, g2b)
-    dense, domain_legs, codomain_legs = sds22b, (g2, g2b), (g2b, g2)
-    ftb = FusionTensor(dense, domain_legs, codomain_legs)
+    dense, codomain_legs, domain_legs = sds22b, (g2, g2b), (g2b, g2)
+    ftb = FusionTensor(dense, codomain_legs, domain_legs)
     @test norm(ftb) ≈ √3 / 2
     @test isnothing(check_sanity(ft))
     @test Array(ftb) ≈ sds22b
     @test Array(adjoint(ftb)) ≈ sds22b
 
-    # no codomain axis
-    dense, domain_legs, codomain_legs = sds22, (g2b, g2b, g2, g2), ()
-    ft = FusionTensor(dense, domain_legs, codomain_legs)
+    # no domain axis
+    dense, codomain_legs, domain_legs = sds22, (g2b, g2b, g2, g2), ()
+    ft = FusionTensor(dense, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
     @test Array(adjoint(ft)) ≈ sds22
 
-    # no domain axis
-    dense, domain_legs, codomain_legs = sds22, (), (g2b, g2b, g2, g2)
-    ft = FusionTensor(dense, domain_legs, codomain_legs)
+    # no codomain axis
+    dense, codomain_legs, domain_legs = sds22, (), (g2b, g2b, g2, g2)
+    ft = FusionTensor(dense, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
     @test Array(adjoint(ft)) ≈ sds22
