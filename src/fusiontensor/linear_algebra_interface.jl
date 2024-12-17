@@ -4,7 +4,7 @@ using LinearAlgebra: LinearAlgebra, mul!, norm, tr
 
 using BlockArrays: Block, blocks
 
-using BlockSparseArrays: stored_indices
+using BlockSparseArrays: eachblockstoredindex
 using GradedUnitRanges: blocklabels
 using SymmetrySectors: quantum_dimension
 
@@ -45,9 +45,9 @@ function LinearAlgebra.norm(ft::FusionTensor)
   m = data_matrix(ft)
   row_sectors = blocklabels(matrix_row_axis(ft))
   n2 = mapreduce(
-    idx -> quantum_dimension(row_sectors[idx[1]]) * norm(m[Block(Tuple(idx))])^2,
+    b -> quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * norm(m[b])^2,
     +,
-    stored_indices(blocks(m));
+    eachblockstoredindex(m);
     init=0.0,
   )
   return sqrt(n2)
@@ -57,9 +57,9 @@ function LinearAlgebra.tr(ft::FusionTensor)
   m = data_matrix(ft)
   row_sectors = blocklabels(matrix_row_axis(ft))
   return mapreduce(
-    idx -> quantum_dimension(row_sectors[idx[1]]) * tr(m[Block(Tuple(idx))]),
+    b -> quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * tr(m[b]),
     +,
-    stored_indices(blocks(m));
+    eachblockstoredindex(m);
     init=eltype(ft)(0),
   )
 end

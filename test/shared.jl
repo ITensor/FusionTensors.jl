@@ -1,6 +1,6 @@
 using LinearAlgebra: Adjoint
 
-using BlockSparseArrays: BlockSparseMatrix, block_stored_indices
+using BlockSparseArrays: BlockSparseMatrix, eachblockstoredindex
 using FusionTensors:
   FusionTensor,
   codomain_axes,
@@ -46,11 +46,11 @@ function check_sanity(ft::FusionTensor)
   column_axis = matrix_column_axis(ft)
   @assert row_axis === axes(m, 1) "invalid row_axis"
   @assert column_axis === axes(m, 2) "invalid column_axis"
-  check_data_matrix_axes(data_matrix(ft), codomain_axes(ft), domain_axes(ft))
+  check_data_matrix_axes(m, codomain_axes(ft), domain_axes(ft))
 
-  for b in block_stored_indices(m)
-    it = Int.(Tuple(b))
-    @assert blocklabels(row_axis)[it[1]] == blocklabels(dual(column_axis))[it[2]] "forbidden block"
+  for b in eachblockstoredindex(m)
+    ir, ic = Int.(Tuple(b))
+    @assert blocklabels(row_axis)[ir] == blocklabels(dual(column_axis))[ic] "forbidden block"
   end
   return nothing
 end

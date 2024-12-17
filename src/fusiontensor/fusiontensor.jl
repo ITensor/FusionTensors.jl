@@ -2,7 +2,7 @@
 
 using BlockArrays: AbstractBlockMatrix, BlockArrays, blocklength, findblock
 
-using BlockSparseArrays: AbstractBlockSparseMatrix, BlockSparseArray, block_stored_indices
+using BlockSparseArrays: AbstractBlockSparseMatrix, BlockSparseArray, eachblockstoredindex
 using GradedUnitRanges:
   AbstractGradedUnitRange, blocklabels, dual, isdual, sector_type, space_isequal
 using SymmetrySectors: SectorProduct, TrivialSector
@@ -125,9 +125,9 @@ function FusionTensor(
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
   ft = FusionTensor(eltype(mat), codomain_legs, domain_legs)
-  for b in block_stored_indices(mat)
-    @assert last(b) in block_stored_indices(data_matrix(ft))
-    data_matrix(ft)[last(b)] = mat[last(b)]
+  for b in eachblockstoredindex(mat)
+    @assert b in eachblockstoredindex(data_matrix(ft))
+    data_matrix(ft)[b] = mat[b]
   end
   return ft
 end
