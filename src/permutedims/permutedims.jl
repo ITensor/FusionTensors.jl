@@ -1,6 +1,7 @@
 # This file defines permutedims for a FusionTensor
 
 using BlockArrays: blocklengths
+using Strided: Strided, @strided
 
 using TensorAlgebra: BlockedPermutation, blockedperm, blockpermute
 
@@ -39,9 +40,9 @@ function fusiontensor_permutedims(ft, biperm::BlockedPermutation{2})
   end
 
   new_codomain_legs, new_domain_legs = blockpermute(axes(ft), biperm)
-  permuted = FusionTensor(eltype(ft), new_codomain_legs, new_domain_legs)
-  fusiontensor_permutedims!(permuted, ft, Tuple(biperm))
-  return permuted
+  new_ft = FusionTensor(eltype(ft), new_codomain_legs, new_domain_legs)
+  fusiontensor_permutedims!(new_ft, ft, Tuple(biperm))
+  return new_ft
 end
 
 function fusiontensor_permutedims!(
@@ -50,6 +51,8 @@ function fusiontensor_permutedims!(
   unitary = compute_unitary(new_ft, old_ft, flatperm)
   for p in unitary
     old_trees, new_trees = first(p)
-    new_ft[new_trees] += last(p) * permutedims(old_ft[old_trees], flatperm)
+    new_block = view(new_ft, new_trees)
+    old_block = view(old_ft, old_trees)
+    @strided new_block .+= last(p) .* permutedims(old_block, flatperm)
   end
 end
