@@ -1,8 +1,8 @@
 @eval module $(gensym())
 using LinearAlgebra: LinearAlgebra, norm
-using Test: @test, @testset, @test_broken
+using Test: @test, @test_broken, @test_throws, @testset
 
-using BlockArrays: Block, blocksize
+using BlockArrays: Block, BlockedArray, blocksize
 
 using FusionTensors: FusionTensor, data_matrix
 using GradedUnitRanges: dual, fusion_product, gradedrange
@@ -97,6 +97,19 @@ end
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ dense
     @test Array(adjoint(ft)) ≈ adjoint(dense)
+
+    @test_throws BoundsError FusionTensor(
+      dense, (gradedrange([U1(1) => 1, U1(2) => 3]),), domain_legs
+    )
+    @test_throws MethodError FusionTensor(dense, (g, g), domain_legs)
+
+    ba = BlockedArray(dense, [1, 2], [1, 2])
+    @test_throws DomainError FusionTensor(
+      ba, (gradedrange([U1(1) => 1, U1(2) => 3]),), domain_legs
+    )
+    @test_throws DomainError FusionTensor(ba, (g, g), domain_legs)
+    dense[1, 2] = 1  # forbidden
+    @test_throws InexactError FusionTensor(dense, codomain_legs, domain_legs)
   end
 
   @testset "several axes, one block" begin

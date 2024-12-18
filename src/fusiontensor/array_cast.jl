@@ -37,16 +37,35 @@ end
 function cast_from_array(
   blockarray::AbstractBlockArray,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-  domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+  domain_legs::Tuple{Vararg{AbstractGradedUnitRange}};
+  tol::Float64=1e-12,
 )
   # input validation
   if length(codomain_legs) + length(domain_legs) != ndims(blockarray)  # compile time
-    throw(codomainError("legs are incompatible with array ndims"))
+    throw(DomainError("legs are incompatible with array ndims"))
   end
   if quantum_dimension.((codomain_legs..., domain_legs...)) != size(blockarray)
-    throw(codomainError("legs dimensions are incompatible with array"))
+    throw(DomainError("legs dimensions are incompatible with array"))
   end
 
+  ft = unsafe_cast_from_array(blockarray, codomain_legs, domain_legs)
+
+  # if blockarray is not G-invariant, norm(ft) < norm(blockarray)
+  if abs(norm(ft) - norm(blockarray)) > tol
+    throw(
+      InexactError(
+        :FusionTensor, typeof(blockarray), typeof(codomain_legs), typeof(domain_legs)
+      ),
+    )
+  end
+  return ft
+end
+
+function unsafe_cast_from_array(
+  blockarray::AbstractBlockArray,
+  codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+  domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+)
   ft = FusionTensor(eltype(blockarray), codomain_legs, domain_legs)
   for (f1, f2) in keys(trees_block_mapping(ft))
     b = findblock(ft, f1, f2)
