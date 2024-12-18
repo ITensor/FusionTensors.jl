@@ -4,20 +4,31 @@ using BlockArrays: blocklengths
 
 using TensorAlgebra: BlockedPermutation, blockedperm, blockpermute
 
+function naive_permutedims(ft, biperm::BlockedPermutation{2})
+  @assert ndims(ft) == length(biperm)
+  new_codomain_legs, new_domain_legs = blockpermute(axes(ft), biperm)
+
+  # naive permute: cast to dense, permutedims, cast to FusionTensor
+  arr = Array(ft)
+  permuted_arr = permutedims(arr, Tuple(biperm))
+  permuted = FusionTensor(permuted_arr, new_codomain_legs, new_domain_legs)
+  return permuted
+end
+
 # permutedims with 1 tuple of 2 separate tuples
-function fusiontensor_permutedims(ft::FusionTensor, new_leg_indices::Tuple{Tuple,Tuple})
+function fusiontensor_permutedims(ft, new_leg_indices::Tuple{Tuple,Tuple})
   return fusiontensor_permutedims(ft, new_leg_indices...)
 end
 
 # permutedims with 2 separate tuples
 function fusiontensor_permutedims(
-  ft::FusionTensor, new_codomain_indices::Tuple, new_domain_indices::Tuple
+  ft, new_codomain_indices::Tuple, new_domain_indices::Tuple
 )
   biperm = blockedperm(new_codomain_indices, new_domain_indices)
   return fusiontensor_permutedims(ft, biperm)
 end
 
-function fusiontensor_permutedims(ft::FusionTensor, biperm::BlockedPermutation{2})
+function fusiontensor_permutedims(ft, biperm::BlockedPermutation{2})
   @assert ndims(ft) == length(biperm)
 
   # early return for identity operation. Do not copy. Also handle tricky 0-dim case.
@@ -29,22 +40,11 @@ function fusiontensor_permutedims(ft::FusionTensor, biperm::BlockedPermutation{2
 
   new_codomain_legs, new_domain_legs = blockpermute(axes(ft), biperm)
   permuted = FusionTensor(eltype(ft), new_codomain_legs, new_domain_legs)
-  permute_fusiontensor_data!(permuted, ft, Tuple(biperm))
+  fusiontensor_permutedims!(permuted, ft, Tuple(biperm))
   return permuted
 end
 
-function naive_permutedims(ft::FusionTensor, biperm::BlockedPermutation{2})
-  @assert ndims(ft) == length(biperm)
-  new_codomain_legs, new_domain_legs = blockpermute(axes(ft), biperm)
-
-  # naive permute: cast to dense, permutedims, cast to FusionTensor
-  arr = Array(ft)
-  permuted_arr = permutedims(arr, Tuple(biperm))
-  permuted = FusionTensor(permuted_arr, new_codomain_legs, new_domain_legs)
-  return permuted
-end
-
-function permute_fusiontensor_data!(
+function fusiontensor_permutedims!(
   new_ft::FusionTensor{T,N}, old_ft::FusionTensor{T,N}, flatperm::NTuple{N,Integer}
 ) where {T,N}
   unitary = compute_unitary(new_ft, old_ft, flatperm)
