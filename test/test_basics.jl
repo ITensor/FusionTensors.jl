@@ -15,8 +15,8 @@ using FusionTensors:
   ndims_domain,
   ndims_codomain
 using GradedUnitRanges:
-  blockmergesort, dual, flip, fusion_product, gradedrange, space_isequal
-using SymmetrySectors: U1
+  blockmergesort, dual, flip, fusion_product, gradedrange, sector_type, space_isequal
+using SymmetrySectors: U1, SU2, SectorProduct, Z
 
 include("shared.jl")
 
@@ -46,6 +46,7 @@ include("shared.jl")
   @test space_isequal(matrix_column_axis(ft1), g2)
   @test isnothing(check_sanity(ft0))
   @test isnothing(check_sanity(ft1))
+  @test sector_type(ft1) === U1{Int}
 
   # Base methods
   @test eltype(ft1) === Float64
@@ -231,5 +232,32 @@ end
   @test space_isequal(dual(g3), codomain_axes(ad)[1])
   @test space_isequal(dual(g4), codomain_axes(ad)[2])
   @test isnothing(check_sanity(ad))
+end
+
+@testset "mising SectorProduct" begin
+  g1 = gradedrange([SectorProduct(U1(1)) => 1])
+  g2 = gradedrange([SectorProduct(U1(1), SU2(1//2)) => 1])
+  g3 = gradedrange([SectorProduct(U1(1), SU2(1//2), Z{2}(1)) => 1])
+  S = sector_type(g3)
+
+  ft = FusionTensor(Float64, (g1,), (dual(g2), dual(g3)))
+  @test sector_type(ft) === S
+  gr = gradedrange([SectorProduct(U1(1), SU2(0), Z{2}(0)) => 1])
+  @test space_isequal(matrix_row_axis(ft), gr)
+  gc = gradedrange([
+    SectorProduct(U1(2), SU2(0), Z{2}(1)) => 1, SectorProduct(U1(2), SU2(1), Z{2}(1)) => 1
+  ])
+  @test space_isequal(matrix_column_axis(ft), dual(gc))
+
+  gA = gradedrange([SectorProduct(; A=U1(1)) => 1])
+  gB = gradedrange([SectorProduct(; B=SU2(1//2)) => 1])
+  gC = gradedrange([SectorProduct(; C=Z{2}(0)) => 1])
+  gABC = fusion_product(fusion_product(gA, gB), gC)
+  S = sector_type(gABC)
+
+  ft = FusionTensor(Float64, (gA, gB), (dual(gA), dual(gB), gC))
+  @test sector_type(ft) === S
+  @test space_isequal(matrix_row_axis(ft), gABC)
+  @test space_isequal(matrix_column_axis(ft), dual(gABC))
 end
 end

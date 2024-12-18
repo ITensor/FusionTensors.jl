@@ -4,7 +4,13 @@ using BlockArrays: AbstractBlockMatrix, BlockArrays, blocklength, findblock
 
 using BlockSparseArrays: AbstractBlockSparseMatrix, BlockSparseArray, eachblockstoredindex
 using GradedUnitRanges:
-  AbstractGradedUnitRange, blocklabels, dual, isdual, sector_type, space_isequal
+  AbstractGradedUnitRange,
+  blocklabels,
+  dual,
+  isdual,
+  map_blocklabels,
+  sector_type,
+  space_isequal
 using SymmetrySectors: SectorProduct, TrivialSector
 
 struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,N}
@@ -79,7 +85,7 @@ end
 
 sanitize_axes(::Tuple{}) = ()
 function sanitize_axes(raw_legs::Tuple{Vararg{AbstractGradedUnitRange}})
-  legs = unify_sector_type(typeof(first(raw_legs)), raw_legs)
+  legs = promote_sectors(typeof(first(raw_legs)), raw_legs)
   @assert all(check_unique_blocklabels.(legs))
   return legs
 end
@@ -88,35 +94,27 @@ function check_unique_blocklabels(g::AbstractGradedUnitRange)
   return length(unique(blocklabels(g))) == blocklength(g)
 end
 
-function unify_sector_type(
+function promote_sectors(
   ::Type{<:AbstractGradedUnitRange{LA}}, legs::Tuple{Vararg{AbstractGradedUnitRange{LA}}}
 ) where {LA}  # nothing to do
   return legs
 end
 
-function unify_sector_type(
+function promote_sectors(
   ::Type{<:AbstractGradedUnitRange}, legs::Tuple{Vararg{AbstractGradedUnitRange}}
 )
-  T = find_common_sector_type(legs)
-  unified_legs = map(g -> unify_sector_type(T, g), legs)
+  T = promote_sector_type(legs)
+  # fuse with trivial to insert all missing arguments inside each GradedAxis
+  # avoid depending on SymmetrySectors internals
+  s0 = trivial(T)
+  unified_legs = map_blocklabels.(s -> only(blocklabels(fusion_product(s0, s))), legs)
   return unified_legs
 end
 
-# TODO move this to SymmetrySectors or GradedUnitRanges
-# merge with SymmetrySectors.map_blocklabels
-function find_common_sector_type(sector_or_axes_enum)
+function promote_sector_type(legs)
   # fuse trivial sectors to produce unified type
   # avoid depending on SymmetrySectors internals
-  return label_type(fusion_product(trivial.(sector_or_axes_enum)...))
-end
-
-function unify_sector_type(T::Type{<:SectorProduct}, g::AbstractGradedUnitRange)
-  # fuse with trivial to insert all missing arguments inside each GradedAxis
-  # avoid depending on SymmetrySectors internals
-  glabels = map(s -> only(blocklabels(fusion_product(trivial(T), s))), blocklabels(g))
-  # use labelled_blocks to preserve GradedUnitRange
-  unified_g = labelled_blocks(unlabel_blocks(g), glabels)
-  return isdual(g) ? flip(unified_g) : unified_g
+  return sector_type(fusion_product(trivial.(legs)...))
 end
 
 function FusionTensor(
