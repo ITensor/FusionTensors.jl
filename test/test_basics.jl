@@ -4,9 +4,10 @@ using Test: @test, @test_throws, @testset
 using BlockSparseArrays: BlockSparseArray
 using FusionTensors:
   FusionTensor,
-  domain_axes,
   codomain_axes,
   data_matrix,
+  domain_axes,
+  fusiontensor,
   matching_axes,
   matching_dual,
   matrix_column_axis,
@@ -30,7 +31,7 @@ include("shared.jl")
   @test space_isequal(matrix_column_axis(ft0), g2)
 
   m = BlockSparseArray{Float64}(g1, g2)
-  ft1 = FusionTensor(m, (g1,), (g2,))
+  ft1 = fusiontensor(m, (g1,), (g2,))
 
   # getters
   @test data_matrix(ft1) == m
@@ -100,7 +101,7 @@ end
   gr = fusion_product(g1, g2)
   gc = dual(fusion_product(dual(g3), dual(g4)))
   m2 = BlockSparseArray{Float64}(gr, gc)
-  ft = FusionTensor(m2, (g1, g2), (g3, g4))
+  ft = fusiontensor(m2, (g1, g2), (g3, g4))
 
   @test data_matrix(ft) == m2
   @test matching_axes(codomain_axes(ft), (g1, g2))

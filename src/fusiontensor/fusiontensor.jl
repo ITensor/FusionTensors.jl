@@ -118,11 +118,13 @@ function promote_sector_type(legs)
   return sector_type(fusion_product(trivial.(legs)...))
 end
 
-function FusionTensor(
+# initialize with already computed data_matrix
+function fusiontensor(
   mat::AbstractBlockSparseMatrix,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
+  # init with empty data_matrix to construct trees_block_mapping
   ft = FusionTensor(eltype(mat), codomain_legs, domain_legs)
   for b in eachblockstoredindex(mat)
     @assert b in eachblockstoredindex(data_matrix(ft))
