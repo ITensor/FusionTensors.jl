@@ -88,13 +88,15 @@ end
 
 #-----------------------------------   misc tools  ----------------------------------------
 
-function degen_dims_shape(dense_shape::Tuple{Vararg{Int}}, f::FusionTree)
+function degen_dims_shape(dense_shape::Tuple{Vararg{Int}}, f::SectorFusionTree)
   dims = quantum_dimension.(leaves(f))
   mults = dense_shape .÷ dims
   return braid_tuples(mults, dims)
 end
 
-function split_degen_dims(array_block::AbstractArray, f1::FusionTree, f2::FusionTree)
+function split_degen_dims(
+  array_block::AbstractArray, f1::SectorFusionTree, f2::SectorFusionTree
+)
   array_block_split_shape = (
     degen_dims_shape(size(array_block)[begin:length(f1)], f1)...,
     degen_dims_shape(size(array_block)[(length(f1) + 1):end], f2)...,
@@ -112,7 +114,9 @@ end
 
 #----------------------------------  cast from array ---------------------------------------
 
-function contract_fusion_trees(array_block::AbstractArray, f1::FusionTree, f2::FusionTree)
+function contract_fusion_trees(
+  array_block::AbstractArray, f1::SectorFusionTree, f2::SectorFusionTree
+)
   # start from an array outer block with e.g. N=6 axes divided into N_DO=3 ndims_codomain
   # and N_CO=3 ndims_domain. Each leg k can be decomposed as a product of external an
   # multiplicity extk and a quantum dimension dimk
@@ -159,7 +163,7 @@ function contract_fusion_trees(array_block::AbstractArray, f1::FusionTree, f2::F
   )
 end
 
-function contract_singlet_projector(f1::FusionTree, f2::FusionTree)
+function contract_singlet_projector(f1::SectorFusionTree, f2::SectorFusionTree)
   f1_array = convert(Array, f1)
   f2_array = convert(Array, f2)
   N_CO = length(f1)
@@ -174,7 +178,7 @@ function contract_singlet_projector(f1::FusionTree, f2::FusionTree)
 end
 
 #-----------------------------------  cast to array ----------------------------------------
-function contract_fusion_trees(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+function contract_fusion_trees(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   N = ndims(ft)
   charge_block = view(ft, f1, f2)
   p = contract_singlet_projector(f1, f2)

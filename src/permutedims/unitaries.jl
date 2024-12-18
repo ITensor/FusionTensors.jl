@@ -6,7 +6,10 @@ using LRUCache: LRU
 using SymmetrySectors: quantum_dimension
 
 const unitary_cache = LRU{
-  Tuple{FusionTree,FusionTree,FusionTree,FusionTree,Tuple{Vararg{Int}}},Float64
+  Tuple{
+    SectorFusionTree,SectorFusionTree,SectorFusionTree,SectorFusionTree,Tuple{Vararg{Int}}
+  },
+  Float64,
 }(;
   maxsize=10000,  # TBD size
 )
@@ -20,8 +23,8 @@ end
 
 # ===========================  Constructor from Clebsch-Gordan  ============================
 function overlap_fusion_trees(
-  old_trees::Tuple{FusionTree{S},FusionTree{S}},
-  new_trees::Tuple{FusionTree{S},FusionTree{S}},
+  old_trees::Tuple{SectorFusionTree{S},SectorFusionTree{S}},
+  new_trees::Tuple{SectorFusionTree{S},SectorFusionTree{S}},
   flatperm::Tuple{Vararg{Integer}},
 ) where {S}
   old_proj = contract_singlet_projector(old_trees...)
@@ -31,8 +34,8 @@ function overlap_fusion_trees(
 end
 
 function cached_unitary_coeff(
-  old_trees::Tuple{FusionTree{S},FusionTree{S}},
-  new_trees::Tuple{FusionTree{S},FusionTree{S}},
+  old_trees::Tuple{SectorFusionTree{S},SectorFusionTree{S}},
+  new_trees::Tuple{SectorFusionTree{S},SectorFusionTree{S}},
   flatperm::Tuple{Vararg{Integer}},
 ) where {S}
   get!(unitary_cache, (old_trees..., new_trees..., flatperm)) do

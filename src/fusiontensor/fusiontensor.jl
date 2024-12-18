@@ -29,7 +29,8 @@ struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,
   )
     S = sector_type(axes(mat, 1))
     @assert sector_type(axes(mat, 2)) === S
-    @assert keytype(trees_block_mapping) <: Tuple{<:FusionTree{S},<:FusionTree{S}}
+    @assert keytype(trees_block_mapping) <:
+      Tuple{<:SectorFusionTree{S},<:SectorFusionTree{S}}
     @assert all(sector_type.(codomain_legs) .=== S)
     @assert all(sector_type.(domain_legs) .=== S)
     return new{
@@ -58,7 +59,7 @@ ndims_domain(ft::FusionTensor) = length(domain_axes(ft))
 matrix_size(ft::FusionTensor) = quantum_dimension.(axes(data_matrix(ft)))
 matrix_row_axis(ft::FusionTensor) = first(axes(data_matrix(ft)))
 matrix_column_axis(ft::FusionTensor) = last(axes(data_matrix(ft)))
-function charge_block_size(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+function charge_block_size(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   b = Tuple(findblock(ft, f1, f2))
   return ntuple(i -> Int(length(axes(ft)[i][b[i]])), ndims(ft))
 end
@@ -67,7 +68,7 @@ end
 GradedUnitRanges.sector_type(ft::FusionTensor) = sector_type(matrix_row_axis(ft))
 
 # BlockArrays interface
-function BlockArrays.findblock(ft::FusionTensor, f1::FusionTree, f2::FusionTree)
+function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   # find outer block corresponding to fusion trees
   @assert ndims_codomain(ft) == length(f1)
   @assert ndims_domain(ft) == length(f2)

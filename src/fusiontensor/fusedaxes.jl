@@ -15,7 +15,7 @@ struct FusedAxes{A,B,C}
   function FusedAxes(
     outer_legs::NTuple{N,AbstractGradedUnitRange{LA}},
     fused_axis::AbstractGradedUnitRange{LA},
-    trees_to_ranges_mapping::Dict{<:FusionTree{<:AbstractSector,N}},
+    trees_to_ranges_mapping::Dict{<:SectorFusionTree{<:AbstractSector,N}},
   ) where {N,LA}
     return new{typeof(outer_legs),typeof(fused_axis),typeof(trees_to_ranges_mapping)}(
       outer_legs, fused_axis, trees_to_ranges_mapping
@@ -38,7 +38,7 @@ GradedUnitRanges.blocklabels(fa::FusedAxes) = blocklabels(fused_axis(fa))
 # constructors
 function FusedAxes{S}(::Tuple{}) where {S<:AbstractSector}
   fused_axis = gradedrange([trivial(S) => 1])
-  trees_to_ranges_mapping = Dict([FusionTree{S}() => Block(1)[1:1]])
+  trees_to_ranges_mapping = Dict([SectorFusionTree{S}() => Block(1)[1:1]])
   return FusedAxes((), fused_axis, trees_to_ranges_mapping)
 end
 
@@ -64,7 +64,7 @@ function fusion_trees_external_multiplicities(
 end
 
 function compute_inner_ranges(
-  fusion_trees_mult::AbstractVector{<:Pair{<:FusionTree,<:Integer}}
+  fusion_trees_mult::AbstractVector{<:Pair{<:SectorFusionTree,<:Integer}}
 )
   fused_leg = blockmergesort(
     gradedrange(root_sector.(first.(fusion_trees_mult)) .=> last.(fusion_trees_mult))

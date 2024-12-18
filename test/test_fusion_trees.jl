@@ -5,7 +5,7 @@ using LinearAlgebra: I
 using BlockArrays: BlockArrays
 
 using FusionTensors:
-  FusionTree,
+  SectorFusionTree,
   arrows,
   branch_sectors,
   build_trees,
@@ -17,7 +17,7 @@ using SymmetrySectors: ×, SectorProduct, SU, SU2, TrivialSector, arguments
 
 @testset "Trivial fusion trees" begin
   q = TrivialSector()
-  f = FusionTree{TrivialSector}()
+  f = SectorFusionTree{TrivialSector}()
   @test arrows(f) == ()
   @test leaves(f) == ()
   @test root_sector(f) == q
@@ -43,7 +43,7 @@ using SymmetrySectors: ×, SectorProduct, SU, SU2, TrivialSector, arguments
   @test convert(Array, f) ≈ ones((1, 1, 1))
 end
 
-@testset "SU(2) FusionTree" begin
+@testset "SU(2) SectorFusionTree" begin
   j2 = SU2(1//2)
 
   f = only(build_trees((j2,), (false,)))
@@ -91,7 +91,7 @@ end
   @test branch_sectors(f34) == (SU2(1//2), SU2(1))
 end
 
-@testset "SU(3) FusionTree" begin
+@testset "SU(3) SectorFusionTree" begin
   a8 = SU{3}((2, 1))
   trees = build_trees((a8, a8), (false, false))
   @test length(trees) == 6
@@ -109,7 +109,7 @@ end
   @test outer_multiplicity_indices(f8b) == (2,)
 end
 
-@testset "SU(2)×SU(3) FusionTree" begin
+@testset "SU(2)×SU(3) SectorFusionTree" begin
   j2 = SU2(1//2)
   a8 = SU{3}((2, 1))
   s = j2 × a8
