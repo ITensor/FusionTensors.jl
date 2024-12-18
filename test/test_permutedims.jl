@@ -146,7 +146,7 @@ end
       @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
       @test permutedims(adjoint(ft), biperm) ≈ naive_permutedims(adjoint(ft), biperm)
 
-      ft = FusionTensor(sds22b, (g2, g2b), (g2, g2b))
+      ft = FusionTensor(sds22b, (g2, g2b), (g2b, g2))
       @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
       @test permutedims(adjoint(ft), biperm) ≈ naive_permutedims(adjoint(ft), biperm)
     end

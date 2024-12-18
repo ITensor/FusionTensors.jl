@@ -1,5 +1,7 @@
 # This files defines Base functions for FusionTensor
 
+using BlockSparseArrays: @view!
+
 function Base.:*(x::Number, ft::FusionTensor)
   return FusionTensor(
     x * data_matrix(ft), codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
@@ -158,6 +160,6 @@ function Base.view(ft::FusionTensor, f1f2::Tuple{<:SectorFusionTree,<:SectorFusi
   return view(ft, f1f2...)
 end
 function Base.view(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
-  charge_matrix = view(data_matrix(ft), trees_block_mapping(ft)[f1, f2])
+  charge_matrix = @view! data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]
   return reshape(charge_matrix, charge_block_size(ft, f1, f2))
 end
