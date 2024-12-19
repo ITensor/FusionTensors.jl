@@ -120,14 +120,16 @@ end
 
 # initialize with already computed data_matrix
 function fusiontensor(
-  mat::AbstractBlockSparseMatrix,
+  mat::AbstractMatrix,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
   # init with empty data_matrix to construct trees_block_mapping
   ft = FusionTensor(eltype(mat), codomain_legs, domain_legs)
+  @assert space_isequal(matrix_row_axis(ft), axes(mat, 1))
+  @assert space_isequal(matrix_column_axis(ft), axes(mat, 2))
   for b in eachblockstoredindex(mat)
-    @assert b in eachblockstoredindex(data_matrix(ft))
+    @assert b in eachblockstoredindex(data_matrix(ft))  # check matrix block is allowed
     data_matrix(ft)[b] = mat[b]
   end
   return ft
@@ -170,7 +172,7 @@ function initialize_data_matrix(
   return mat
 end
 
-function initialize_allowed_sectors!(mat::AbstractBlockMatrix)
+function initialize_allowed_sectors!(mat::AbstractMatrix)
   row_sectors = blocklabels(axes(mat, 1))
   col_sectors = blocklabels(dual(axes(mat, 2)))
   row_block_indices = findall(in(col_sectors), row_sectors)
