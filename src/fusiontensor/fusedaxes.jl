@@ -54,7 +54,6 @@ end
 function fusion_trees_external_multiplicities(
   outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
 )
-  N = length(outer_legs)
   tree_arrows = isdual.(outer_legs)
   return mapreduce(vcat, CartesianIndices(blocklength.(outer_legs))) do it
     block_sectors = map((g, i) -> blocklabels(g)[i], outer_legs, Tuple(it))
