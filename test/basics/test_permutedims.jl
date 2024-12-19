@@ -14,7 +14,7 @@ using GradedUnitRanges: dual, gradedrange, space_isequal
 using SymmetrySectors: O2, U1, SectorProduct, SU2
 using TensorAlgebra: blockedperm
 
-include("shared.jl")
+include("setup.jl")
 
 @testset "Abelian permutedims" begin
   @testset "dummy" begin

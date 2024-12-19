@@ -18,7 +18,7 @@ using GradedUnitRanges:
   blockmergesort, dual, flip, fusion_product, gradedrange, sector_type, space_isequal
 using SymmetrySectors: U1, SU2, SectorProduct, Z
 
-include("shared.jl")
+include("setup.jl")
 
 @testset "Fusion matrix" begin
   g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])

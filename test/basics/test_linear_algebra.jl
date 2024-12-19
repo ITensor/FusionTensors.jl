@@ -9,7 +9,7 @@ using FusionTensors: FusionTensor
 using GradedUnitRanges: dual, gradedrange
 using SymmetrySectors: U1, SU2, TrivialSector
 
-include("shared.jl")
+include("setup.jl")
 
 @testset "LinearAlgebra interface" begin
   sds22 = [
