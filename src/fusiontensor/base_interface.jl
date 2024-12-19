@@ -53,7 +53,7 @@ function Base.:/(ft::FusionTensor, x::Number)
   )
 end
 
-Base.Array(ft::FusionTensor) = Array(cast_to_array(ft))
+Base.Array(ft::FusionTensor) = Array(to_array(ft))
 
 # adjoint is costless: dual axes, swap codomain and domain, take data_matrix adjoint.
 # data_matrix coeff are not modified (beyond complex conjugation)

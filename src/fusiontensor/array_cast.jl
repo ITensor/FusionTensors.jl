@@ -15,30 +15,34 @@ function FusionTensor(
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
-  return cast_from_array(array, codomain_legs, domain_legs)
+  return to_fusiontensor(array, codomain_legs, domain_legs)
 end
 
 #### cast from symmetric to array
 function BlockSparseArrays.BlockSparseArray(ft::FusionTensor)
-  return cast_to_array(ft)
+  return to_array(ft)
 end
 
 # =================================  Low level interface  ==================================
-function cast_from_array(
+function to_fusiontensor(
   array::AbstractArray,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
   bounds = block_dimensions.((codomain_legs..., domain_legs...))
   blockarray = BlockedArray(array, bounds...)
-  return cast_from_array(blockarray, codomain_legs, domain_legs)
+  return to_fusiontensor(blockarray, codomain_legs, domain_legs)
 end
 
-function cast_from_array(
+get_tol(a::AbstractArray) = get_tol(real(eltype(a)))
+get_tol(T::Type{<:Integer}) = get_tol(Float64)
+get_tol(T::Type{<:Real}) = 10 * eps(T)
+
+function to_fusiontensor(
   blockarray::AbstractBlockArray,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}};
-  tol::Float64=1e-12,
+  tol::Real=get_tol(blockarray),
 )
   # input validation
   if length(codomain_legs) + length(domain_legs) != ndims(blockarray)  # compile time
@@ -48,20 +52,26 @@ function cast_from_array(
     throw(DomainError("legs dimensions are incompatible with array"))
   end
 
-  ft = unsafe_cast_from_array(blockarray, codomain_legs, domain_legs)
+  ft = to_fusiontensor_no_checknorm(blockarray, codomain_legs, domain_legs)
 
   # if blockarray is not G-invariant, norm(ft) < norm(blockarray)
-  if abs(norm(ft) - norm(blockarray)) > tol
+  checknorm(ft, blockarray, tol)
+  return ft
+end
+
+function checknorm(ft::FusionTensor, a::AbstractArray, tol::Real)
+  n0 = norm(a)
+  if abs(norm(ft) - n0) > tol * n0
     throw(
       InexactError(
-        :FusionTensor, typeof(blockarray), typeof(codomain_legs), typeof(domain_legs)
+        :FusionTensor, typeof(a), typeof(codomain_axes(ft)), typeof(domain_axes(ft))
       ),
     )
   end
   return ft
 end
 
-function unsafe_cast_from_array(
+function to_fusiontensor_no_checknorm(
   blockarray::AbstractBlockArray,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
@@ -74,7 +84,7 @@ function unsafe_cast_from_array(
   return ft
 end
 
-function cast_to_array(ft::FusionTensor)
+function to_array(ft::FusionTensor)
   bounds = block_dimensions.((codomain_axes(ft)..., domain_axes(ft)...))
   bsa = BlockSparseArray{eltype(ft)}(blockedrange.(bounds))
   for (f1, f2) in keys(trees_block_mapping(ft))
