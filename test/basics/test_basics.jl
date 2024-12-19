@@ -1,4 +1,3 @@
-@eval module $(gensym())
 using Test: @test, @test_throws, @testset
 
 using BlockSparseArrays: BlockSparseArray
@@ -260,5 +259,4 @@ end
   @test sector_type(ft) === S
   @test space_isequal(matrix_row_axis(ft), gABC)
   @test space_isequal(matrix_column_axis(ft), dual(gABC))
-end
 end

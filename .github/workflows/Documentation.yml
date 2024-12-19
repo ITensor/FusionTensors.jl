@@ -19,4 +19,5 @@ jobs:
     uses: "ITensor/ITensorActions/.github/workflows/Documentation.yml@main"
     with:
       localregistry: https://github.com/ITensor/ITensorRegistry.git
-    secrets: "inherit"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
