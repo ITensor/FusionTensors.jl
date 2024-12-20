@@ -102,19 +102,11 @@ end
 # eachindex is automatically defined for AbstractArray. We do not want it.
 Base.eachindex(::FusionTensor) = error("eachindex not defined for FusionTensor")
 
-function Base.getindex(ft::FusionTensor, f1f2::Tuple{<:SectorFusionTree,<:SectorFusionTree})
-  return ft[f1f2...]
-end
 function Base.getindex(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   charge_matrix = data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]
   return reshape(charge_matrix, charge_block_size(ft, f1, f2))
 end
 
-function Base.setindex!(
-  ft::FusionTensor, a::AbstractArray, f1f2::Tuple{<:SectorFusionTree,<:SectorFusionTree}
-)
-  return setindex!(ft, a, f1f2...)
-end
 function Base.setindex!(
   ft::FusionTensor, a::AbstractArray, f1::SectorFusionTree, f2::SectorFusionTree
 )
@@ -156,9 +148,6 @@ end
 
 Base.size(ft::FusionTensor) = quantum_dimension.(axes(ft))
 
-function Base.view(ft::FusionTensor, f1f2::Tuple{<:SectorFusionTree,<:SectorFusionTree})
-  return view(ft, f1f2...)
-end
 function Base.view(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   charge_matrix = @view! data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]
   return reshape(charge_matrix, charge_block_size(ft, f1, f2))

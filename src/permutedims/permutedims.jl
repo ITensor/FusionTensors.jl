@@ -51,8 +51,8 @@ function fusiontensor_permutedims!(
   unitary = compute_unitary(new_ft, old_ft, flatperm)
   for p in unitary
     old_trees, new_trees = first(p)
-    new_block = view(new_ft, new_trees)
-    old_block = view(old_ft, old_trees)
+    new_block = view(new_ft, new_trees...)
+    old_block = view(old_ft, old_trees...)
     @strided new_block .+= last(p) .* permutedims(old_block, flatperm)
   end
 end
