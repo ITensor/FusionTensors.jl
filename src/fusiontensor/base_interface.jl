@@ -115,12 +115,7 @@ end
 
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
-function Base.similar(ft::FusionTensor)
-  mat = similar(data_matrix(ft))
-  initialize_allowed_sectors!(mat)
-  return FusionTensor(mat, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft))
-end
-
+Base.similar(ft::FusionTensor) = similar(ft, eltype(ft))
 function Base.similar(ft::FusionTensor, ::Type{T}) where {T}
   # fusion trees have Float64 eltype: need compatible type
   @assert promote_type(T, Float64) === T
@@ -138,8 +133,7 @@ Base.show(io::IO, ft::FusionTensor) = print(io, "$(ndims(ft))-dim FusionTensor")
 function Base.show(io::IO, ::MIME"text/plain", ft::FusionTensor)
   println(io, "$(ndims(ft))-dim FusionTensor with axes:")
   for ax in axes(ft)
-    display(ax)
-    println(io)
+    println(io, ax)
   end
   return nothing
 end
