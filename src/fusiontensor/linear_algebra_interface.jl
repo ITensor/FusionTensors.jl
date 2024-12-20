@@ -44,11 +44,10 @@ end
 function LinearAlgebra.norm(ft::FusionTensor)
   m = data_matrix(ft)
   row_sectors = blocklabels(matrix_row_axis(ft))
-  n2 = mapreduce(
-    b -> quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * norm(m[b])^2,
-    +,
-    eachblockstoredindex(m);
-    init=0.0,
+  n2 = sum(
+    quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * norm(m[b])^2 for
+    b in eachblockstoredindex(m);
+    init=zero(real(eltype(ft))),
   )
   return sqrt(n2)
 end
@@ -56,25 +55,24 @@ end
 function LinearAlgebra.tr(ft::FusionTensor)
   m = data_matrix(ft)
   row_sectors = blocklabels(matrix_row_axis(ft))
-  return mapreduce(
-    b -> quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * tr(m[b]),
-    +,
-    eachblockstoredindex(m);
-    init=eltype(ft)(0),
+  return sum(
+    quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * tr(m[b]) for
+    b in eachblockstoredindex(m);
+    init=zero(eltype(ft)),
   )
 end
 
 function LinearAlgebra.qr(ft::FusionTensor)
   qmat, rmat = block_qr(data_matrix(ft))
-  qtens = FusionTensor(qmat, codomain_axes(ft), (axes(qmat)[1],))
-  rtens = FusionTensor(rmat, (axes(rmat)[0],), domain_axes(ft))
+  qtens = FusionTensor(qmat, codomain_axes(ft), (axes(qmat, 2),))
+  rtens = FusionTensor(rmat, (axes(rmat, 1),), domain_axes(ft))
   return qtens, rtens
 end
 
 function LinearAlgebra.svd(ft::FusionTensor)
   umat, s, vmat = block_svd(data_matrix(ft))
-  utens = FusionTensor(umat, codomain_axes(ft), (axes(umat)[1],))
-  stens = FusionTensor(s, (axes(umat)[1],), (axes(vmat)[0],))
-  vtens = FusionTensor(vmat, (axes(vmat)[0],), domain_axes(ft))
+  utens = FusionTensor(umat, codomain_axes(ft), (axes(umat, 2),))
+  stens = FusionTensor(s, (axes(umat, 1),), (axes(vmat, 2),))
+  vtens = FusionTensor(vmat, (axes(vmat, 1),), domain_axes(ft))
   return utens, stens, vtens
 end

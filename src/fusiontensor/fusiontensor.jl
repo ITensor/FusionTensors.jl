@@ -137,7 +137,7 @@ end
 
 # empty matrix
 function FusionTensor(
-  data_type::Type,
+  elt::Type,
   codomain_legs_raw::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs_raw::Tuple{Vararg{AbstractGradedUnitRange}},
 )
@@ -147,24 +147,24 @@ function FusionTensor(
   domain_legs = legs[(length(codomain_legs_raw) + 1):end]
   codomain_fused_axes = FusedAxes{S}(codomain_legs)
   domain_fused_axes = FusedAxes{S}(dual.(domain_legs))
-  mat = initialize_data_matrix(data_type, codomain_fused_axes, domain_fused_axes)
+  mat = initialize_data_matrix(elt, codomain_fused_axes, domain_fused_axes)
   tree_to_block_mapping = intersect_sectors(codomain_fused_axes, domain_fused_axes)
   return FusionTensor(mat, codomain_legs, domain_legs, tree_to_block_mapping)
 end
 
-function FusionTensor(data_type::Type, ::Tuple{}, ::Tuple{})
+function FusionTensor(elt::Type, ::Tuple{}, ::Tuple{})
   codomain_fused_axes = FusedAxes{TrivialSector}(())
   domain_fused_axes = FusedAxes{TrivialSector}(())
-  mat = initialize_data_matrix(data_type, codomain_fused_axes, domain_fused_axes)
+  mat = initialize_data_matrix(elt, codomain_fused_axes, domain_fused_axes)
   tree_to_block_mapping = intersect_sectors(codomain_fused_axes, domain_fused_axes)
   return FusionTensor(mat, (), (), tree_to_block_mapping)
 end
 
 function initialize_data_matrix(
-  data_type::Type{<:Number}, codomain_fused_axes::FusedAxes, domain_fused_axes::FusedAxes
+  elt::Type{<:Number}, codomain_fused_axes::FusedAxes, domain_fused_axes::FusedAxes
 )
   # fusion trees have Float64 eltype: need compatible type
-  promoted = promote_type(data_type, Float64)
+  promoted = promote_type(elt, Float64)
   mat_row_axis = fused_axis(codomain_fused_axes)
   mat_col_axis = dual(fused_axis(domain_fused_axes))
   mat = BlockSparseArray{promoted}(mat_row_axis, mat_col_axis)
