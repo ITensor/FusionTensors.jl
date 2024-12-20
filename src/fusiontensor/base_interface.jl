@@ -113,8 +113,6 @@ function Base.setindex!(
   return view(ft, f1, f2) .= a
 end
 
-Base.ndims(::FusionTensor{T,N}) where {T,N} = N
-
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
 function Base.similar(ft::FusionTensor)
