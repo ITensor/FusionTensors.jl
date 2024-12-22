@@ -2,6 +2,7 @@
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 BlockArrays = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
 BlockSparseArrays = "2c9a651f-6452-4ace-a6ac-809f4280fbb4"
+FusionTensors = "e16ca583-1f51-4df0-8e12-57d32947d33e"
 GradedUnitRanges = "e2de450a-8a67-46c7-b59c-01d5a3d041c5"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
