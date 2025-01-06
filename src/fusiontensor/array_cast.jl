@@ -34,15 +34,24 @@ function to_fusiontensor(
   return to_fusiontensor(blockarray, codomain_legs, domain_legs)
 end
 
-get_tol(a::AbstractArray) = get_tol(real(eltype(a)))
-get_tol(T::Type{<:Integer}) = get_tol(Float64)
-get_tol(T::Type{<:Real}) = 10 * eps(T)
+rtoldefault(a::AbstractArray) = rtoldefault(eltype(a))
+rtoldefault(arrayt::Type{<:AbstractArray}) = rtoldefault(eltype(arrayt))
+rtoldefault(elt::Type{<:Number}) = 10 * eps(real(float(elt)))
+
+function checknorm(ft::FusionTensor, a::AbstractArray, atol::Real, rtol::Real)
+  return isapprox(norm(ft), norm(a); atol=atol, rtol=rtol) || throw(
+    InexactError(
+      :FusionTensor, typeof(a), typeof(codomain_axes(ft)), typeof(domain_axes(ft))
+    ),
+  )
+end
 
 function to_fusiontensor(
   blockarray::AbstractBlockArray,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}};
-  tol::Real=get_tol(blockarray),
+  atol::Real=0,
+  rtol::Real=rtoldefault(blockarray),
 )
   # input validation
   if length(codomain_legs) + length(domain_legs) != ndims(blockarray)  # compile time
@@ -55,19 +64,7 @@ function to_fusiontensor(
   ft = to_fusiontensor_no_checknorm(blockarray, codomain_legs, domain_legs)
 
   # if blockarray is not G-invariant, norm(ft) < norm(blockarray)
-  checknorm(ft, blockarray, tol)
-  return ft
-end
-
-function checknorm(ft::FusionTensor, a::AbstractArray, tol::Real)
-  n0 = norm(a)
-  if abs(norm(ft) - n0) > tol * n0
-    throw(
-      InexactError(
-        :FusionTensor, typeof(a), typeof(codomain_axes(ft)), typeof(domain_axes(ft))
-      ),
-    )
-  end
+  checknorm(ft, blockarray, atol, rtol)
   return ft
 end
 
