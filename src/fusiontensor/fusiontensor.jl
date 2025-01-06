@@ -66,17 +66,9 @@ end
 
 # GradedUnitRanges interface
 function GradedUnitRanges.sector_type(
-  ::Type{<:FusionTensor{<:Any,<:Any,CoDomainAxes}}
-) where {CoDomainAxes}
-  return sector_type(fieldtype(CoDomainAxes, 1))
-end
-function GradedUnitRanges.sector_type(
-  ::Type{<:FusionTensor{<:Any,<:Any,Tuple{},DomainAxes}}
-) where {DomainAxes}
-  return sector_type(fieldtype(DomainAxes, 1))
-end
-function GradedUnitRanges.sector_type(::Type{<:FusionTensor{<:Any,0}})
-  return TrivialSector
+  ::Type{<:FusionTensor{<:Any,<:Any,<:Any,<:Any,<:Any,<:Dict{<:Tuple{<:Any,F}}}}
+) where {F}
+  return sector_type(F)
 end
 
 # BlockArrays interface

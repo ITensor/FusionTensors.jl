@@ -71,7 +71,7 @@ Base.isless(f1::SectorFusionTree, f2::SectorFusionTree) = isless(to_tuple(f1), t
 Base.length(::SectorFusionTree{<:Any,N}) where {N} = N
 
 # GradedUnitRanges interface
-GradedUnitRanges.sector_type(::SectorFusionTree{S}) where {S} = S
+GradedUnitRanges.sector_type(::Type{<:SectorFusionTree{S}}) where {S} = S
 
 function build_trees(legs::Vararg{AbstractGradedUnitRange})
   tree_arrows = isdual.(legs)
