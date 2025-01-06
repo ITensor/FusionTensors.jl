@@ -28,15 +28,9 @@ function LinearAlgebra.mul!(
   end
 
   # input validation
-  if !matching_dual(domain_axes(A), codomain_axes(B))
-    throw(codomainError("Incompatible tensor axes for A and B"))
-  end
-  if !matching_axes(codomain_axes(C), codomain_axes(A))
-    throw(codomainError("Incompatible tensor axes for C and A"))
-  end
-  if !matching_axes(domain_axes(C), domain_axes(B))
-    throw(codomainError("Incompatible tensor axes for C and B"))
-  end
+  checkaxes_dual(domain_axes(A), codomain_axes(B))
+  checkaxes(codomain_axes(C), codomain_axes(A))
+  checkaxes(domain_axes(C), domain_axes(B))
   mul!(data_matrix(C), data_matrix(A), data_matrix(B), α, β)
   return C
 end

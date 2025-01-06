@@ -11,7 +11,7 @@ Base.:*(ft::FusionTensor, x::Number) = set_data_matrix(ft, x * data_matrix(ft))
 
 # tensor contraction is a block data_matrix product.
 function Base.:*(left::FusionTensor, right::FusionTensor)
-  @assert matching_dual(domain_axes(left), codomain_axes(right))
+  checkaxes_dual(domain_axes(left), codomain_axes(right))
   new_data_matrix = data_matrix(left) * data_matrix(right)
   return fusiontensor(new_data_matrix, codomain_axes(left), domain_axes(right))
 end
@@ -20,14 +20,14 @@ Base.:+(ft::FusionTensor) = ft
 
 # tensor addition is a block data_matrix add.
 function Base.:+(left::FusionTensor, right::FusionTensor)
-  @assert matching_axes(axes(left), axes(right))
+  checkaxes(axes(left), axes(right))
   return set_data_matrix(left, data_matrix(left) + data_matrix(right))
 end
 
 Base.:-(ft::FusionTensor) = set_data_matrix(ft, -data_matrix(ft))
 
 function Base.:-(left::FusionTensor, right::FusionTensor)
-  @assert matching_axes(axes(left), axes(right))
+  checkaxes(axes(left), axes(right))
   return set_data_matrix(left, data_matrix(left) - data_matrix(right))
 end
 

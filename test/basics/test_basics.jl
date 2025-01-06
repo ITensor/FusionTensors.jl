@@ -7,8 +7,8 @@ using FusionTensors:
   data_matrix,
   domain_axes,
   fusiontensor,
-  matching_axes,
-  matching_dual,
+  checkaxes,
+  checkaxes_dual,
   matrix_column_axis,
   matrix_row_axis,
   matrix_size,
@@ -34,11 +34,11 @@ include("setup.jl")
 
   # getters
   @test data_matrix(ft1) == m
-  @test matching_axes(codomain_axes(ft1), (g1,))
-  @test matching_axes(domain_axes(ft1), (g2,))
+  @test checkaxes(codomain_axes(ft1), (g1,))
+  @test checkaxes(domain_axes(ft1), (g2,))
 
   # misc
-  @test matching_axes(axes(ft1), (g1, g2))
+  @test checkaxes(axes(ft1), (g1, g2))
   @test ndims_codomain(ft1) == 1
   @test ndims_domain(ft1) == 1
   @test matrix_size(ft1) == (6, 5)
@@ -60,36 +60,36 @@ include("setup.jl")
   @test ft2 !== ft1
   @test data_matrix(ft2) == data_matrix(ft1)
   @test data_matrix(ft2) !== data_matrix(ft1)
-  @test matching_axes(codomain_axes(ft2), codomain_axes(ft1))
-  @test matching_axes(domain_axes(ft2), domain_axes(ft1))
+  @test checkaxes(codomain_axes(ft2), codomain_axes(ft1))
+  @test checkaxes(domain_axes(ft2), domain_axes(ft1))
 
   ft2 = deepcopy(ft1)
   @test ft2 !== ft1
   @test data_matrix(ft2) == data_matrix(ft1)
   @test data_matrix(ft2) !== data_matrix(ft1)
-  @test matching_axes(codomain_axes(ft2), codomain_axes(ft1))
-  @test matching_axes(domain_axes(ft2), domain_axes(ft1))
+  @test checkaxes(codomain_axes(ft2), codomain_axes(ft1))
+  @test checkaxes(domain_axes(ft2), domain_axes(ft1))
 
   # similar
   ft2 = similar(ft1)
   @test isnothing(check_sanity(ft2))
   @test eltype(ft2) == Float64
-  @test matching_axes(codomain_axes(ft2), codomain_axes(ft1))
-  @test matching_axes(domain_axes(ft2), domain_axes(ft1))
+  @test checkaxes(codomain_axes(ft2), codomain_axes(ft1))
+  @test checkaxes(domain_axes(ft2), domain_axes(ft1))
 
   ft3 = similar(ft1, ComplexF64)
   @test isnothing(check_sanity(ft3))
   @test eltype(ft3) == ComplexF64
-  @test matching_axes(codomain_axes(ft3), codomain_axes(ft1))
-  @test matching_axes(domain_axes(ft3), domain_axes(ft1))
+  @test checkaxes(codomain_axes(ft3), codomain_axes(ft1))
+  @test checkaxes(domain_axes(ft3), domain_axes(ft1))
 
   @test_throws AssertionError similar(ft1, Int)
 
   ft5 = similar(ft1, ComplexF32, ((g1, g1), (g2,)))
   @test isnothing(check_sanity(ft5))
   @test eltype(ft5) == ComplexF64
-  @test matching_axes(codomain_axes(ft5), (g1, g1))
-  @test matching_axes(domain_axes(ft5), (g2,))
+  @test checkaxes(codomain_axes(ft5), (g1, g1))
+  @test checkaxes(domain_axes(ft5), (g2,))
 end
 
 @testset "More than 2 axes" begin
@@ -103,8 +103,8 @@ end
   ft = fusiontensor(m2, (g1, g2), (g3, g4))
 
   @test data_matrix(ft) == m2
-  @test matching_axes(codomain_axes(ft), (g1, g2))
-  @test matching_axes(domain_axes(ft), (g3, g4))
+  @test checkaxes(codomain_axes(ft), (g1, g2))
+  @test checkaxes(domain_axes(ft), (g3, g4))
 
   @test axes(ft) == (g1, g2, g3, g4)
   @test ndims_codomain(ft) == 2
@@ -232,6 +232,11 @@ end
   @test space_isequal(dual(g3), codomain_axes(ad)[1])
   @test space_isequal(dual(g4), codomain_axes(ad)[2])
   @test isnothing(check_sanity(ad))
+
+  ft7 = FusionTensor(Float64, (g1,), (g2, g3, g4))
+  @test_throws DimensionMismatch ft7 + ft3
+  @test_throws DimensionMismatch ft7 - ft3
+  @test_throws DimensionMismatch ft7 * ft3
 end
 
 @testset "mising SectorProduct" begin

@@ -182,8 +182,11 @@ function initialize_allowed_sectors!(mat::AbstractMatrix)
   end
 end
 
-matching_dual(axes1::Tuple, axes2::Tuple) = matching_axes(axes1, dual.(axes2))
-matching_axes(axes1::Tuple, axes2::Tuple) = false
-function matching_axes(axes1::T, axes2::T) where {T<:Tuple}
-  return all(space_isequal.(axes1, axes2))
+checkaxes_dual(axes1, axes2) = checkaxes(axes1, dual.(axes2))
+function checkaxes(ax1, ax2)
+  return checkaxes(Bool, ax1, ax2) ||
+         throw(DimensionMismatch(lazy"$ax1 does not match $ax2"))
+end
+function checkaxes(::Type{Bool}, axes1, axes2)
+  return length(axes1) == length(axes2) && all(space_isequal.(axes1, axes2))
 end

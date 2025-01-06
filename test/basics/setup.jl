@@ -6,8 +6,8 @@ using FusionTensors:
   codomain_axes,
   data_matrix,
   domain_axes,
-  matching_axes,
-  matching_dual,
+  checkaxes,
+  checkaxes_dual,
   matrix_column_axis,
   matrix_row_axis,
   ndims_codomain,
@@ -37,8 +37,8 @@ function check_sanity(ft::FusionTensor)
   @assert nda + nca == ndims(ft) "invalid ndims"
 
   @assert length(axes(ft)) == ndims(ft) "ndims does not match axes"
-  @assert matching_axes(axes(ft)[begin:nda], codomain_axes(ft)) "axes do not match codomain_axes"
-  @assert matching_axes(axes(ft)[(nda + 1):end], domain_axes(ft)) "axes do not match domain_axes"
+  checkaxes(axes(ft)[begin:nda], codomain_axes(ft))
+  checkaxes(axes(ft)[(nda + 1):end], domain_axes(ft))
 
   m = data_matrix(ft)
   @assert ndims(m) == 2 "invalid data_matrix ndims"
