@@ -66,7 +66,7 @@ branch_sectors(f::SectorFusionTree) = f.branch_sectors
 outer_multiplicity_indices(f::SectorFusionTree) = f.outer_multiplicity_indices
 
 # Base interface
-Base.convert(T::Type{<:Array}, f::SectorFusionTree) = convert(T, to_tensor(f))
+Base.convert(T::Type{<:Array}, f::SectorFusionTree) = convert(T, to_array(f))
 Base.isless(f1::SectorFusionTree, f2::SectorFusionTree) = isless(to_tuple(f1), to_tuple(f2))
 Base.length(::SectorFusionTree{<:Any,N}) where {N} = N
 
@@ -138,10 +138,9 @@ function SymmetrySectors.arguments(f::SectorFusionTree{<:SectorProduct,1})
   arguments_root = arguments(root_sector(f))
   arguments_leave = arguments(only(leaves(f)))
   # use map(keys) to stay agnostic with respect to SectorProduct implementation
-  return map(
-    k -> SectorFusionTree((arguments_leave[k],), arrows(f), arguments_root[k], (), ()),
-    keys(arguments_root),
-  )
+  return map(keys(arguments_root)) do k
+    return SectorFusionTree((arguments_leave[k],), arrows(f), arguments_root[k], (), ())
+  end
 end
 
 #
@@ -254,9 +253,9 @@ function build_trees(
 end
 
 # --------------- convert to Array  ---------------
-to_tensor(::SectorFusionTree{<:Any,0}) = ones(1)
+to_array(::SectorFusionTree{<:Any,0}) = ones(1)
 
-function to_tensor(f::SectorFusionTree)
+function to_array(f::SectorFusionTree)
   # init with dummy trivial leg to get arrow correct and deal with size-1 case
   cgt1 = clebsch_gordan_tensor(
     trivial(sector_type(f)), first(leaves(f)), first(leaves(f)), false, first(arrows(f)), 1
@@ -265,8 +264,7 @@ function to_tensor(f::SectorFusionTree)
   return grow_tensor_tree(tree_tensor, f)
 end
 
-#to_tensor(::SectorFusionTree{<:SectorProduct,0}) = ones(1)
-function to_tensor(f::SectorFusionTree{<:SectorProduct})
+function to_array(f::SectorFusionTree{<:SectorProduct})
   args = convert.(Array, arguments(f))
   return reduce(_tensor_kron, args)
 end
