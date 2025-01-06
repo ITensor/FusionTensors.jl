@@ -65,7 +65,19 @@ function charge_block_size(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFus
 end
 
 # GradedUnitRanges interface
-GradedUnitRanges.sector_type(ft::FusionTensor) = sector_type(matrix_row_axis(ft))
+function GradedUnitRanges.sector_type(
+  ::Type{<:FusionTensor{<:Any,<:Any,CoDomainAxes}}
+) where {CoDomainAxes}
+  return sector_type(fieldtype(CoDomainAxes, 1))
+end
+function GradedUnitRanges.sector_type(
+  ::Type{<:FusionTensor{<:Any,<:Any,Tuple{},DomainAxes}}
+) where {DomainAxes}
+  return sector_type(fieldtype(DomainAxes, 1))
+end
+function GradedUnitRanges.sector_type(::Type{<:FusionTensor{<:Any,0}})
+  return TrivialSector
+end
 
 # BlockArrays interface
 function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)

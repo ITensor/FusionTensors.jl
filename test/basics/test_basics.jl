@@ -16,7 +16,7 @@ using FusionTensors:
   ndims_codomain
 using GradedUnitRanges:
   blockmergesort, dual, flip, fusion_product, gradedrange, sector_type, space_isequal
-using SymmetrySectors: U1, SU2, SectorProduct, Z
+using SymmetrySectors: U1, SU2, SectorProduct, TrivialSector, Z
 
 include("setup.jl")
 
@@ -129,6 +129,7 @@ end
   @test size(ft1) == (6,)
   @test size(data_matrix(ft1)) == (6, 1)
   @test isnothing(check_sanity(ft1))
+  @test sector_type(ft1) === sector_type(g1)
 
   # one column axis
   ft2 = FusionTensor(Float64, (), (g1,))
@@ -138,6 +139,7 @@ end
   @test size(ft2) == (6,)
   @test size(data_matrix(ft2)) == (1, 6)
   @test isnothing(check_sanity(ft2))
+  @test sector_type(ft2) === sector_type(g1)
 
   # zero axis
   ft3 = FusionTensor(Float64, (), ())
@@ -147,6 +149,7 @@ end
   @test size(ft3) == ()
   @test size(data_matrix(ft3)) == (1, 1)
   @test isnothing(check_sanity(ft3))
+  @test sector_type(ft3) === TrivialSector
 end
 
 @testset "Base operations" begin
