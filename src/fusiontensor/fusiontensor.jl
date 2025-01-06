@@ -167,10 +167,10 @@ end
 function initialize_data_matrix(
   elt::Type{<:Number}, codomain_fused_axes::FusedAxes, domain_fused_axes::FusedAxes
 )
-  # fusion trees have Float64 eltype: need compatible type
-  promoted = promote_type(elt, Float64)
   mat_row_axis = fused_axis(codomain_fused_axes)
   mat_col_axis = dual(fused_axis(domain_fused_axes))
+  # non-abelian fusion trees have float eltype: need compatible type
+  promoted = promote_type(elt, fusiontree_eltype(sector_type(mat_row_axis)))
   mat = BlockSparseArray{promoted}(mat_row_axis, mat_col_axis)
   initialize_allowed_sectors!(mat)
   return mat

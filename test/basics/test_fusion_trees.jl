@@ -9,6 +9,7 @@ using FusionTensors:
   arrows,
   branch_sectors,
   build_trees,
+  fusiontree_eltype,
   leaves,
   outer_multiplicity_indices,
   root_sector
@@ -41,6 +42,8 @@ using SymmetrySectors: ×, SectorProduct, SU, SU2, TrivialSector, arguments
   @test branch_sectors(f) == (q,)
   @test outer_multiplicity_indices(f) == (1,)
   @test convert(Array, f) ≈ ones((1, 1, 1))
+
+  @test fusiontree_eltype(sector_type(f)) === eltype(convert(Array, f))
 end
 
 @testset "SU(2) SectorFusionTree" begin
@@ -54,6 +57,7 @@ end
   @test outer_multiplicity_indices(f) == ()
   @test sector_type(f) == typeof(j2)
   @test convert(Array, f) ≈ I(2)
+  @test fusiontree_eltype(sector_type(f)) === eltype(convert(Array, f))
 
   f = only(build_trees((j2,), (true,)))
   @test arrows(f) == (true,)

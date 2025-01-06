@@ -151,6 +151,9 @@ function SymmetrySectors.arguments(f::SectorFusionTree{<:SectorProduct,1})
   end
 end
 
+# TBD change type depending on AbelianStyle?
+fusiontree_eltype(::Type{<:AbstractSector}) = Float64
+
 #
 # =====================================  Internals  ========================================
 #
