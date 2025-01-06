@@ -91,7 +91,6 @@ end
 
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
-Base.similar(ft::FusionTensor) = similar(ft, eltype(ft))
 function Base.similar(ft::FusionTensor, ::Type{T}) where {T}
   # fusion trees have Float64 eltype: need compatible type
   @assert promote_type(T, Float64) === T
