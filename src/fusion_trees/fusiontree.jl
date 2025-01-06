@@ -67,7 +67,15 @@ outer_multiplicity_indices(f::SectorFusionTree) = f.outer_multiplicity_indices
 
 # Base interface
 Base.convert(T::Type{<:Array}, f::SectorFusionTree) = convert(T, to_array(f))
-Base.isless(f1::SectorFusionTree, f2::SectorFusionTree) = isless(to_tuple(f1), to_tuple(f2))
+
+function Base.isless(f1::SectorFusionTree, f2::SectorFusionTree)
+  return isless(leaves(f1), leaves(f2)) ||
+         isless(arrows(f1), arrows(f2)) ||
+         isless(root_sector(f1), root_sector(f2)) ||
+         isless(branch_sectors(f1), branch_sectors(f2)) ||
+         isless(outer_multiplicity_indices(f1), outer_multiplicity_indices(f2))
+end
+
 Base.length(::SectorFusionTree{<:Any,N}) where {N} = N
 
 # GradedUnitRanges interface
@@ -146,16 +154,6 @@ end
 #
 # =====================================  Internals  ========================================
 #
-# --------------- misc  ---------------
-function to_tuple(f::SectorFusionTree)
-  return (
-    leaves(f)...,
-    arrows(f)...,
-    root_sector(f),
-    branch_sectors(f)...,
-    outer_multiplicity_indices(f)...,
-  )
-end
 
 # --------------- SectorProduct helper functions  ---------------
 function outer_multiplicity_kron(
