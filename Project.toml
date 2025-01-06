@@ -4,6 +4,7 @@ authors = ["ITensor developers <support@itensor.org> and contributors"]
 version = "0.2.0"
 
 [deps]
+Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
 BlockArrays = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
 BlockSparseArrays = "2c9a651f-6452-4ace-a6ac-809f4280fbb4"
 BroadcastMapConversion = "4a4adec5-520f-4750-bb37-d5e66b4ddeb2"
@@ -20,6 +21,7 @@ TypeParameterAccessors = "7e5a90cf-f82e-492e-a09b-e3e26432c138"
 WignerSymbols = "9f57e263-0b3d-5e2e-b1be-24f2bb48858b"
 
 [compat]
+Accessors = "0.1.39"
 BlockArrays = "1.2.0"
 BlockSparseArrays = "0.2.0"
 BroadcastMapConversion = "0.1.0"

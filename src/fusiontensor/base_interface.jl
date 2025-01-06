@@ -1,18 +1,13 @@
 # This files defines Base functions for FusionTensor
 
+using Accessors: @set
+
 using BlockSparseArrays: @view!
 
-function Base.:*(x::Number, ft::FusionTensor)
-  return FusionTensor(
-    x * data_matrix(ft), codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
-  )
-end
+set_data_matrix(ft::FusionTensor, data_matrix) = @set ft.data_matrix = data_matrix
 
-function Base.:*(ft::FusionTensor, x::Number)
-  return FusionTensor(
-    x * data_matrix(ft), codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
-  )
-end
+Base.:*(x::Number, ft::FusionTensor) = set_data_matrix(ft, x * data_matrix(ft))
+Base.:*(ft::FusionTensor, x::Number) = set_data_matrix(ft, x * data_matrix(ft))
 
 # tensor contraction is a block data_matrix product.
 function Base.:*(left::FusionTensor, right::FusionTensor)
@@ -26,32 +21,17 @@ Base.:+(ft::FusionTensor) = ft
 # tensor addition is a block data_matrix add.
 function Base.:+(left::FusionTensor, right::FusionTensor)
   @assert matching_axes(axes(left), axes(right))
-  new_data_matrix = data_matrix(left) + data_matrix(right)
-  return FusionTensor(
-    new_data_matrix, codomain_axes(left), domain_axes(left), trees_block_mapping(left)
-  )
+  return set_data_matrix(left, data_matrix(left) + data_matrix(right))
 end
 
-function Base.:-(ft::FusionTensor)
-  new_data_matrix = -data_matrix(ft)
-  return FusionTensor(
-    new_data_matrix, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
-  )
-end
+Base.:-(ft::FusionTensor) = set_data_matrix(ft, -data_matrix(ft))
 
 function Base.:-(left::FusionTensor, right::FusionTensor)
   @assert matching_axes(axes(left), axes(right))
-  new_data_matrix = data_matrix(left) - data_matrix(right)
-  return FusionTensor(
-    new_data_matrix, codomain_axes(left), domain_axes(left), trees_block_mapping(left)
-  )
+  return set_data_matrix(left, data_matrix(left) - data_matrix(right))
 end
 
-function Base.:/(ft::FusionTensor, x::Number)
-  return FusionTensor(
-    data_matrix(ft) / x, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
-  )
-end
+Base.:/(ft::FusionTensor, x::Number) = set_data_matrix(ft, data_matrix(ft) / x)
 
 Base.Array(ft::FusionTensor) = Array(to_array(ft))
 
@@ -75,11 +55,7 @@ Base.axes(ft::FusionTensor) = (codomain_axes(ft)..., domain_axes(ft)...)
 
 # conj is defined as coefficient wise complex conjugation, without axis dual
 Base.conj(ft::FusionTensor{<:Real}) = ft   # same object for real element type
-function Base.conj(ft::FusionTensor)
-  return FusionTensor(
-    conj(data_matrix(ft)), codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft)
-  )
-end
+Base.conj(ft::FusionTensor) = set_data_matrix(ft, conj(data_matrix(ft)))
 
 function Base.copy(ft::FusionTensor)
   return FusionTensor(
