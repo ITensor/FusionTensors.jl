@@ -7,7 +7,7 @@ using BlockSparseArrays: @view!
 set_data_matrix(ft::FusionTensor, data_matrix) = @set ft.data_matrix = data_matrix
 
 Base.:*(x::Number, ft::FusionTensor) = set_data_matrix(ft, x * data_matrix(ft))
-Base.:*(ft::FusionTensor, x::Number) = set_data_matrix(ft, x * data_matrix(ft))
+Base.:*(ft::FusionTensor, x::Number) = x * ft
 
 # tensor contraction is a block data_matrix product.
 function Base.:*(left::FusionTensor, right::FusionTensor)
