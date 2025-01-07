@@ -13,7 +13,7 @@ Base.:*(ft::FusionTensor, x::Number) = x * ft
 function Base.:*(left::FusionTensor, right::FusionTensor)
   checkaxes_dual(domain_axes(left), codomain_axes(right))
   new_data_matrix = data_matrix(left) * data_matrix(right)
-  return fusiontensor(new_data_matrix, codomain_axes(left), domain_axes(right))
+  return to_fusiontensor(new_data_matrix, codomain_axes(left), domain_axes(right))
 end
 
 Base.:+(ft::FusionTensor) = ft

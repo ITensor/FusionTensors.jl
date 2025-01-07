@@ -135,7 +135,7 @@ function promote_sector_type(legs)
 end
 
 # initialize with already computed data_matrix
-function fusiontensor(
+function to_fusiontensor(
   mat::AbstractMatrix,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
@@ -163,7 +163,7 @@ function FusionTensor(
   nondual_col_axis, domain_trees_to_ranges_mapping = fuse_axes(S, dual.(domain_legs))
 
   mat = initialize_data_matrix(elt, row_axis, nondual_col_axis)
-  tree_to_block_mapping = intersect_sectors(
+  tree_to_block_mapping = intersect_codomain_domain(
     codomain_trees_to_ranges_mapping, domain_trees_to_ranges_mapping
   )
   return FusionTensor(mat, codomain_legs, domain_legs, tree_to_block_mapping)
@@ -214,7 +214,7 @@ function to_blockindexrange(b1::BlockIndexRange{1}, b2::BlockIndexRange{1})
   return Block(Block.(t))[to_block_indices.(t)...]
 end
 
-function intersect_sectors(
+function intersect_codomain_domain(
   codomain_trees_to_ranges_mapping::Dict{<:SectorFusionTree,<:BlockIndexRange{1}},
   domain_trees_to_ranges_mapping::Dict{<:SectorFusionTree,<:BlockIndexRange{1}},
 )
