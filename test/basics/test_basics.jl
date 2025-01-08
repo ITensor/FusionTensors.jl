@@ -6,7 +6,7 @@ using FusionTensors:
   codomain_axes,
   data_matrix,
   domain_axes,
-  fusiontensor,
+  FusionTensor,
   checkaxes,
   checkaxes_dual,
   matrix_column_axis,
@@ -30,7 +30,7 @@ include("setup.jl")
   @test space_isequal(matrix_column_axis(ft0), g2)
 
   m = BlockSparseArray{Float64}(g1, g2)
-  ft1 = fusiontensor(m, (g1,), (g2,))
+  ft1 = FusionTensor(m, (g1,), (g2,))
 
   # getters
   @test data_matrix(ft1) == m
@@ -100,7 +100,7 @@ end
   gr = fusion_product(g1, g2)
   gc = dual(fusion_product(dual(g3), dual(g4)))
   m2 = BlockSparseArray{Float64}(gr, gc)
-  ft = fusiontensor(m2, (g1, g2), (g3, g4))
+  ft = FusionTensor(m2, (g1, g2), (g3, g4))
 
   @test data_matrix(ft) == m2
   @test checkaxes(codomain_axes(ft), (g1, g2))

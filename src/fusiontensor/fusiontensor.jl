@@ -81,6 +81,7 @@ function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::Secto
   b2 = find_sector_block.(leaves(f2), dual.(domain_axes(ft)))
   return Block(b1..., b2...)
 end
+# TBD move to GradedUnitRanges? rename findfirst_sector?
 function find_sector_block(s::AbstractSector, l::AbstractGradedUnitRange)
   return findfirst(==(s), blocklabels(l))
 end

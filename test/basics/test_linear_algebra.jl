@@ -5,7 +5,7 @@ using Test: @test, @testset
 using BlockArrays: BlockArrays
 
 using BlockSparseArrays: BlockSparseArrays
-using FusionTensors: FusionTensor
+using FusionTensors: FusionTensor, to_fusiontensor
 using GradedUnitRanges: dual, gradedrange
 using SymmetrySectors: U1, SU2, TrivialSector
 
@@ -30,7 +30,7 @@ include("setup.jl")
     @test norm(ft0) == 0
     @test tr(ft0) == 0
 
-    ft = FusionTensor(sdst, (g, g), (dual(g), dual(g)))
+    ft = to_fusiontensor(sdst, (g, g), (dual(g), dual(g)))
     @test isnothing(check_sanity(ft))
     @test norm(ft) ≈ √3 / 2
     @test isapprox(tr(ft), 0; atol=eps(Float64))

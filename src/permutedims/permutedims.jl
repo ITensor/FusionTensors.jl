@@ -12,7 +12,7 @@ function naive_permutedims(ft, biperm::BlockedPermutation{2})
   # naive permute: cast to dense, permutedims, cast to FusionTensor
   arr = Array(ft)
   permuted_arr = permutedims(arr, Tuple(biperm))
-  permuted = FusionTensor(permuted_arr, new_codomain_legs, new_domain_legs)
+  permuted = to_fusiontensor(permuted_arr, new_codomain_legs, new_domain_legs)
   return permuted
 end
 
