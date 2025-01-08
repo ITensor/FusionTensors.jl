@@ -4,7 +4,7 @@ using Test: @test, @test_broken, @test_throws, @testset
 
 using BlockArrays: Block, BlockedArray, blocksize
 
-using FusionTensors: FusionTensor, data_matrix
+using FusionTensors: FusionTensor, data_matrix, to_fusiontensor
 using GradedUnitRanges: dual, fusion_product, gradedrange
 using SymmetrySectors: O2, SectorProduct, SU2, TrivialSector, U1
 
@@ -15,7 +15,7 @@ include("setup.jl")
     g = gradedrange([TrivialSector() => 1])
     gb = dual(g)
     m = ones((1, 1))
-    ft = FusionTensor(m, (g,), (gb,))
+    ft = to_fusiontensor(m, (g,), (gb,))
     @test size(data_matrix(ft)) == (1, 1)
     @test blocksize(data_matrix(ft)) == (1, 1)
     @test data_matrix(ft)[1, 1] ≈ 1.0
@@ -25,14 +25,14 @@ include("setup.jl")
 
     for elt in (Int, UInt32, Float32)
       m = ones(elt, (1, 1))
-      ft = FusionTensor(m, (g,), (gb,))
+      ft = to_fusiontensor(m, (g,), (gb,))
       @test eltype(ft) === Float64
       @test Array(ft) ≈ m
     end
 
     for elt in (ComplexF32, ComplexF64)
       m = ones(elt, (1, 1))
-      ft = FusionTensor(m, (g,), (gb,))
+      ft = to_fusiontensor(m, (g,), (gb,))
       @test eltype(ft) === ComplexF64
       @test Array(ft) ≈ m
     end
@@ -46,7 +46,7 @@ include("setup.jl")
     codomain_legs = (g1, g2)
     domain_legs = dual.((g3, g4))
     t = convert.(Float64, reshape(collect(1:48), (2, 3, 4, 2)))
-    ft = FusionTensor(t, codomain_legs, domain_legs)
+    ft = to_fusiontensor(t, codomain_legs, domain_legs)
     @test size(data_matrix(ft)) == (6, 8)
     @test blocksize(data_matrix(ft)) == (1, 1)
     @test data_matrix(ft)[Block(1, 1)] ≈ reshape(t, (6, 8))
@@ -61,7 +61,7 @@ end
     g = gradedrange([U1(0) => 1])
     gb = dual(g)
     m = ones((1, 1))
-    ft = FusionTensor(m, (g,), (gb,))
+    ft = to_fusiontensor(m, (g,), (gb,))
     @test size(data_matrix(ft)) == (1, 1)
     @test blocksize(data_matrix(ft)) == (1, 1)
     @test data_matrix(ft)[1, 1] ≈ 1.0
@@ -74,7 +74,7 @@ end
     g = gradedrange([U1(1) => 2])
     gb = dual(g)
     m = ones((2, 2))
-    ft = FusionTensor(m, (g,), (gb,))
+    ft = to_fusiontensor(m, (g,), (gb,))
     @test size(data_matrix(ft)) == (2, 2)
     @test blocksize(data_matrix(ft)) == (1, 1)
     @test data_matrix(ft)[Block(1, 1)] ≈ m
@@ -88,7 +88,7 @@ end
     codomain_legs = (g,)
     domain_legs = (dual(g),)
     dense = Array{Float64}(LinearAlgebra.I(3))
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test size(data_matrix(ft)) == (3, 3)
     @test blocksize(data_matrix(ft)) == (2, 2)
     @test data_matrix(ft)[Block(1, 1)] ≈ ones((1, 1))
@@ -98,18 +98,18 @@ end
     @test Array(ft) ≈ dense
     @test Array(adjoint(ft)) ≈ adjoint(dense)
 
-    @test_throws BoundsError FusionTensor(
+    @test_throws BoundsError to_fusiontensor(
       dense, (gradedrange([U1(1) => 1, U1(2) => 3]),), domain_legs
     )
-    @test_throws MethodError FusionTensor(dense, (g, g), domain_legs)
+    @test_throws MethodError to_fusiontensor(dense, (g, g), domain_legs)
 
     ba = BlockedArray(dense, [1, 2], [1, 2])
-    @test_throws DomainError FusionTensor(
+    @test_throws DomainError to_fusiontensor(
       ba, (gradedrange([U1(1) => 1, U1(2) => 3]),), domain_legs
     )
-    @test_throws DomainError FusionTensor(ba, (g, g), domain_legs)
+    @test_throws DomainError to_fusiontensor(ba, (g, g), domain_legs)
     dense[1, 2] = 1  # forbidden
-    @test_throws InexactError FusionTensor(dense, codomain_legs, domain_legs)
+    @test_throws InexactError to_fusiontensor(dense, codomain_legs, domain_legs)
   end
 
   @testset "several axes, one block" begin
@@ -120,7 +120,7 @@ end
     codomain_legs = (g1, g2)
     domain_legs = dual.((g3, g4))
     t = convert.(Float64, reshape(collect(1:48), (2, 3, 4, 2)))
-    ft = FusionTensor(t, codomain_legs, domain_legs)
+    ft = to_fusiontensor(t, codomain_legs, domain_legs)
     @test size(data_matrix(ft)) == (6, 8)
     @test blocksize(data_matrix(ft)) == (1, 1)
     @test data_matrix(ft)[Block(1, 1)] ≈ reshape(t, (6, 8))
@@ -141,7 +141,7 @@ end
     dense[3:4, 1:3, 5:5, 1:2] .= 2.0
     dense[1:2, 4:5, 5:5, 1:2] .= 3.0
     dense[3:4, 4:5, 1:4, 3:3] .= 4.0
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test size(data_matrix(ft)) == (20, 15)
     @test blocksize(data_matrix(ft)) == (3, 4)
     @test norm(ft) ≈ norm(dense)
@@ -159,7 +159,7 @@ end
     domain_legs = (dual(g2), dual(g3), g4)
     dense = zeros(ComplexF64, (3, 6, 5, 4))
     dense[2:2, 1:1, 1:2, 2:3] .= 1.0im
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test size(data_matrix(ft)) == (3, 120)
     @test blocksize(data_matrix(ft)) == (3, 8)
     @test norm(ft) ≈ norm(dense)
@@ -173,36 +173,36 @@ end
     v = zeros((6,))
     v[1] = 1.0
 
-    ft1 = FusionTensor(v, (g,), ())
+    ft1 = to_fusiontensor(v, (g,), ())
     @test isnothing(check_sanity(ft1))
     @test ndims(ft1) == 1
     @test vec(Array(data_matrix(ft1))) ≈ v
     @test Array(ft1) ≈ v
     @test Array(adjoint(ft1)) ≈ v
 
-    ft2 = FusionTensor(v, (), (dual(g),))
+    ft2 = to_fusiontensor(v, (), (dual(g),))
     @test isnothing(check_sanity(ft2))
     @test ndims(ft2) == 1
     @test vec(Array(data_matrix(ft2))) ≈ v
     @test Array(ft2) ≈ v
     @test Array(adjoint(ft2)) ≈ v
 
-    ft3 = FusionTensor(v, (dual(g),), ())
+    ft3 = to_fusiontensor(v, (dual(g),), ())
     @test isnothing(check_sanity(ft3))
     @test Array(ft3) ≈ v
     @test Array(adjoint(ft3)) ≈ v
 
-    ft4 = FusionTensor(v, (), (g,))
+    ft4 = to_fusiontensor(v, (), (g,))
     @test isnothing(check_sanity(ft4))
     @test Array(ft4) ≈ v
     @test Array(adjoint(ft4)) ≈ v
 
     zerodim = ones(())
     if VERSION < v"1.11"
-      @test_broken FusionTensor(zerodim, (), ()) isa FusionTensor  # https://github.com/JuliaLang/julia/issues/52615
+      @test_broken to_fusiontensor(zerodim, (), ()) isa FusionTensor  # https://github.com/JuliaLang/julia/issues/52615
     else
       # TODO fix: add specialized method, maybe fix TensorAlgebra
-      @test_broken FusionTensor(zerodim, (), ())
+      @test_broken to_fusiontensor(zerodim, (), ())
       #@test ft isa FusionTensor
       #@test ndims(ft) == 0
       #@test isnothing(check_sanity(ft))
@@ -218,7 +218,7 @@ end
     g = gradedrange([O2(0) => 1])
     gb = dual(g)
     m = ones((1, 1))
-    ft = FusionTensor(m, (gb,), (g,))
+    ft = to_fusiontensor(m, (gb,), (g,))
     @test size(data_matrix(ft)) == (1, 1)
     @test blocksize(data_matrix(ft)) == (1, 1)
     @test data_matrix(ft)[1, 1] ≈ 1.0
@@ -233,7 +233,7 @@ end
 
     # identity
     id2 = LinearAlgebra.I((2))
-    ft = FusionTensor(id2, (g2,), (g2b,))
+    ft = to_fusiontensor(id2, (g2,), (g2b,))
     @test norm(ft) ≈ √2
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ id2
@@ -250,7 +250,7 @@ end
       (2, 2, 2, 2),
     )
     dense, codomain_legs, domain_legs = sds22, (g2, g2), (g2b, g2b)
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test norm(ft) ≈ √3 / 2
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
@@ -268,7 +268,7 @@ end
     )
     sds22b_codomain_legs = (g2, g2b)
     dense, codomain_legs, domain_legs = sds22b, (g2, g2b), (g2b, g2)
-    ftb = FusionTensor(dense, codomain_legs, domain_legs)
+    ftb = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test norm(ftb) ≈ √3 / 2
     @test isnothing(check_sanity(ft))
     @test Array(ftb) ≈ sds22b
@@ -276,14 +276,14 @@ end
 
     # no domain axis
     dense, codomain_legs, domain_legs = sds22, (g2, g2, g2b, g2b), ()
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
     @test Array(adjoint(ft)) ≈ sds22
 
     # no codomain axis
     dense, codomain_legs, domain_legs = sds22, (), (g2, g2, g2b, g2b)
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
     @test Array(adjoint(ft)) ≈ sds22
@@ -295,7 +295,7 @@ end
     g = gradedrange([SU2(0) => 1])
     gb = dual(g)
     m = ones((1, 1))
-    ft = FusionTensor(m, (gb,), (g,))
+    ft = to_fusiontensor(m, (gb,), (g,))
     @test size(data_matrix(ft)) == (1, 1)
     @test blocksize(data_matrix(ft)) == (1, 1)
     @test data_matrix(ft)[1, 1] ≈ 1.0
@@ -310,7 +310,7 @@ end
 
     # identity
     id2 = LinearAlgebra.I((2))
-    ft = FusionTensor(id2, (g2,), (g2b,))
+    ft = to_fusiontensor(id2, (g2,), (g2b,))
     @test norm(ft) ≈ √2
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ id2
@@ -327,7 +327,7 @@ end
       (2, 2, 2, 2),
     )
     dense, codomain_legs, domain_legs = sds22, (g2, g2), (g2b, g2b)
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test norm(ft) ≈ √3 / 2
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
@@ -345,7 +345,7 @@ end
     )
     sds22b_codomain_legs = (g2, g2b)
     dense, codomain_legs, domain_legs = sds22b, (g2, g2b), (g2b, g2)
-    ftb = FusionTensor(dense, codomain_legs, domain_legs)
+    ftb = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test norm(ftb) ≈ √3 / 2
     @test isnothing(check_sanity(ft))
     @test Array(ftb) ≈ sds22b
@@ -353,14 +353,14 @@ end
 
     # no domain axis
     dense, codomain_legs, domain_legs = sds22, (g2b, g2b, g2, g2), ()
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
     @test Array(adjoint(ft)) ≈ sds22
 
     # no codomain axis
     dense, codomain_legs, domain_legs = sds22, (), (g2b, g2b, g2, g2)
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ sds22
     @test Array(adjoint(ft)) ≈ sds22
@@ -373,7 +373,7 @@ end
     domain_legs = dual.(codomain_legs)
     d = 8
     dense = reshape(LinearAlgebra.I(d^N), ntuple(_ -> d, 2 * N))
-    ft = FusionTensor(dense, codomain_legs, domain_legs)
+    ft = to_fusiontensor(dense, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ dense
     @test Array(adjoint(ft)) ≈ dense
@@ -396,7 +396,7 @@ end
     codomain_legs = (dual(gd),)
     gD = gradedrange([SectorProduct(SU2(0), U1(1)) => 1, SectorProduct(s, U1(0)) => 1])
     domain_legs = (gD, gD, gD, gD)
-    ft = FusionTensor(tRVB, codomain_legs, domain_legs)
+    ft = to_fusiontensor(tRVB, codomain_legs, domain_legs)
     @test isnothing(check_sanity(ft))
     @test Array(ft) ≈ tRVB
 
@@ -407,7 +407,7 @@ end
       SectorProduct(; S=SU2(0), N=U1(1)) => 1, SectorProduct(; S=s, N=U1(0)) => 1
     ])
     domain_legs_nt = (gD_nt, gD_nt, gD_nt, gD_nt)
-    ft_nt = FusionTensor(tRVB, codomain_legs_nt, domain_legs_nt)
+    ft_nt = to_fusiontensor(tRVB, codomain_legs_nt, domain_legs_nt)
     @test isnothing(check_sanity(ft_nt))
     @test Array(ft_nt) ≈ tRVB
   end

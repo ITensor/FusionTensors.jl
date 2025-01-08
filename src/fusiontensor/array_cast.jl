@@ -10,7 +10,7 @@ using TensorAlgebra: contract
 # =================================  High level interface  =================================
 
 #### cast from array to symmetric
-function FusionTensor(
+function to_fusiontensor(
   array::AbstractArray,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},

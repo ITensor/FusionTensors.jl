@@ -76,18 +76,13 @@ end
 # BlockArrays interface
 function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   # find outer block corresponding to fusion trees
-  @assert ndims_codomain(ft) == length(f1)
-  @assert ndims_domain(ft) == length(f2)
-  @assert sector_type(ft) == sector_type(f1)
-  @assert sector_type(ft) == sector_type(f2)
-  b1 = ntuple(
-    i -> findfirst(==(leaves(f1)[i]), blocklabels(codomain_axes(ft)[i])), ndims_codomain(ft)
-  )
-  b2 = ntuple(
-    i -> findfirst(==(leaves(f2)[i]), blocklabels(dual(domain_axes(ft)[i]))),
-    ndims_domain(ft),
-  )
+  @assert typeof((f1, f2)) === keytype(trees_block_mapping(ft))
+  b1 = find_sector_block.(leaves(f1), codomain_axes(ft))
+  b2 = find_sector_block.(leaves(f2), dual.(domain_axes(ft)))
   return Block(b1..., b2...)
+end
+function find_sector_block(s::AbstractSector, l::AbstractGradedUnitRange)
+  return findfirst(==(s), blocklabels(l))
 end
 
 function sanitize_axes(raw_legs::Tuple{Vararg{AbstractGradedUnitRange}})
@@ -135,7 +130,7 @@ function promote_sector_type(legs)
 end
 
 # initialize with already computed data_matrix
-function to_fusiontensor(
+function FusionTensor(
   mat::AbstractMatrix,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
