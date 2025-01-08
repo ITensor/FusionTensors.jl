@@ -216,12 +216,13 @@ function intersect_codomain_domain(
 )
   return Dict(
     map(
-      t -> first.(t) => to_blockindexrange(last.(t)...),
       Iterators.filter(
         t -> root_sector(first(t[1])) == root_sector(first(t[2])),
         Iterators.product(codomain_trees_to_ranges_mapping, domain_trees_to_ranges_mapping),
       ),
-    ),
+    ) do t
+      return first.(t) => to_blockindexrange(last.(t)...)
+    end,
   )
 end
 
