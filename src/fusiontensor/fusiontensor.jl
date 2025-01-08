@@ -120,8 +120,7 @@ function promote_sectors(
   # fuse with trivial to insert all missing arguments inside each GradedAxis
   # avoid depending on SymmetrySectors internals
   s0 = trivial(T)
-  unified_legs = map_blocklabels.(s -> only(blocklabels(fusion_product(s0, s))), legs)
-  return unified_legs
+  return map_blocklabels.(s -> only(blocklabels(fusion_product(s0, s))), legs)
 end
 
 function promote_sector_type(legs)
