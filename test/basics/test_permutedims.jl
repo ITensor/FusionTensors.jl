@@ -83,15 +83,14 @@ include("setup.jl")
 
   @testset "Less than two axes" begin
     if VERSION >= v"1.11"
-      @test_broken to_fusiontensor(ones(()), (), ()) isa FusionTensor
-      #=  ft0p = permutedims(ft0, (), ())
-        @test ft0p isa FusionTensor{Float64,0}
-        @test data_matrix(ft0p) ≈ data_matrix(ft0)
-        @test ft0p ≈ ft0
+      ft0 = to_fusiontensor(ones(()), (), ())
+      ft0p = permutedims(ft0, (), ())
+      @test ft0p isa FusionTensor{Float64,0}
+      @test data_matrix(ft0p) ≈ data_matrix(ft0)
+      @test ft0p ≈ ft0
 
-        @test permutedims(ft0, ((), ())) isa FusionTensor{Float64,0}
-        @test permutedims(ft0, blockedperm((), ())) isa FusionTensor{Float64,0}
-      =#
+      @test permutedims(ft0, ((), ())) isa FusionTensor{Float64,0}
+      @test permutedims(ft0, blockedperm((), ())) isa FusionTensor{Float64,0}
     end
 
     g = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
