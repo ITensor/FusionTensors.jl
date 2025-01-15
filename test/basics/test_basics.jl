@@ -17,6 +17,7 @@ using FusionTensors:
 using GradedUnitRanges:
   blockmergesort, dual, flip, fusion_product, gradedrange, sector_type, space_isequal
 using SymmetrySectors: U1, SU2, SectorProduct, TrivialSector, Z
+using TensorAlgebra: tuplemortar
 
 include("setup.jl")
 
@@ -34,11 +35,11 @@ include("setup.jl")
 
   # getters
   @test data_matrix(ft1) == m
-  @test checkaxes(codomain_axes(ft1), (g1,))
-  @test checkaxes(domain_axes(ft1), (g2,))
+  @test checkaxes(axes(ft1), tuplemortar(((g1,), (g2,))))
 
   # misc
-  @test checkaxes(axes(ft1), (g1, g2))
+  @test checkaxes(codomain_axes(ft1), (g1,))
+  @test checkaxes(domain_axes(ft1), (g2,))
   @test ndims_codomain(ft1) == 1
   @test ndims_domain(ft1) == 1
   @test matrix_size(ft1) == (6, 5)
@@ -52,7 +53,7 @@ include("setup.jl")
   @test eltype(ft1) === Float64
   @test length(ft1) == 30
   @test ndims(ft1) == 2
-  @test size(ft1) == (6, 5)
+  @test size(ft1) == tuplemortar(((6,), (5,)))
 
   # copy
   ft2 = copy(ft1)
@@ -106,7 +107,7 @@ end
   @test checkaxes(codomain_axes(ft), (g1, g2))
   @test checkaxes(domain_axes(ft), (g3, g4))
 
-  @test axes(ft) == (g1, g2, g3, g4)
+  @test axes(ft) == tuplemortar(((g1, g2), (g3, g4)))
   @test ndims_codomain(ft) == 2
   @test ndims_domain(ft) == 2
   @test matrix_size(ft) == (30, 12)
@@ -115,7 +116,7 @@ end
   @test isnothing(check_sanity(ft))
 
   @test ndims(ft) == 4
-  @test size(ft) == (6, 5, 4, 3)
+  @test size(ft) == tuplemortar(((6, 5), (4, 3)))
 end
 
 @testset "Less than 2 axes" begin
@@ -126,7 +127,7 @@ end
   @test ndims_codomain(ft1) == 1
   @test ndims_domain(ft1) == 0
   @test ndims(ft1) == 1
-  @test size(ft1) == (6,)
+  @test size(ft1) == tuplemortar(((6,), ()))
   @test size(data_matrix(ft1)) == (6, 1)
   @test isnothing(check_sanity(ft1))
   @test sector_type(ft1) === sector_type(g1)
@@ -136,7 +137,7 @@ end
   @test ndims_codomain(ft2) == 0
   @test ndims_domain(ft2) == 1
   @test ndims(ft2) == 1
-  @test size(ft2) == (6,)
+  @test size(ft2) == tuplemortar(((), (6,)))
   @test size(data_matrix(ft2)) == (1, 6)
   @test isnothing(check_sanity(ft2))
   @test sector_type(ft2) === sector_type(g1)
@@ -146,7 +147,7 @@ end
   @test ndims_codomain(ft3) == 0
   @test ndims_domain(ft3) == 0
   @test ndims(ft3) == 0
-  @test size(ft3) == ()
+  @test size(ft3) == tuplemortar(((), ()))
   @test size(data_matrix(ft3)) == (1, 1)
   @test isnothing(check_sanity(ft3))
   @test sector_type(ft3) === TrivialSector

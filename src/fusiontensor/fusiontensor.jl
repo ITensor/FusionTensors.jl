@@ -15,46 +15,39 @@ using GradedUnitRanges:
   sector_type,
   space_isequal
 using SymmetrySectors: SectorProduct, TrivialSector
+using TensorAlgebra: BlockedTuple, tuplemortar
 
-struct FusionTensor{T,N,CoDomainAxes,DomainAxes,Mat,Mapping} <: AbstractArray{T,N}
+struct FusionTensor{T,N,Axes,Mat,Mapping} <: AbstractArray{T,N}
   data_matrix::Mat
-  codomain_axes::CoDomainAxes
-  domain_axes::DomainAxes
+  axes::Axes
   trees_block_mapping::Mapping
 
   # inner constructor to impose constraints on types
   function FusionTensor(
     mat::AbstractMatrix,
-    codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-    domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+    legs::BlockedTuple{2,<:Any,<:Tuple{Vararg{AbstractGradedUnitRange}}},
     trees_block_mapping::Dict,
   )
     S = sector_type(axes(mat, 1))
     @assert sector_type(axes(mat, 2)) === S
     @assert keytype(trees_block_mapping) <:
       Tuple{<:SectorFusionTree{S},<:SectorFusionTree{S}}
-    @assert all(sector_type.(codomain_legs) .=== S)
-    @assert all(sector_type.(domain_legs) .=== S)
+    @assert all(sector_type.(Tuple(legs)) .=== S)
     return new{
-      eltype(mat),
-      length(codomain_legs) + length(domain_legs),
-      typeof(codomain_legs),
-      typeof(domain_legs),
-      typeof(mat),
-      typeof(trees_block_mapping),
+      eltype(mat),length(legs),typeof(legs),typeof(mat),typeof(trees_block_mapping)
     }(
-      mat, codomain_legs, domain_legs, trees_block_mapping
+      mat, legs, trees_block_mapping
     )
   end
 end
 
 # getters
 data_matrix(ft::FusionTensor) = ft.data_matrix
-codomain_axes(ft::FusionTensor) = ft.codomain_axes
-domain_axes(ft::FusionTensor) = ft.domain_axes
 trees_block_mapping(ft::FusionTensor) = ft.trees_block_mapping
 
 # misc access
+codomain_axes(ft::FusionTensor) = first(blocks(axes(ft)))
+domain_axes(ft::FusionTensor) = last(blocks(axes(ft)))
 ndims_codomain(ft::FusionTensor) = length(codomain_axes(ft))
 ndims_domain(ft::FusionTensor) = length(domain_axes(ft))
 
@@ -68,7 +61,7 @@ end
 
 # GradedUnitRanges interface
 function GradedUnitRanges.sector_type(
-  ::Type{<:FusionTensor{<:Any,<:Any,<:Any,<:Any,<:Any,<:Dict{<:Tuple{<:Any,F}}}}
+  ::Type{<:FusionTensor{<:Any,<:Any,<:Any,<:Any,<:Dict{<:Tuple{<:Any,F}}}}
 ) where {F}
   return sector_type(F)
 end
@@ -91,16 +84,10 @@ function sanitize_axes(raw_legs::Tuple{Vararg{AbstractGradedUnitRange}})
   @assert all(check_unique_blocklabels.(legs))
   return legs
 end
-sanitize_axes(::Tuple{}, ::Tuple{}) = TrivialSector, (), ()
-function sanitize_axes(
-  codomain_legs_raw::Tuple{Vararg{AbstractGradedUnitRange}},
-  domain_legs_raw::Tuple{Vararg{AbstractGradedUnitRange}},
-)
-  legs = sanitize_axes((codomain_legs_raw..., domain_legs_raw...))
-  S = sector_type(first(legs))
-  codomain_legs = legs[begin:length(codomain_legs_raw)]
-  domain_legs = legs[(length(codomain_legs_raw) + 1):end]
-  return S, domain_legs, codomain_legs
+sanitize_axes(legs::BlockedTuple{2,(0, 0)}) = TrivialSector, legs
+function sanitize_axes(raw_legs::BlockedTuple{2})
+  flat_legs = sanitize_axes(Tuple(raw_legs))
+  return sector_type(first(flat_legs)), BlockedTuple(flat_legs, Val(blocklengths(raw_legs)))
 end
 
 function check_unique_blocklabels(g::AbstractGradedUnitRange)
@@ -131,12 +118,16 @@ end
 
 # initialize with already computed data_matrix
 function FusionTensor(
-  mat::AbstractMatrix,
+  x,
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
+  return FusionTensor(x, tuplemortar((codomain_legs, domain_legs)))
+end
+
+function FusionTensor(mat::AbstractMatrix, legs::BlockedTuple{2})
   # init with empty data_matrix to construct trees_block_mapping
-  ft = FusionTensor(eltype(mat), codomain_legs, domain_legs)
+  ft = FusionTensor(eltype(mat), legs)
   @assert space_isequal(matrix_row_axis(ft), axes(mat, 1))
   @assert space_isequal(matrix_column_axis(ft), axes(mat, 2))
   for b in eachblockstoredindex(mat)
@@ -147,21 +138,17 @@ function FusionTensor(
 end
 
 # empty matrix
-function FusionTensor(
-  elt::Type,
-  codomain_legs_raw::Tuple{Vararg{AbstractGradedUnitRange}},
-  domain_legs_raw::Tuple{Vararg{AbstractGradedUnitRange}},
-)
-  S, domain_legs, codomain_legs = sanitize_axes(codomain_legs_raw, domain_legs_raw)
+function FusionTensor(elt::Type, raw_legs::BlockedTuple{2})
+  S, legs = sanitize_axes(raw_legs)
 
-  row_axis, codomain_trees_to_ranges_mapping = fuse_axes(S, codomain_legs)
-  nondual_col_axis, domain_trees_to_ranges_mapping = fuse_axes(S, dual.(domain_legs))
+  row_axis, codomain_trees_to_ranges_mapping = fuse_axes(S, first(blocks(legs)))
+  nondual_col_axis, domain_trees_to_ranges_mapping = fuse_axes(S, dual.(last(blocks(legs))))
 
   mat = initialize_data_matrix(elt, row_axis, nondual_col_axis)
   tree_to_block_mapping = intersect_codomain_domain(
     codomain_trees_to_ranges_mapping, domain_trees_to_ranges_mapping
   )
-  return FusionTensor(mat, codomain_legs, domain_legs, tree_to_block_mapping)
+  return FusionTensor(mat, legs, tree_to_block_mapping)
 end
 
 function fuse_axes(::Type{S}, ::Tuple{}) where {S<:AbstractSector}
@@ -178,12 +165,17 @@ end
 function fusion_trees_external_multiplicities(
   outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
 )
-  tree_arrows = isdual.(outer_legs)
   return mapreduce(vcat, CartesianIndices(blocklength.(outer_legs))) do it
-    block_sectors = map((g, i) -> blocklabels(g)[i], outer_legs, Tuple(it))
-    block_mult = mapreduce((g, i) -> blocklengths(g)[i], *, outer_legs, Tuple(it); init=1)
-    return build_trees(block_sectors, tree_arrows) .=> block_mult
+    return fusion_trees_external_multiplicities(outer_legs, Tuple(it))
   end
+end
+
+function fusion_trees_external_multiplicities(
+  outer_legs::NTuple{N,AbstractGradedUnitRange}, indices::NTuple{N,Int}
+) where {N}
+  block_sectors = map((g, i) -> blocklabels(g)[i], outer_legs, indices)
+  block_mult = mapreduce((g, i) -> blocklengths(g)[i], *, outer_legs, indices; init=1)
+  return build_trees(block_sectors, isdual.(outer_legs)) .=> block_mult
 end
 
 function compute_inner_ranges(

@@ -201,14 +201,13 @@ end
     if VERSION < v"1.11"
       @test_broken to_fusiontensor(zerodim, (), ()) isa FusionTensor  # https://github.com/JuliaLang/julia/issues/52615
     else
-      # TODO fix: add specialized method, maybe fix TensorAlgebra
-      @test_broken to_fusiontensor(zerodim, (), ())
-      #@test ft isa FusionTensor
-      #@test ndims(ft) == 0
-      #@test isnothing(check_sanity(ft))
-      #@test size(data_matrix(ft)) == (1, 1)
-      #@test data_matrix(ft)[1, 1] ≈ 1.0
-      #@test_broken Array(ft) ≈ zerodim  # cannot create zerodim BlockSparseArray
+      ft = to_fusiontensor(zerodim, (), ())
+      @test ft isa FusionTensor
+      @test ndims(ft) == 0
+      @test isnothing(check_sanity(ft))
+      @test size(data_matrix(ft)) == (1, 1)
+      @test data_matrix(ft)[1, 1] ≈ 1.0
+      @test_broken Array(ft) ≈ zerodim # https://github.com/ITensor/BlockSparseArrays.jl/issues/27
     end
   end
 end

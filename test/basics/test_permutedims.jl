@@ -13,7 +13,7 @@ using FusionTensors:
   to_fusiontensor
 using GradedUnitRanges: dual, gradedrange, space_isequal
 using SymmetrySectors: O2, U1, SectorProduct, SU2
-using TensorAlgebra: blockedperm
+using TensorAlgebra: blockedperm, tuplemortar
 
 include("setup.jl")
 
@@ -42,10 +42,7 @@ include("setup.jl")
       ft3 = permutedims(ft1, (4,), (1, 2, 3))
       @test ft3 !== ft1
       @test ft3 isa FusionTensor{elt,4}
-      @test checkaxes(axes(ft3), (dual(g4), g1, g2, dual(g3)))
-      @test ndims_domain(ft3) == 3
-      @test ndims_codomain(ft3) == 1
-      @test ndims(ft3) == 4
+      @test checkaxes(axes(ft3), tuplemortar(((dual(g4),), (g1, g2, dual(g3)))))
       @test isnothing(check_sanity(ft3))
 
       ft4 = permutedims(ft3, (2, 3), (4, 1))

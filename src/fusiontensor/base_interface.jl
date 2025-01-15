@@ -3,6 +3,7 @@
 using Accessors: @set
 
 using BlockSparseArrays: @view!
+using TensorAlgebra: BlockedTuple, tuplemortar
 
 set_data_matrix(ft::FusionTensor, data_matrix) = @set ft.data_matrix = data_matrix
 
@@ -43,35 +44,25 @@ function transpose_mapping(b::BlockIndexRange{2})
   return new_block[reverse(b.indices)...]
 end
 function Base.adjoint(ft::FusionTensor)
+  new_axes = tuplemortar((dual.(domain_axes(ft)), dual.(codomain_axes(ft))))
   return FusionTensor(
-    adjoint(data_matrix(ft)),
-    dual.(domain_axes(ft)),
-    dual.(codomain_axes(ft)),
-    transpose_mapping(trees_block_mapping(ft)),
+    adjoint(data_matrix(ft)), new_axes, transpose_mapping(trees_block_mapping(ft))
   )
 end
 
-Base.axes(ft::FusionTensor) = (codomain_axes(ft)..., domain_axes(ft)...)
+Base.axes(ft::FusionTensor) = ft.axes
 
 # conj is defined as coefficient wise complex conjugation, without axis dual
 Base.conj(ft::FusionTensor{<:Real}) = ft   # same object for real element type
 Base.conj(ft::FusionTensor) = set_data_matrix(ft, conj(data_matrix(ft)))
 
 function Base.copy(ft::FusionTensor)
-  return FusionTensor(
-    copy(data_matrix(ft)),
-    copy.(codomain_axes(ft)),
-    copy.(domain_axes(ft)),
-    copy(trees_block_mapping(ft)),
-  )
+  return FusionTensor(copy(data_matrix(ft)), copy.(axes(ft)), copy(trees_block_mapping(ft)))
 end
 
 function Base.deepcopy(ft::FusionTensor)
   return FusionTensor(
-    deepcopy(data_matrix(ft)),
-    deepcopy.(codomain_axes(ft)),
-    deepcopy.(domain_axes(ft)),
-    deepcopy(trees_block_mapping(ft)),
+    deepcopy(data_matrix(ft)), deepcopy(axes(ft)), deepcopy(trees_block_mapping(ft))
   )
 end
 
@@ -91,16 +82,33 @@ end
 
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
-function Base.similar(ft::FusionTensor, ::Type{T}) where {T}
+Base.similar(ft::FusionTensor) = similar(ft, eltype(ft))
+function Base.similar(ft::FusionTensor, T::Type)
+  # reuse trees_block_mapping
+
   # some fusion trees have Float64 eltype: need compatible type
   @assert promote_type(T, fusiontree_eltype(sector_type(ft))) === T
   mat = similar(data_matrix(ft), T)
   initialize_allowed_sectors!(mat)
-  return FusionTensor(mat, codomain_axes(ft), domain_axes(ft), trees_block_mapping(ft))
+  return FusionTensor(mat, axes(ft), trees_block_mapping(ft))
 end
 
-function Base.similar(::FusionTensor, ::Type{T}, new_axes::Tuple{<:Tuple,<:Tuple}) where {T}
-  return FusionTensor(T, new_axes[1], new_axes[2])
+# trigger explicit error in TensorAlgebra.contract
+# TBD impose some convention? Remove?
+function Base.similar(
+  ft::FusionTensor, T::Type, new_axes::Tuple{Vararg{AbstractGradedUnitRange}}
+)
+  throw(DimensionMismatch("Need bituple of axes"))
+end
+function Base.similar(ft::FusionTensor, T::Type, new_axes::Tuple{})
+  throw(DimensionMismatch("Need bituple of axes"))
+end
+
+function Base.similar(ft::FusionTensor, T::Type, new_axes::Tuple{<:Tuple,<:Tuple})
+  return similar(ft, T, tuplemortar(new_axes))
+end
+function Base.similar(::FusionTensor, T::Type, new_axes::BlockedTuple{2})
+  return FusionTensor(T, new_axes)
 end
 
 Base.show(io::IO, ft::FusionTensor) = print(io, "$(ndims(ft))-dim FusionTensor")
