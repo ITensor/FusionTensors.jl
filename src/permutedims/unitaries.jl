@@ -5,14 +5,7 @@ using LRUCache: LRU
 
 using SymmetrySectors: quantum_dimension
 
-const unitary_cache = LRU{
-  Tuple{
-    SectorFusionTree,SectorFusionTree,SectorFusionTree,SectorFusionTree,Tuple{Vararg{Int}}
-  },
-  Float64,
-}(;
-  maxsize=10000,  # TBD size
-)
+const unitary_cache = LRU{Any,Float64}(; maxsize=10000)  # TBD size
 
 # ======================================  Interface  =======================================
 function compute_unitary(
