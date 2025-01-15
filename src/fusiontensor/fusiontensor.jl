@@ -165,22 +165,20 @@ end
 function fusion_trees_external_multiplicities(
   outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
 )
-  return mapreduce(vcat, CartesianIndices(blocklength.(outer_legs))) do it
-    return fusion_trees_external_multiplicities(outer_legs, Tuple(it))
-  end
+  return Iterators.flatten(
+    block_fusion_trees_external_multiplicities.(Iterators.product(blocks.(outer_legs)...))
+  )
 end
 
-function fusion_trees_external_multiplicities(
-  outer_legs::NTuple{N,AbstractGradedUnitRange}, indices::NTuple{N,Int}
+function block_fusion_trees_external_multiplicities(
+  it::NTuple{N,AbstractUnitRange}
 ) where {N}
-  block_sectors = map((g, i) -> blocklabels(g)[i], outer_legs, indices)
-  block_mult = mapreduce((g, i) -> blocklengths(g)[i], *, outer_legs, indices; init=1)
-  return build_trees(block_sectors, isdual.(outer_legs)) .=> block_mult
+  block_sectors = only.(blocklabels.(it))
+  block_mult = prod(length.(it))
+  return build_trees(block_sectors, isdual.(it)) .=> block_mult
 end
 
-function compute_inner_ranges(
-  fusion_trees_mult::AbstractVector{<:Pair{<:SectorFusionTree,<:Integer}}
-)
+function compute_inner_ranges(fusion_trees_mult)
   fused_leg = blockmergesort(
     gradedrange(root_sector.(first.(fusion_trees_mult)) .=> last.(fusion_trees_mult))
   )

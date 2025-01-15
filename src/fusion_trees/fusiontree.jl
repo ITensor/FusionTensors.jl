@@ -81,15 +81,6 @@ Base.length(::SectorFusionTree{<:Any,N}) where {N} = N
 # GradedUnitRanges interface
 GradedUnitRanges.sector_type(::Type{<:SectorFusionTree{S}}) where {S} = S
 
-function build_trees(legs::Vararg{AbstractGradedUnitRange})
-  tree_arrows = isdual.(legs)
-  sectors = blocklabels.(legs)
-  return mapreduce(vcat, CartesianIndices(blocklength.(legs))) do it
-    block_sectors = getindex.(sectors, Tuple(it))  # why not type stable?
-    return build_trees(block_sectors, tree_arrows)
-  end
-end
-
 # SymmetrySectors interface
 function SymmetrySectors.:×(f1::SectorFusionTree, f2::SectorFusionTree)
   @assert arrows(f1) == arrows(f2)
@@ -154,6 +145,23 @@ end
 # TBD change type depending on AbelianStyle?
 fusiontree_eltype(::Type{<:AbstractSector}) = Float64
 
+# constructors
+function build_trees(legs::Vararg{AbstractGradedUnitRange})
+  # construct all authorized trees for each outer block in legs
+  tree_arrows = isdual.(legs)
+  return mapreduce(vcat, Iterators.product(blocklabels.(legs)...)) do it
+    return build_trees(it, tree_arrows)
+  end
+end
+
+function build_trees(
+  sectors_to_fuse::NTuple{N,<:AbstractSector}, arrows_to_fuse::NTuple{N,Bool}
+) where {N}
+  # construct all authorized trees with fixed outer sectors
+  trees = [SectorFusionTree(first(sectors_to_fuse), first(arrows_to_fuse))]
+  return recursive_build_trees(trees, Base.tail(sectors_to_fuse), Base.tail(arrows_to_fuse))
+end
+
 #
 # =====================================  Internals  ========================================
 #
@@ -205,7 +213,7 @@ function braid_tuples(t1::Tuple{Vararg{Any,N}}, t2::Tuple{Vararg{Any,N}}) where 
   return flatten_tuples(nested)
 end
 
-function grow_tree(
+function append_tree_leave(
   parent_tree::SectorFusionTree,
   branch_sector::AbstractSector,
   level_arrow::Bool,
@@ -221,36 +229,31 @@ function grow_tree(
   )
 end
 
-function grow_tree(
+function fuse_next_sector(
   parent_tree::SectorFusionTree, branch_sector::AbstractSector, level_arrow::Bool
 )
   new_space = fusion_product(root_sector(parent_tree), branch_sector)
   return mapreduce(vcat, zip(blocklabels(new_space), blocklengths(new_space))) do (la, n)
     return [
-      grow_tree(parent_tree, branch_sector, level_arrow, la, outer_mult) for
+      append_tree_leave(parent_tree, branch_sector, level_arrow, la, outer_mult) for
       outer_mult in 1:n
     ]
   end
 end
 
-function build_trees(old_trees::Vector, sectors_to_fuse::Tuple, arrows_to_fuse::Tuple)
+function recursive_build_trees(
+  old_trees::Vector, sectors_to_fuse::Tuple, arrows_to_fuse::Tuple
+)
   next_level_trees = mapreduce(vcat, old_trees) do tree
-    return grow_tree(tree, first(sectors_to_fuse), first(arrows_to_fuse))
+    return fuse_next_sector(tree, first(sectors_to_fuse), first(arrows_to_fuse))
   end
-  return build_trees(
+  return recursive_build_trees(
     next_level_trees, Base.tail(sectors_to_fuse), Base.tail(arrows_to_fuse)
   )
 end
 
-function build_trees(trees::Vector, ::Tuple{}, ::Tuple{})
+function recursive_build_trees(trees::Vector, ::Tuple{}, ::Tuple{})
   return trees
-end
-
-function build_trees(
-  sectors_to_fuse::NTuple{N,<:AbstractSector}, arrows_to_fuse::NTuple{N,Bool}
-) where {N}
-  trees = [SectorFusionTree(first(sectors_to_fuse), first(arrows_to_fuse))]
-  return build_trees(trees, Base.tail(sectors_to_fuse), Base.tail(arrows_to_fuse))
 end
 
 # --------------- convert to Array  ---------------
