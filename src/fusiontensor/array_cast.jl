@@ -183,11 +183,11 @@ function contract_fusion_trees(ft::FusionTensor, f1::SectorFusionTree, f2::Secto
   charge_block = view(ft, f1, f2)
   p = contract_singlet_projector(f1, f2)
 
-  # TODO use contract once it supports outer product
-  swapped = reshape(charge_block, :, 1) * reshape(p, 1, :)
-  block_shape = (size(charge_block)..., size(p)...)
+  # outer product of charge block and fusion tree
+  labels1 = ntuple(identity, N)
+  labels2 = ntuple(i -> i + N, N)
   perm = braid_tuples(ntuple(identity, N), ntuple(i -> i + N, N))
-  split_array_block = permutedims(reshape(swapped, block_shape), perm)
+  split_array_block = contract(perm, charge_block, labels1, p, labels2)
 
   return merge_degen_dims(split_array_block)
 end
