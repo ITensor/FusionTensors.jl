@@ -82,7 +82,6 @@ end
 
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
-Base.similar(ft::FusionTensor) = similar(ft, eltype(ft))
 function Base.similar(ft::FusionTensor, T::Type)
   # reuse trees_block_mapping
 

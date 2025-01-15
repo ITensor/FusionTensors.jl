@@ -91,6 +91,12 @@ include("setup.jl")
   @test eltype(ft5) == ComplexF64
   @test checkaxes(codomain_axes(ft5), (g1, g1))
   @test checkaxes(domain_axes(ft5), (g2,))
+
+  ft5 = similar(ft1, ComplexF32, tuplemortar(((g1, g1), (g2,))))
+  @test isnothing(check_sanity(ft5))
+  @test eltype(ft5) == ComplexF64
+  @test checkaxes(codomain_axes(ft5), (g1, g1))
+  @test checkaxes(domain_axes(ft5), (g2,))
 end
 
 @testset "More than 2 axes" begin
