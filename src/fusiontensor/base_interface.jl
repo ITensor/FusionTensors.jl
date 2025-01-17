@@ -38,7 +38,9 @@ Base.Array(ft::FusionTensor) = Array(to_array(ft))
 
 # adjoint is costless: dual axes, swap codomain and domain, take data_matrix adjoint.
 # data_matrix coeff are not modified (beyond complex conjugation)
-transpose_mapping(d::Dict) = Dict([reverse(k) => transpose_mapping(v) for (k, v) in d])
+function transpose_mapping(d::Dict)
+  return Dict([reverse(flip.(k)) => transpose_mapping(v) for (k, v) in d])
+end
 function transpose_mapping(b::BlockIndexRange{2})
   new_block = Block(reverse(Tuple(Block(b))))
   return new_block[reverse(b.indices)...]

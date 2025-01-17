@@ -9,6 +9,7 @@ using GradedUnitRanges:
   blocklabels,
   blockmergesort,
   dual,
+  flip,
   gradedrange,
   isdual,
   map_blocklabels,
@@ -71,7 +72,7 @@ function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::Secto
   # find outer block corresponding to fusion trees
   @assert typeof((f1, f2)) === keytype(trees_block_mapping(ft))
   b1 = find_sector_block.(leaves(f1), codomain_axes(ft))
-  b2 = find_sector_block.(leaves(f2), dual.(domain_axes(ft)))
+  b2 = find_sector_block.(leaves(f2), domain_axes(ft))
   return Block(b1..., b2...)
 end
 # TBD move to GradedUnitRanges? rename findfirst_sector?
@@ -137,16 +138,24 @@ function FusionTensor(mat::AbstractMatrix, legs::BlockedTuple{2})
   return ft
 end
 
+function flip_domain(nonflipped_col_axis, nonflipped_trees_to_ranges)
+  col_axis = dual(nonflipped_col_axis)
+  domain_trees_to_ranges_mapping = Dict(
+    map(((tree, v),) -> flip(tree) => v, collect(nonflipped_trees_to_ranges))
+  )
+  return col_axis, domain_trees_to_ranges_mapping
+end
+
 # empty matrix
 function FusionTensor(elt::Type, raw_legs::BlockedTuple{2})
   S, legs = sanitize_axes(raw_legs)
 
-  row_axis, codomain_trees_to_ranges_mapping = fuse_axes(S, first(blocks(legs)))
-  nondual_col_axis, domain_trees_to_ranges_mapping = fuse_axes(S, dual.(last(blocks(legs))))
+  row_axis, codomain_trees_to_ranges = fuse_axes(S, first(blocks(legs)))
+  col_axis, domain_trees_to_ranges = flip_domain(fuse_axes(S, dual.(last(blocks(legs))))...)
 
-  mat = initialize_data_matrix(elt, row_axis, nondual_col_axis)
+  mat = initialize_data_matrix(elt, row_axis, col_axis)
   tree_to_block_mapping = intersect_codomain_domain(
-    codomain_trees_to_ranges_mapping, domain_trees_to_ranges_mapping
+    codomain_trees_to_ranges, domain_trees_to_ranges
   )
   return FusionTensor(mat, legs, tree_to_block_mapping)
 end
@@ -170,9 +179,7 @@ function fusion_trees_external_multiplicities(
   )
 end
 
-function block_fusion_trees_external_multiplicities(
-  it::NTuple{N,AbstractUnitRange}
-) where {N}
+function block_fusion_trees_external_multiplicities(it::Tuple{Vararg{AbstractUnitRange}})
   block_sectors = only.(blocklabels.(it))
   block_mult = prod(length.(it))
   return build_trees(block_sectors, isdual.(it)) .=> block_mult
@@ -206,7 +213,7 @@ function intersect_codomain_domain(
   return Dict(
     map(
       Iterators.filter(
-        t -> root_sector(first(t[1])) == root_sector(first(t[2])),
+        t -> root_sector(first(first(t))) == dual(root_sector(first(t[2]))),
         Iterators.product(codomain_trees_to_ranges_mapping, domain_trees_to_ranges_mapping),
       ),
     ) do t
@@ -218,11 +225,11 @@ end
 function initialize_data_matrix(
   elt::Type{<:Number},
   mat_row_axis::AbstractGradedUnitRange,
-  nondual_col_axis::AbstractGradedUnitRange,
+  mat_col_axis::AbstractGradedUnitRange,
 )
   # non-abelian fusion trees have float eltype: need compatible type
   promoted = promote_type(elt, fusiontree_eltype(sector_type(mat_row_axis)))
-  mat = BlockSparseArray{promoted}(mat_row_axis, dual(nondual_col_axis))
+  mat = BlockSparseArray{promoted}(mat_row_axis, mat_col_axis)
   initialize_allowed_sectors!(mat)
   return mat
 end

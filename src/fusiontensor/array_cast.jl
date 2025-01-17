@@ -165,7 +165,7 @@ end
 
 function contract_singlet_projector(f1::SectorFusionTree, f2::SectorFusionTree)
   f1_array = convert(Array, f1)
-  f2_array = convert(Array, f2)
+  f2_array = convert(Array, flip(f2))
   N_CO = length(f1)
   N_DO = length(f2)
   return contract(

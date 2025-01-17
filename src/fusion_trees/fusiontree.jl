@@ -4,7 +4,7 @@
 # compatibility with TensorKit conventions?
 
 using GradedUnitRanges:
-  AbstractGradedUnitRange, GradedUnitRanges, fusion_product, isdual, sector_type
+  AbstractGradedUnitRange, GradedUnitRanges, flip, fusion_product, isdual, sector_type
 using SymmetrySectors: ×, AbstractSector, SectorProduct, SymmetrySectors, arguments, trivial
 using TensorAlgebra: flatten_tuples
 
@@ -80,6 +80,15 @@ Base.length(::SectorFusionTree{<:Any,N}) where {N} = N
 
 # GradedUnitRanges interface
 GradedUnitRanges.sector_type(::Type{<:SectorFusionTree{S}}) where {S} = S
+function GradedUnitRanges.flip(f::SectorFusionTree)
+  return SectorFusionTree(
+    dual.(leaves(f)),
+    .!arrows(f),
+    dual(root_sector(f)),
+    dual.(branch_sectors(f)),
+    outer_multiplicity_indices(f),
+  )
+end
 
 # SymmetrySectors interface
 function SymmetrySectors.:×(f1::SectorFusionTree, f2::SectorFusionTree)
