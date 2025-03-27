@@ -76,7 +76,7 @@ end
 
 function to_array(ft::FusionTensor)
   bounds = block_dimensions.((codomain_axes(ft)..., domain_axes(ft)...))
-  bsa = BlockSparseArray{eltype(ft)}(blockedrange.(bounds))
+  bsa = BlockSparseArray{eltype(ft)}(undef, blockedrange.(bounds))
   for (f1, f2) in keys(trees_block_mapping(ft))
     b = findblock(ft, f1, f2)
     bsa[b] = bsa[b] + contract_fusion_trees(ft, f1, f2)  # init block when needed

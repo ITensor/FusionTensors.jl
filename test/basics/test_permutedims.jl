@@ -13,7 +13,7 @@ using FusionTensors:
   to_fusiontensor
 using GradedUnitRanges: dual, gradedrange, space_isequal
 using SymmetrySectors: O2, U1, SectorProduct, SU2
-using TensorAlgebra: blockedperm, tuplemortar
+using TensorAlgebra: permmortar, tuplemortar
 
 include("setup.jl")
 
@@ -35,7 +35,7 @@ include("setup.jl")
       ft2 = permutedims(ft1, ((1, 2), (3, 4)))   # trivial with tuple of 2 tuples
       @test ft2 === ft1  # same object
 
-      biperm = blockedperm((1, 2), (3, 4))
+      biperm = permmortar(((1, 2), (3, 4)))
       ft2 = permutedims(ft1, biperm)   # trivial with biperm
       @test ft2 === ft1  # same object
 
@@ -66,7 +66,7 @@ include("setup.jl")
     arr[1:2, 4:5, 5:5, 1:2] .= 3.0
     arr[3:4, 4:5, 1:4, 3:3] .= 4.0
     ft = to_fusiontensor(arr, codomain_legs, domain_legs)
-    biperm = blockedperm((3,), (2, 4, 1))
+    biperm = permmortar(((3,), (2, 4, 1)))
 
     ftp = permutedims(ft, biperm)
     @test ftp ≈ naive_permutedims(ft, biperm)
@@ -90,13 +90,13 @@ include("setup.jl")
       @test ft0p ≈ ft0
 
       @test permutedims(ft0, ((), ())) isa FusionTensor{Float64,0}
-      @test permutedims(ft0, blockedperm((), ())) isa FusionTensor{Float64,0}
+      @test permutedims(ft0, permmortar(((), ()))) isa FusionTensor{Float64,0}
     end
 
     g = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
     v = zeros((6,))
     v[1] = 1.0
-    biperm = blockedperm((), (1,))
+    biperm = permmortar(((), (1,)))
     ft1 = to_fusiontensor(v, (g,), ())
     ft2 = permutedims(ft1, biperm)
     @test isnothing(check_sanity(ft2))
@@ -137,7 +137,9 @@ end
   )
     g2b = dual(g2)
     for biperm in [
-      blockedperm((2, 1), (3, 4)), blockedperm((3, 1), (2, 4)), blockedperm((3, 1, 4), (2,))
+      permmortar(((2, 1), (3, 4))),
+      permmortar(((3, 1), (2, 4))),
+      permmortar(((3, 1, 4), (2,))),
     ]
       ft = to_fusiontensor(sds22, (g2, g2), (g2b, g2b))
       @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
@@ -147,7 +149,7 @@ end
       @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
       @test permutedims(adjoint(ft), biperm) ≈ naive_permutedims(adjoint(ft), biperm)
     end
-    for biperm in [blockedperm((1, 2, 3, 4), ()), blockedperm((), (3, 1, 2, 4))]
+    for biperm in [permmortar(((1, 2, 3, 4), ())), permmortar(((), (3, 1, 2, 4)))]
       ft = to_fusiontensor(sds22, (g2, g2), (g2b, g2b))
       @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
     end

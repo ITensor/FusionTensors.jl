@@ -187,7 +187,7 @@ end
 
 # TODO move to GradedUnitRanges
 function nsymbol(s1::AbstractSector, s2::AbstractSector, s3::AbstractSector)
-  full_space = tensor_product(s1, s2)
+  full_space = to_gradedrange(s1 ⊗ s2)
   x = findfirst(==(s3), blocklabels(full_space))
   isnothing(x) && return 0  # OR labelled(0, s3)?
   return Int(blocklengths(full_space)[x])

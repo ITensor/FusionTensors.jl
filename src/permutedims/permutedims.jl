@@ -3,7 +3,7 @@
 using BlockArrays: blocklengths
 using Strided: Strided, @strided
 
-using TensorAlgebra: BlockedPermutation, blockedperm, blockpermute
+using TensorAlgebra: BlockedPermutation, permmortar, blockpermute
 
 function naive_permutedims(ft, biperm::BlockedPermutation{2})
   @assert ndims(ft) == length(biperm)
@@ -25,7 +25,7 @@ end
 function fusiontensor_permutedims(
   ft, new_codomain_indices::Tuple, new_domain_indices::Tuple
 )
-  biperm = blockedperm(new_codomain_indices, new_domain_indices)
+  biperm = permmortar((new_codomain_indices, new_domain_indices))
   return fusiontensor_permutedims(ft, biperm)
 end
 
