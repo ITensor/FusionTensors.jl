@@ -14,10 +14,10 @@ using FusionTensors:
   matrix_size,
   ndims_domain,
   ndims_codomain
-using GradedUnitRanges:
-  blockmergesort, dual, flip, fusion_product, gradedrange, sector_type, space_isequal
+using GradedUnitRanges: blockmergesort, dual, flip, gradedrange, sector_type, space_isequal
 using SymmetrySectors: U1, SU2, SectorProduct, TrivialSector, Z
 using TensorAlgebra: tuplemortar
+using TensorProducts: tensor_product
 
 include("setup.jl")
 
@@ -27,10 +27,11 @@ include("setup.jl")
 
   # check dual convention when initializing data_matrix
   ft0 = FusionTensor(Float64, (g1,), (g2,))
+  @test ft0 isa FusionTensor
   @test space_isequal(matrix_row_axis(ft0), g1)
   @test space_isequal(matrix_column_axis(ft0), g2)
 
-  m = BlockSparseArray{Float64}(g1, g2)
+  m = BlockSparseArray{Float64}(undef, g1, g2)
   ft1 = FusionTensor(m, (g1,), (g2,))
 
   # getters
@@ -104,9 +105,9 @@ end
   g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
   g3 = dual(gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1]))
   g4 = dual(gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1]))
-  gr = fusion_product(g1, g2)
-  gc = dual(fusion_product(dual(g3), dual(g4)))
-  m2 = BlockSparseArray{Float64}(gr, gc)
+  gr = tensor_product(g1, g2)
+  gc = dual(tensor_product(dual(g3), dual(g4)))
+  m2 = BlockSparseArray{Float64}(undef, gr, gc)
   ft = FusionTensor(m2, (g1, g2), (g3, g4))
 
   @test data_matrix(ft) == m2
@@ -249,7 +250,7 @@ end
   @test_throws DimensionMismatch ft7 * ft3
 end
 
-@testset "mising SectorProduct" begin
+@testset "missing SectorProduct" begin
   g1 = gradedrange([SectorProduct(U1(1)) => 1])
   g2 = gradedrange([SectorProduct(U1(1), SU2(1//2)) => 1])
   g3 = gradedrange([SectorProduct(U1(1), SU2(1//2), Z{2}(1)) => 1])
@@ -267,7 +268,7 @@ end
   gA = gradedrange([SectorProduct(; A=U1(1)) => 1])
   gB = gradedrange([SectorProduct(; B=SU2(1//2)) => 1])
   gC = gradedrange([SectorProduct(; C=Z{2}(0)) => 1])
-  gABC = fusion_product(fusion_product(gA, gB), gC)
+  gABC = tensor_product(gA, gB, gC)
   S = sector_type(gABC)
 
   ft = FusionTensor(Float64, (gA, gB), (dual(gA), dual(gB), gC))

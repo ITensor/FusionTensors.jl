@@ -3,10 +3,11 @@
 # TBD
 # compatibility with TensorKit conventions?
 
-using GradedUnitRanges:
-  AbstractGradedUnitRange, GradedUnitRanges, flip, fusion_product, isdual, sector_type
-using SymmetrySectors: ×, AbstractSector, SectorProduct, SymmetrySectors, arguments, trivial
+using GradedUnitRanges: AbstractGradedUnitRange, GradedUnitRanges, flip, isdual, sector_type
+using SymmetrySectors:
+  ×, AbstractSector, SectorProduct, SymmetrySectors, arguments, trivial, to_gradedrange
 using TensorAlgebra: flatten_tuples
+using TensorProducts: ⊗, tensor_product
 
 #
 # A fusion tree fuses N sectors sec1, secN  onto one sector fused_sec. A given set of
@@ -186,7 +187,7 @@ end
 
 # TODO move to GradedUnitRanges
 function nsymbol(s1::AbstractSector, s2::AbstractSector, s3::AbstractSector)
-  full_space = fusion_product(s1, s2)
+  full_space = tensor_product(s1, s2)
   x = findfirst(==(s3), blocklabels(full_space))
   isnothing(x) && return 0  # OR labelled(0, s3)?
   return Int(blocklengths(full_space)[x])
@@ -241,7 +242,7 @@ end
 function fuse_next_sector(
   parent_tree::SectorFusionTree, branch_sector::AbstractSector, level_arrow::Bool
 )
-  new_space = fusion_product(root_sector(parent_tree), branch_sector)
+  new_space = to_gradedrange(root_sector(parent_tree) ⊗ branch_sector)
   return mapreduce(vcat, zip(blocklabels(new_space), blocklengths(new_space))) do (la, n)
     return [
       append_tree_leave(parent_tree, branch_sector, level_arrow, la, outer_mult) for

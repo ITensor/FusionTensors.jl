@@ -17,6 +17,7 @@ using GradedUnitRanges:
   space_isequal
 using SymmetrySectors: SectorProduct, TrivialSector
 using TensorAlgebra: BlockedTuple, tuplemortar
+using TensorProducts: tensor_product
 
 struct FusionTensor{T,N,Axes,Mat,Mapping} <: AbstractArray{T,N}
   data_matrix::Mat
@@ -108,13 +109,13 @@ function promote_sectors(
   # fuse with trivial to insert all missing arguments inside each GradedAxis
   # avoid depending on SymmetrySectors internals
   s0 = trivial(T)
-  return map_blocklabels.(s -> only(blocklabels(fusion_product(s0, s))), legs)
+  return map_blocklabels.(s -> only(blocklabels(tensor_product(s0, s))), legs)
 end
 
 function promote_sector_type(legs)
   # fuse trivial sectors to produce unified type
   # avoid depending on SymmetrySectors internals
-  return sector_type(fusion_product(trivial.(legs)...))
+  return sector_type(tensor_product(trivial.(legs)...))
 end
 
 # initialize with already computed data_matrix
@@ -229,7 +230,7 @@ function initialize_data_matrix(
 )
   # non-abelian fusion trees have float eltype: need compatible type
   promoted = promote_type(elt, fusiontree_eltype(sector_type(mat_row_axis)))
-  mat = BlockSparseArray{promoted}(mat_row_axis, mat_col_axis)
+  mat = BlockSparseArray{promoted}(undef, mat_row_axis, mat_col_axis)
   initialize_allowed_sectors!(mat)
   return mat
 end

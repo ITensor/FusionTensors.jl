@@ -5,8 +5,9 @@ using Test: @test, @test_throws, @testset
 using BlockArrays: Block, BlockedArray, blocksize
 
 using FusionTensors: FusionTensor, data_matrix, to_fusiontensor
-using GradedUnitRanges: dual, fusion_product, gradedrange
+using GradedUnitRanges: dual, gradedrange
 using SymmetrySectors: O2, SectorProduct, SU2, TrivialSector, U1
+using TensorProducts: tensor_product
 
 include("setup.jl")
 
@@ -365,7 +366,7 @@ end
   end
 
   @testset "large identity" begin
-    g = reduce(fusion_product, (SU2(1 / 2), SU2(1 / 2), SU2(1 / 2)))
+    g = reduce(tensor_product, (SU2(1 / 2), SU2(1 / 2), SU2(1 / 2)))
     N = 3
     codomain_legs = ntuple(_ -> g, N)
     domain_legs = dual.(codomain_legs)

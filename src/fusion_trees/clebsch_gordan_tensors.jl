@@ -5,9 +5,8 @@
 using HalfIntegers: half
 using WignerSymbols: clebschgordan
 
-using GradedUnitRanges: dual, fusion_product
+using GradedUnitRanges: dual
 using SymmetrySectors:
-  ⊗,
   AbelianStyle,
   AbstractSector,
   NotAbelianStyle,
@@ -20,6 +19,7 @@ using SymmetrySectors:
   trivial,
   zero_odd
 using TensorAlgebra: contract
+using TensorProducts: ⊗
 
 function symbol_1j(s::AbstractSector)
   cgt = clebsch_gordan_tensor(s, dual(s), trivial(s), 1)
@@ -66,7 +66,7 @@ function clebsch_gordan_tensor(s1::O2, s2::O2, s3::O2)
   d2 = quantum_dimension(s2)
   d3 = quantum_dimension(s3)
   cgt = zeros((d1, d2, d3))
-  s3 ∉ blocklabels(fusion_product(s1, s2)) && return cgt
+  s3 ∉ blocklabels(s1 ⊗ s2) && return cgt
 
   # adapted from TensorKit
   l1 = sector_label(s1)
