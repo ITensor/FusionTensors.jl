@@ -5,9 +5,16 @@
 
 using GradedUnitRanges: AbstractGradedUnitRange, GradedUnitRanges, flip, isdual, sector_type
 using SymmetrySectors:
-  ×, AbstractSector, SectorProduct, SymmetrySectors, arguments, trivial, to_gradedrange
+  ×,
+  AbstractSector,
+  SectorProduct,
+  SymmetrySectors,
+  arguments,
+  nsymbol,
+  to_gradedrange,
+  trivial
 using TensorAlgebra: flatten_tuples
-using TensorProducts: ⊗, tensor_product
+using TensorProducts: ⊗
 
 #
 # A fusion tree fuses N sectors sec1, secN  onto one sector fused_sec. A given set of
@@ -183,14 +190,6 @@ function outer_multiplicity_kron(
   n = nsymbol(sec1, sec2, fused)
   linear_inds = LinearIndices((n, outer_multiplicity2))
   return linear_inds[outer_multiplicity1, outer_multiplicity2]
-end
-
-# TODO move to GradedUnitRanges
-function nsymbol(s1::AbstractSector, s2::AbstractSector, s3::AbstractSector)
-  full_space = to_gradedrange(s1 ⊗ s2)
-  x = findfirst(==(s3), blocklabels(full_space))
-  isnothing(x) && return 0  # OR labelled(0, s3)?
-  return Int(blocklengths(full_space)[x])
 end
 
 function outer_multiplicity_split(
