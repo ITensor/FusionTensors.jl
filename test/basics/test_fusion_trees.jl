@@ -1,4 +1,3 @@
-@eval module $(gensym())
 using Test: @test, @testset
 using LinearAlgebra: I
 
@@ -127,5 +126,4 @@ end
   @test sector_type(f2) == typeof(j2)
   @test sector_type(f3) == typeof(a8)
   @test f == f2 × f3
-end
 end

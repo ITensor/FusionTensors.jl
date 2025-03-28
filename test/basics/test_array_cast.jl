@@ -1,4 +1,3 @@
-@eval module $(gensym())
 using LinearAlgebra: LinearAlgebra, norm
 using Test: @test, @test_throws, @testset
 
@@ -410,5 +409,4 @@ end
     @test isnothing(check_sanity(ft_nt))
     @test Array(ft_nt) ≈ tRVB
   end
-end
 end

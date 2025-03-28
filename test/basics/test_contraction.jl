@@ -1,4 +1,3 @@
-@eval module $(gensym())
 using LinearAlgebra: mul!
 using Test: @test, @testset, @test_broken
 
@@ -64,5 +63,4 @@ end
   @test permutedims(ft1, (), (1, 2, 3, 4)) * permutedims(ft3, (3, 4, 1, 2), ()) isa
     FusionTensor{Float64,0}
   @test_broken contract(ft1, (1, 2, 3, 4), ft3, (3, 4, 1, 2))
-end
 end

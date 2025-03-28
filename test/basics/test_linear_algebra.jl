@@ -1,4 +1,3 @@
-@eval module $(gensym())
 using LinearAlgebra: norm, tr
 using Test: @test, @testset
 
@@ -35,5 +34,4 @@ include("setup.jl")
     @test norm(ft) ≈ √3 / 2
     @test isapprox(tr(ft), 0; atol=eps(Float64))
   end
-end
 end

@@ -1,4 +1,3 @@
-@eval module $(gensym())
 using Test: @test, @testset, @test_broken
 
 using FusionTensors:
@@ -154,5 +153,4 @@ end
       @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
     end
   end
-end
 end
