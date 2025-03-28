@@ -97,7 +97,9 @@ end
 # trigger explicit error in TensorAlgebra.contract
 # TBD impose some convention? Remove?
 function Base.similar(
-  ft::FusionTensor, T::Type, new_axes::Tuple{Vararg{AbstractGradedUnitRange}}
+  ft::FusionTensor,
+  T::Type,
+  new_axes::Tuple{AbstractGradedUnitRange,Vararg{AbstractGradedUnitRange}},
 )
   throw(DimensionMismatch("Need bituple of axes"))
 end
