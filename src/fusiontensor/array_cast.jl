@@ -32,11 +32,8 @@ rtoldefault(arrayt::Type{<:AbstractArray}) = rtoldefault(eltype(arrayt))
 rtoldefault(elt::Type{<:Number}) = 10 * eps(real(float(elt)))
 
 function checknorm(ft::FusionTensor, a::AbstractArray, atol::Real, rtol::Real)
-  return isapprox(norm(ft), norm(a); atol=atol, rtol=rtol) || throw(
-    InexactError(
-      :FusionTensor, typeof(a), typeof(codomain_axes(ft)), typeof(domain_axes(ft))
-    ),
-  )
+  return isapprox(norm(ft), norm(a); atol, rtol) ||
+         throw(InexactError(:FusionTensor, typeof(ft), a))
 end
 
 function to_fusiontensor(
