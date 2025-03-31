@@ -1,9 +1,7 @@
 using FusionTensors: FusionTensors
 using Documenter: Documenter, DocMeta, deploydocs, makedocs
 
-DocMeta.setdocmeta!(
-  FusionTensors, :DocTestSetup, :(using FusionTensors); recursive=true
-)
+DocMeta.setdocmeta!(FusionTensors, :DocTestSetup, :(using FusionTensors); recursive=true)
 
 include("make_index.jl")
 
