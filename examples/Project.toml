@@ -1,2 +1,5 @@
 [deps]
 FusionTensors = "e16ca583-1f51-4df0-8e12-57d32947d33e"
+
+[compat]
+FusionTensors = "0.2"
