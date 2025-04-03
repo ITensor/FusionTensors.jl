@@ -3,7 +3,7 @@
 using BlockArrays: Block, findblock
 using LRUCache: LRU
 
-using SymmetrySectors: quantum_dimension
+using GradedArrays.SymmetrySectors: quantum_dimension
 
 const unitary_cache = LRU{Any,Float64}(; maxsize=10000)  # TBD size
 

@@ -3,8 +3,8 @@ using Test: @test, @testset, @test_broken
 
 using BlockSparseArrays: BlockSparseArray
 using FusionTensors: FusionTensor, domain_axes, codomain_axes
-using GradedUnitRanges: dual, gradedrange
-using SymmetrySectors: U1
+using GradedArrays: dual, gradedrange
+using GradedArrays.SymmetrySectors: U1
 using TensorAlgebra: contract
 
 include("setup.jl")

@@ -3,8 +3,8 @@
 using BlockArrays: AbstractBlockArray, BlockedArray, blockedrange, blocklengths, findblock
 
 using BlockSparseArrays: BlockSparseArrays, BlockSparseArray
-using GradedUnitRanges: AbstractGradedUnitRange, blocklabels
-using SymmetrySectors: block_dimensions, quantum_dimension
+using GradedArrays: AbstractGradedUnitRange, blocklabels
+using GradedArrays.SymmetrySectors: block_dimensions, quantum_dimension
 using TensorAlgebra: contract
 
 # =================================  High level interface  =================================

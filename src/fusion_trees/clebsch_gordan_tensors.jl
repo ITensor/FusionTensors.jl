@@ -5,8 +5,8 @@
 using HalfIntegers: half
 using WignerSymbols: clebschgordan
 
-using GradedUnitRanges: dual
-using SymmetrySectors:
+using GradedArrays: dual
+using GradedArrays.SymmetrySectors:
   AbelianStyle,
   AbstractSector,
   NotAbelianStyle,

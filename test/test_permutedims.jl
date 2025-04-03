@@ -10,8 +10,8 @@ using FusionTensors:
   ndims_domain,
   ndims_codomain,
   to_fusiontensor
-using GradedUnitRanges: dual, gradedrange, space_isequal
-using SymmetrySectors: O2, U1, SectorProduct, SU2
+using GradedArrays: dual, gradedrange, space_isequal
+using GradedArrays.SymmetrySectors: O2, U1, SectorProduct, SU2
 using TensorAlgebra: permmortar, tuplemortar
 
 include("setup.jl")

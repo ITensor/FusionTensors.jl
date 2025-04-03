@@ -5,8 +5,8 @@ using LinearAlgebra: LinearAlgebra, mul!, norm, tr
 using BlockArrays: Block, blocks
 
 using BlockSparseArrays: eachblockstoredindex
-using GradedUnitRanges: blocklabels
-using SymmetrySectors: quantum_dimension
+using GradedArrays: blocklabels
+using GradedArrays.SymmetrySectors: quantum_dimension
 
 # allow to contract with different eltype and let BlockSparseArray ensure compatibility
 # impose matching type and number of axes at compile time

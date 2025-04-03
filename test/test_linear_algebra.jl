@@ -5,8 +5,8 @@ using BlockArrays: BlockArrays
 
 using BlockSparseArrays: BlockSparseArrays
 using FusionTensors: FusionTensor, to_fusiontensor
-using GradedUnitRanges: dual, gradedrange
-using SymmetrySectors: U1, SU2, TrivialSector
+using GradedArrays: dual, gradedrange
+using GradedArrays.SymmetrySectors: U1, SU2, TrivialSector
 
 include("setup.jl")
 

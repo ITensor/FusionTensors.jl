@@ -4,7 +4,7 @@ using BlockArrays: AbstractBlockMatrix, BlockArrays, BlockIndexRange, blocklengt
 
 using BlockSparseArrays:
   AbstractBlockSparseMatrix, BlockSparseArray, eachblockstoredindex, to_block_indices
-using GradedUnitRanges:
+using GradedArrays:
   AbstractGradedUnitRange,
   blocklabels,
   blockmergesort,
@@ -15,7 +15,7 @@ using GradedUnitRanges:
   map_blocklabels,
   sector_type,
   space_isequal
-using SymmetrySectors: SectorProduct, TrivialSector
+using GradedArrays.SymmetrySectors: SectorProduct, TrivialSector
 using TensorAlgebra: BlockedTuple, tuplemortar
 using TensorProducts: tensor_product
 
@@ -61,8 +61,8 @@ function charge_block_size(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFus
   return ntuple(i -> Int(length(axes(ft)[i][b[i]])), ndims(ft))
 end
 
-# GradedUnitRanges interface
-function GradedUnitRanges.sector_type(
+# GradedArrays interface
+function GradedArrays.sector_type(
   ::Type{<:FusionTensor{<:Any,<:Any,<:Any,<:Any,<:Dict{<:Tuple{<:Any,F}}}}
 ) where {F}
   return sector_type(F)
@@ -76,7 +76,7 @@ function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::Secto
   b2 = find_sector_block.(leaves(f2), domain_axes(ft))
   return Block(b1..., b2...)
 end
-# TBD move to GradedUnitRanges? rename findfirst_sector?
+# TBD move to GradedArrays? rename findfirst_sector?
 function find_sector_block(s::AbstractSector, l::AbstractGradedUnitRange)
   return findfirst(==(s), blocklabels(l))
 end

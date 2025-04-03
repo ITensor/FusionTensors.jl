@@ -12,7 +12,7 @@ using FusionTensors:
   matrix_row_axis,
   ndims_codomain,
   ndims_domain
-using GradedUnitRanges: blocklabels, dual, space_isequal
+using GradedArrays: blocklabels, dual, space_isequal
 
 function check_data_matrix_axes(
   mat::BlockSparseMatrix, codomain_legs::Tuple, domain_legs::Tuple

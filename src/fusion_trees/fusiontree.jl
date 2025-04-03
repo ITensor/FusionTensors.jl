@@ -3,8 +3,8 @@
 # TBD
 # compatibility with TensorKit conventions?
 
-using GradedUnitRanges: AbstractGradedUnitRange, GradedUnitRanges, flip, isdual, sector_type
-using SymmetrySectors:
+using GradedArrays: AbstractGradedUnitRange, GradedArrays, flip, isdual, sector_type
+using GradedArrays.SymmetrySectors:
   ×,
   AbstractSector,
   SectorProduct,
@@ -40,7 +40,7 @@ using TensorProducts: ⊗
 # affect the basis on which the tree projects for self-dual irreps.
 #
 #
-# The interface uses AbstractGradedUnitRanges as input for interface simplicity
+# The interface uses AbstractGradedArrays as input for interface simplicity
 # however only blocklabels are used and blocklengths are never read.
 
 struct SectorFusionTree{S,N,M}
@@ -86,9 +86,9 @@ end
 
 Base.length(::SectorFusionTree{<:Any,N}) where {N} = N
 
-# GradedUnitRanges interface
-GradedUnitRanges.sector_type(::Type{<:SectorFusionTree{S}}) where {S} = S
-function GradedUnitRanges.flip(f::SectorFusionTree)
+# GradedArrays interface
+GradedArrays.sector_type(::Type{<:SectorFusionTree{S}}) where {S} = S
+function GradedArrays.flip(f::SectorFusionTree)
   return SectorFusionTree(
     dual.(leaves(f)),
     .!arrows(f),

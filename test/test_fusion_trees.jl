@@ -12,8 +12,8 @@ using FusionTensors:
   leaves,
   outer_multiplicity_indices,
   root_sector
-using GradedUnitRanges: blocklabels, sector_type
-using SymmetrySectors: ×, SectorProduct, SU, SU2, TrivialSector, arguments
+using GradedArrays: blocklabels, sector_type
+using GradedArrays.SymmetrySectors: ×, SectorProduct, SU, SU2, TrivialSector, arguments
 
 @testset "Trivial fusion trees" begin
   q = TrivialSector()
