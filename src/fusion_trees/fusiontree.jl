@@ -3,7 +3,7 @@
 # TBD
 # compatibility with TensorKit conventions?
 
-using GradedArrays: AbstractGradedUnitRange, GradedArrays, flip, isdual, sector_type
+using GradedArrays: GradedArrays, AbstractGradedUnitRange, flip, isdual, sector_type
 using GradedArrays.SymmetrySectors:
   ×,
   AbstractSector,
