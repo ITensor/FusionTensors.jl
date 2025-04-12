@@ -104,14 +104,13 @@ function SymmetrySectors.:×(f1::SectorFusionTree, f2::SectorFusionTree)
   product_leaves = .×(leaves(f1), leaves(f2))
   product_root_sector = root_sector(f1) × root_sector(f2)
   product_branch_sectors = .×(branch_sectors(f1), branch_sectors(f2))
-  product_outer_multiplicity_indices =
-    outer_multiplicity_kron.(
-      Base.tail(leaves(f1)),
-      branch_sectors(f1),
-      (Base.tail(branch_sectors(f1))..., root_sector(f1)),
-      outer_multiplicity_indices(f1),
-      outer_multiplicity_indices(f2),
-    )
+  product_outer_multiplicity_indices = outer_multiplicity_kron.(
+    Base.tail(leaves(f1)),
+    branch_sectors(f1),
+    (Base.tail(branch_sectors(f1))..., root_sector(f1)),
+    outer_multiplicity_indices(f1),
+    outer_multiplicity_indices(f2),
+  )
   return SectorFusionTree(
     product_leaves,
     arrows(f1),
@@ -122,13 +121,12 @@ function SymmetrySectors.:×(f1::SectorFusionTree, f2::SectorFusionTree)
 end
 
 function SymmetrySectors.arguments(f::SectorFusionTree{<:SectorProduct})
-  transposed_indices =
-    outer_multiplicity_split.(
-      Base.tail(leaves(f)),
-      branch_sectors(f),
-      (Base.tail(branch_sectors(f))..., root_sector(f)),
-      outer_multiplicity_indices(f),
-    )
+  transposed_indices = outer_multiplicity_split.(
+    Base.tail(leaves(f)),
+    branch_sectors(f),
+    (Base.tail(branch_sectors(f))..., root_sector(f)),
+    outer_multiplicity_indices(f),
+  )
   arguments_root = arguments(root_sector(f))
   arguments_leaves = arguments.(leaves(f))
   arguments_branch_sectors = arguments.(branch_sectors(f))
