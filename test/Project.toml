@@ -14,7 +14,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Aqua = "0.8.11"
 BlockArrays = "1.5.0"
-BlockSparseArrays = "0.4.0"
+BlockSparseArrays = "0.4.0, 0.5"
 FusionTensors = "0.3.0"
 GradedArrays = "0.2"
 LinearAlgebra = "1.10.0"
