@@ -79,7 +79,7 @@ function domain_axis(ft::FusionTensor)
 end
 function charge_block_size(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   b = Tuple(findblock(ft, f1, f2))
-  return ntuple(i -> Int(sector_multiplicity(axes(ft)[i][b[i]])), ndims(ft))
+  return ntuple(i -> sector_multiplicity(axes(ft, i)[b[i]]), ndims(ft))
 end
 
 # GradedArrays interface

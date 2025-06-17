@@ -11,6 +11,7 @@ using GradedArrays:
   SectorProduct,
   arguments,
   flip,
+  flip_dual,
   isdual,
   nsymbol,
   sector_multiplicities,
@@ -168,7 +169,7 @@ fusiontree_eltype(::Type{<:AbstractSector}) = Float64
 function build_trees(legs::Vararg{AbstractGradedUnitRange})
   # construct all authorized trees for each outer block in legs
   tree_arrows = isdual.(legs)
-  return mapreduce(vcat, Iterators.product(sectors.(legs)...)) do it
+  return mapreduce(vcat, Iterators.product(sectors.(flip_dual.(legs))...)) do it
     return build_trees(it, tree_arrows)
   end
 end

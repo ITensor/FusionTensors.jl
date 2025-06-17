@@ -12,7 +12,8 @@ using FusionTensors:
   leaves,
   outer_multiplicity_indices,
   root_sector
-using GradedArrays: ×, SectorProduct, SU, SU2, TrivialSector, arguments, dual, sector_type
+using GradedArrays:
+  ×, SectorProduct, SU, SU2, TrivialSector, arguments, dual, gradedrange, sector_type
 
 @testset "Trivial fusion trees" begin
   q = TrivialSector()
@@ -116,6 +117,17 @@ end
 
   trees = build_trees((c3, c3), (false, false))
   @test root_sector.(trees) == [SU{3}((1, 0)), SU{3}((2, 2))]
+
+  # test GradedUnitRange interface
+  g = gradedrange([SU{3}((1, 0)) => 1])
+  trees = build_trees(g, g)
+  @test root_sector.(trees) == [SU{3}((1, 1)), SU{3}((2, 0))]
+  trees = build_trees(g, flip(g))
+  @test root_sector.(trees) == [SU{3}((1, 1)), SU{3}((2, 0))]
+  trees = build_trees(g, flip(dual(g)))
+  @test root_sector.(trees) == [SU{3}((0, 0)), SU{3}((2, 1))]
+  trees = build_trees(g, dual(g))
+  @test root_sector.(trees) == [SU{3}((0, 0)), SU{3}((2, 1))]
 
   # test outer outer_multiplicity > 1
   a8 = SU{3}((2, 1))
