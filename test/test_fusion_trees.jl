@@ -13,7 +13,7 @@ using FusionTensors:
   outer_multiplicity_indices,
   root_sector
 using GradedArrays:
-  ×, SectorProduct, SU, SU2, TrivialSector, arguments, dual, gradedrange, sector_type
+  ×, SectorProduct, SU, SU2, TrivialSector, arguments, dual, flip, gradedrange, sector_type
 
 @testset "Trivial fusion trees" begin
   q = TrivialSector()
