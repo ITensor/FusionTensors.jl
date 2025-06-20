@@ -2,11 +2,10 @@ using Test: @test, @testset
 
 using TensorProducts: ⊗
 using BlockArrays: blockedrange, blocklength, blocklengths
-using TensorAlgebra: tuplemortar
+using TensorAlgebra: trivial_axis, tuplemortar
 
 using FusionTensors:
   FusionTensorAxes,
-  dummy_axis,
   ndims_domain,
   ndims_codomain,
   codomain_axes,
@@ -21,10 +20,6 @@ using GradedArrays:
 
 @testset "misc FusionTensors.jl" begin
   g1 = gradedrange([U1(0) => 1])
-  @test space_isequal(dummy_axis(), gradedrange([TrivialSector() => 1]))
-  @test space_isequal(dummy_axis(U1), g1)
-  @test space_isequal(dummy_axis(typeof(SU2(1))), gradedrange([SU2(0) => 1]))
-
   @test promote_sector_type(U1(1), U1(1)) === typeof(U1(1))
   @test promote_sector_type(g1, U1(1)) === typeof(U1(1))
   @test promote_sector_type(g1, g1) === typeof(U1(1))
@@ -80,7 +75,7 @@ end
   @test all(map(r -> space_isequal(r, g2b), domain_axes(fta)))
   @test space_isequal(codomain_axis(fta), g2 ⊗ g2)
   @test space_isequal(domain_axis(fta), dual(g2 ⊗ g2))
-  @test space_isequal(dummy_axis(fta), dummy_axis(typeof(s2)))
+  @test space_isequal(trivial_axis(fta), trivial_axis(typeof(s2)))
 
   @test fta == fta
   @test copy(fta) == fta
@@ -102,7 +97,7 @@ end
   @test sector_type(fta) == TrivialSector
 
   @test codomain_axes(fta) == ()
-  @test space_isequal(codomain_axis(fta), dummy_axis())
+  @test space_isequal(codomain_axis(fta), trivial_axis(TrivialSector))
   @test domain_axes(fta) == ()
-  @test space_isequal(domain_axis(fta), dual(dummy_axis()))
+  @test space_isequal(domain_axis(fta), dual(trivial_axis(TrivialSector)))
 end
