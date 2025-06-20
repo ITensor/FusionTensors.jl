@@ -44,7 +44,7 @@ function transpose_mapping(b::BlockIndexRange{2})
   return new_block[reverse(b.indices)...]
 end
 function Base.adjoint(ft::FusionTensor)
-  new_axes = tuplemortar((dual.(domain_axes(ft)), dual.(codomain_axes(ft))))
+  new_axes = FusionTensorAxes(dual.(domain_axes(ft)), dual.(codomain_axes(ft)))
   return FusionTensor(
     adjoint(data_matrix(ft)), new_axes, transpose_mapping(trees_block_mapping(ft))
   )
@@ -57,7 +57,7 @@ Base.conj(ft::FusionTensor{<:Real}) = ft   # same object for real element type
 Base.conj(ft::FusionTensor) = set_data_matrix(ft, conj(data_matrix(ft)))
 
 function Base.copy(ft::FusionTensor)
-  return FusionTensor(copy(data_matrix(ft)), copy.(axes(ft)), copy(trees_block_mapping(ft)))
+  return FusionTensor(copy(data_matrix(ft)), copy(axes(ft)), copy(trees_block_mapping(ft)))
 end
 
 function Base.deepcopy(ft::FusionTensor)
@@ -66,8 +66,7 @@ function Base.deepcopy(ft::FusionTensor)
   )
 end
 
-# eachindex is automatically defined for AbstractArray. We do not want it.
-Base.eachindex(::FusionTensor) = error("eachindex not defined for FusionTensor")
+Base.eachindex(::FusionTensor) = throw(MethodError(eachindex, (FusionTensor,)))
 
 function Base.getindex(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   charge_matrix = data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]

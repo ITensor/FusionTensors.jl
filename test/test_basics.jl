@@ -1,8 +1,10 @@
 using Test: @test, @test_throws, @testset
 
+using BlockArrays: Block
 using BlockSparseArrays: BlockSparseArray
 using FusionTensors:
   FusionTensor,
+  FusionTensorAxes,
   codomain_axes,
   data_matrix,
   domain_axes,
@@ -57,12 +59,18 @@ include("setup.jl")
   @test isnothing(check_sanity(ft0))
   @test isnothing(check_sanity(ft1))
   @test sector_type(ft1) === U1{Int}
+  @test sector_type(typeof(ft1)) === U1{Int}
+
+  m1 = BlockSparseArray{Float64}(undef, g1, g2)
+  m1[Block(2, 1)] = ones(2, 2)  # forbidden
+  @test_throws ArgumentError FusionTensor(m1, (g1,), (g2,))
 
   # Base methods
   @test eltype(ft1) === Float64
   @test length(ft1) == 30
   @test ndims(ft1) == 2
   @test size(ft1) == tuplemortar(((6,), (5,)))
+  @test_throws MethodError eachindex(ft1)
 
   # copy
   ft2 = copy(ft1)
@@ -122,7 +130,7 @@ end
   @test checkaxes(codomain_axes(ft), (g1, g2))
   @test checkaxes(domain_axes(ft), (g3, g4))
 
-  @test axes(ft) == tuplemortar(((g1, g2), (g3, g4)))
+  @test axes(ft) == FusionTensorAxes(tuplemortar(((g1, g2), (g3, g4))))
   @test ndims_codomain(ft) == 2
   @test ndims_domain(ft) == 2
   @test size(data_matrix(ft)) == (30, 12)
