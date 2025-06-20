@@ -70,6 +70,7 @@ include("setup.jl")
   @test length(ft1) == 30
   @test ndims(ft1) == 2
   @test size(ft1) == tuplemortar(((6,), (5,)))
+  @test_throws MethodError eachindex(ft1)
 
   # copy
   ft2 = copy(ft1)
