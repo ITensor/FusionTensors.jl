@@ -1,7 +1,7 @@
 using Test: @test, @testset
 
 using TensorProducts: ⊗
-using BlockArrays: blockedrange, blocklength, blocklengths
+using BlockArrays: Block, blockedrange, blocklength, blocklengths, blocks
 using TensorAlgebra: trivial_axis, tuplemortar
 
 using FusionTensors:
