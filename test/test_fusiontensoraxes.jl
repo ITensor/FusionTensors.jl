@@ -2,7 +2,7 @@ using Test: @test, @testset
 
 using TensorProducts: ⊗
 using BlockArrays: Block, blockedrange, blocklength, blocklengths, blocks
-using TensorAlgebra: trivial_axis, tuplemortar
+using TensorAlgebra: BlockedTuple, trivial_axis, tuplemortar
 
 using FusionTensors:
   FusionTensorAxes,
@@ -12,7 +12,6 @@ using FusionTensors:
   codomain_axis,
   domain_axes,
   domain_axis,
-  outer_axes,
   promote_sector_type,
   promote_sectors
 using GradedArrays:
@@ -42,7 +41,7 @@ end
   fta = FusionTensorAxes(bt)
 
   @test fta isa FusionTensorAxes
-  @test outer_axes(fta) == bt
+  @test BlockedTuple(fta) == bt
 
   @test Tuple(fta) == Tuple(bt)
   @test space_isequal(only(axes(fta)), blockedrange([2, 2]))

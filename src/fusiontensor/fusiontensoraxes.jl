@@ -47,10 +47,6 @@ struct FusionTensorAxes{BT<:BlockedTuple{2}}
   end
 end
 
-# =====================================  Accessors  ========================================
-
-outer_axes(fta::FusionTensorAxes) = fta.outer_axes
-
 # ====================================  Constructors  ======================================
 
 function FusionTensorAxes(bt::BlockedTuple{2})
@@ -62,25 +58,31 @@ function FusionTensorAxes(codomain_legs, domain_legs)
   return FusionTensorAxes(tuplemortar((codomain_legs, domain_legs)))
 end
 
+# ==============================  TensorAlgebra interface  =================================
+
+TensorAlgebra.BlockedTuple(fta::FusionTensorAxes) = fta.outer_axes
+
+TensorAlgebra.trivial_axis(fta::FusionTensorAxes) = trivial_axis(sector_type(fta))
+
 # ==================================  Base interface  ======================================
 
 for f in [
   :(broadcastable), :(Tuple), :(axes), :(firstindex), :(lastindex), :(iterate), :(length)
 ]
-  @eval Base.$f(fta::FusionTensorAxes) = Base.$f(outer_axes(fta))
+  @eval Base.$f(fta::FusionTensorAxes) = Base.$f(BlockedTuple(fta))
 end
 
 for f in [:(getindex), :(iterate)]
-  @eval Base.$f(fta::FusionTensorAxes, i) = $f(outer_axes(fta), i)
+  @eval Base.$f(fta::FusionTensorAxes, i) = $f(BlockedTuple(fta), i)
 end
 
 function Base.getindex(fta::FusionTensorAxes, bp::AbstractBlockPermutation)
-  return FusionTensorAxes(outer_axes(fta)[bp])
+  return FusionTensorAxes(BlockedTuple(fta)[bp])
 end
 
-Base.copy(fta::FusionTensorAxes) = FusionTensorAxes(copy.(outer_axes(fta)))
+Base.copy(fta::FusionTensorAxes) = FusionTensorAxes(copy.(BlockedTuple(fta)))
 
-Base.deepcopy(fta::FusionTensorAxes) = FusionTensorAxes(deepcopy.(outer_axes(fta)))
+Base.deepcopy(fta::FusionTensorAxes) = FusionTensorAxes(deepcopy.(BlockedTuple(fta)))
 
 function Base.:(==)(a::FusionTensorAxes, b::FusionTensorAxes)
   blocklengths(a) != blocklengths(b) && return false
@@ -93,7 +95,7 @@ end
 # ================================  BlockArrays interface  =================================
 
 for f in [:(blocklength), :(blocklengths), :(blocks)]
-  @eval BlockArrays.$f(fta::FusionTensorAxes) = $f(outer_axes(fta))
+  @eval BlockArrays.$f(fta::FusionTensorAxes) = $f(BlockedTuple(fta))
 end
 
 # ==============================  GradedArrays interface  ==================================
@@ -107,10 +109,6 @@ end
 function GradedArrays.sector_type(::Type{FTA}) where {BT,FTA<:FusionTensorAxes{BT}}
   return sector_type(type_parameters(type_parameters(BT, 3), 1))
 end
-
-# ==============================  TensorAlgebra interface  =================================
-
-TensorAlgebra.trivial_axis(fta::FusionTensorAxes) = trivial_axis(sector_type(fta))
 
 # ==============================  FusionTensor interface  ==================================
 
