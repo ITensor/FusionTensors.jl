@@ -176,8 +176,8 @@ end
 # empty matrix
 function FusionTensor(elt::Type, legs::FusionTensorAxes)
   S = sector_type(legs)
-  row_axis, codomain_trees_to_ranges = fuse_axes(S, codomain_axes(legs))
-  col_axis, domain_trees_to_ranges = flip_domain(fuse_axes(S, dual.(domain_axes(legs)))...)
+  row_axis, codomain_trees_to_ranges = fuse_axes(S, codomain(legs))
+  col_axis, domain_trees_to_ranges = flip_domain(fuse_axes(S, dual.(domain(legs)))...)
 
   mat = initialize_data_matrix(elt, row_axis, col_axis)
   tree_to_block_mapping = intersect_codomain_domain(
@@ -228,16 +228,17 @@ end
 # ==============================  FusionTensor interface  ==================================
 
 # misc access
-for f in [
-  :(codomain_axes),
-  :(codomain_axis),
-  :(domain_axes),
-  :(domain_axis),
-  :(ndims_codomain),
-  :(ndims_domain),
-]
-  @eval $f(ft::FusionTensor) = $f(axes(ft))
-end
+codomain_axes(ft::FusionTensor) = codomain(axes(ft))
+
+domain_axes(ft::FusionTensor) = domain(axes(ft))
+
+codomain_axis(ft::FusionTensor) = fused_codomain(axes(ft))
+
+domain_axis(ft::FusionTensor) = fused_domain(axes(ft))
+
+ndims_codomain(ft::FusionTensor) = length_codomain(axes(ft))
+
+ndims_domain(ft::FusionTensor) = length_domain(axes(ft))
 
 function charge_block_size(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   b = Tuple(findblock(ft, f1, f2))

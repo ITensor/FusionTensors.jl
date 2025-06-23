@@ -8,10 +8,10 @@ using FusionTensors:
   FusionTensorAxes,
   ndims_domain,
   ndims_codomain,
-  codomain_axes,
-  codomain_axis,
-  domain_axes,
-  domain_axis,
+  codomain,
+  domain,
+  fused_codomain,
+  fused_domain,
   promote_sector_type,
   promote_sectors
 using GradedArrays:
@@ -68,12 +68,12 @@ end
   @test blocks(fta) == blocks(bt)
 
   @test sector_type(fta) === sector_type(g2)
-  @test length(codomain_axes(fta)) == 2
-  @test all(map(r -> space_isequal(r, g2), codomain_axes(fta)))
-  @test length(domain_axes(fta)) == 2
-  @test all(map(r -> space_isequal(r, g2b), domain_axes(fta)))
-  @test space_isequal(codomain_axis(fta), g2 ⊗ g2)
-  @test space_isequal(domain_axis(fta), dual(g2 ⊗ g2))
+  @test length(codomain(fta)) == 2
+  @test all(map(r -> space_isequal(r, g2), codomain(fta)))
+  @test length(domain(fta)) == 2
+  @test all(map(r -> space_isequal(r, g2b), domain(fta)))
+  @test space_isequal(fused_codomain(fta), g2 ⊗ g2)
+  @test space_isequal(fused_domain(fta), dual(g2 ⊗ g2))
   @test space_isequal(trivial_axis(fta), trivial_axis(typeof(s2)))
 
   @test fta == fta
@@ -95,8 +95,8 @@ end
   @test blocklengths(fta) == (0, 0)
   @test sector_type(fta) == TrivialSector
 
-  @test codomain_axes(fta) == ()
-  @test space_isequal(codomain_axis(fta), trivial_axis(TrivialSector))
-  @test domain_axes(fta) == ()
-  @test space_isequal(domain_axis(fta), dual(trivial_axis(TrivialSector)))
+  @test codomain(fta) == ()
+  @test space_isequal(fused_codomain(fta), trivial_axis(TrivialSector))
+  @test domain(fta) == ()
+  @test space_isequal(fused_domain(fta), dual(trivial_axis(TrivialSector)))
 end

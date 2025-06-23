@@ -112,24 +112,24 @@ end
 
 # ==============================  FusionTensor interface  ==================================
 
-codomain_axes(fta::FusionTensorAxes) = fta[Block(1)]
+codomain(fta::FusionTensorAxes) = fta[Block(1)]
 
-domain_axes(fta::FusionTensorAxes) = fta[Block(2)]
+domain(fta::FusionTensorAxes) = fta[Block(2)]
 
-function codomain_axis(fta::FusionTensorAxes)
-  if ndims_codomain(fta) == 0
+function fused_codomain(fta::FusionTensorAxes)
+  if length_codomain(fta) == 0
     return trivial_axis(fta)
   end
-  return ⊗(codomain_axes(fta)...)
+  return ⊗(codomain(fta)...)
 end
 
-function domain_axis(fta::FusionTensorAxes)
-  if ndims_domain(fta) == 0
+function fused_domain(fta::FusionTensorAxes)
+  if length_domain(fta) == 0
     return dual(trivial_axis(fta))
   end
-  return dual(⊗(dual.(domain_axes(fta))...))
+  return dual(⊗(dual.(domain(fta))...))
 end
 
-ndims_codomain(fta::FusionTensorAxes) = length(codomain_axes(fta))
+length_codomain(fta::FusionTensorAxes) = length(codomain(fta))
 
-ndims_domain(fta::FusionTensorAxes) = length(domain_axes(fta))
+length_domain(fta::FusionTensorAxes) = length(domain(fta))
