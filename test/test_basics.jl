@@ -35,6 +35,12 @@ include("setup.jl")
   g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
   g2 = dual(gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1]))
 
+  fta = FusionTensorAxes((g1,), (g2,))
+  ft0 = FusionTensor(Float64, fta)
+  @test ft0 isa FusionTensor
+  @test space_isequal(codomain_axis(ft0), g1)
+  @test space_isequal(domain_axis(ft0), g2)
+
   # check dual convention when initializing data_matrix
   ft0 = FusionTensor(Float64, (g1,), (g2,))
   @test ft0 isa FusionTensor
@@ -264,6 +270,13 @@ end
   @test_throws DimensionMismatch ft7 + ft3
   @test_throws DimensionMismatch ft7 - ft3
   @test_throws DimensionMismatch ft7 * ft3
+
+  fta = FusionTensorAxes((g1,), (g2, g2))
+  @test zeros(fta) isa FusionTensor{Float64,3}
+  @test zeros(ComplexF64, fta) isa FusionTensor{ComplexF64,3}
+  ft9 = randn(ComplexF64, fta)
+  @test ft9 isa FusionTensor{ComplexF64,3}
+  @test all(data_matrix(ft9)[Block(1, 6)] .!= 0)
 end
 
 @testset "missing SectorProduct" begin

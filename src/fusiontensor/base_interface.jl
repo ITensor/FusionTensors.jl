@@ -1,8 +1,8 @@
 # This files defines Base functions for FusionTensor
 
 using Accessors: @set
-
-using BlockSparseArrays: @view!
+using Random: randn!
+using BlockSparseArrays: @view!, eachstoredblock
 using TensorAlgebra: BlockedTuple, tuplemortar
 
 set_data_matrix(ft::FusionTensor, data_matrix) = @set ft.data_matrix = data_matrix
@@ -81,6 +81,15 @@ end
 
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
+function Base.randn(::Type{T}, fta::FusionTensorAxes) where {T}
+  ft = FusionTensor(T, fta)
+  for m in eachstoredblock(data_matrix(ft))
+    m = randn!(m)
+  end
+  return ft
+end
+Base.randn(fta::FusionTensorAxes) = randn(Float64, fta)
+
 function Base.similar(ft::FusionTensor, T::Type)
   # reuse trees_block_mapping
 
@@ -124,3 +133,6 @@ function Base.view(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   charge_matrix = @view! data_matrix(ft)[trees_block_mapping(ft)[f1, f2]]
   return reshape(charge_matrix, charge_block_size(ft, f1, f2))
 end
+
+Base.zeros(::Type{T}, fta::FusionTensorAxes) where {T} = FusionTensor(T, fta)
+Base.zeros(fta::FusionTensorAxes) = zeros(Float64, fta)
