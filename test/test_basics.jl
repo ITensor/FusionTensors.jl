@@ -1,7 +1,7 @@
 using Test: @test, @test_throws, @testset
 
 using BlockArrays: Block
-using BlockSparseArrays: BlockSparseArray
+using BlockSparseArrays: BlockSparseArray, eachblockstoredindex
 using FusionTensors:
   FusionTensor,
   FusionTensorAxes,
@@ -28,6 +28,7 @@ using GradedArrays:
   space_isequal
 using TensorAlgebra: tuplemortar
 using TensorProducts: tensor_product
+using LinearAlgebra: LinearAlgebra
 
 include("setup.jl")
 
@@ -270,13 +271,29 @@ end
   @test_throws DimensionMismatch ft7 + ft3
   @test_throws DimensionMismatch ft7 - ft3
   @test_throws DimensionMismatch ft7 * ft3
+end
 
-  fta = FusionTensorAxes((g1,), (g2, g2))
+@testset "specific constructors" begin
+  g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
+  g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
+  g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
+  g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
+
+  fta = FusionTensorAxes((g1,), (g2, g3))
   @test zeros(fta) isa FusionTensor{Float64,3}
   @test zeros(ComplexF64, fta) isa FusionTensor{ComplexF64,3}
-  ft9 = randn(ComplexF64, fta)
-  @test ft9 isa FusionTensor{ComplexF64,3}
-  @test all(data_matrix(ft9)[Block(1, 6)] .!= 0)
+  ft1 = randn(ComplexF64, fta)
+  @test ft1 isa FusionTensor{ComplexF64,3}
+  @test all(data_matrix(ft1)[Block(1, 5)] .!= 0)
+
+  ft2 = FusionTensor(LinearAlgebra.I, (g1, g2))
+  @test ft2 isa FusionTensor{Float64,4}
+  @test axes(ft2) == FusionTensorAxes((g1, g2), dual.((g1, g2)))
+  @test collect(eachblockstoredindex(data_matrix(ft2))) == map(i -> Block(i, i), 1:6)
+  for i in 1:6
+    m = data_matrix(ft2)[Block(i, i)]
+    @test m == LinearAlgebra.I(size(m, 1))
+  end
 end
 
 @testset "missing SectorProduct" begin

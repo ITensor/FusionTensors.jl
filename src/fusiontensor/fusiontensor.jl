@@ -19,6 +19,7 @@ using GradedArrays:
   sectormergesort,
   sectors,
   space_isequal
+using LinearAlgebra: UniformScaling
 using TensorAlgebra: BlockedTuple, trivial_axis, tuplemortar
 using TensorProducts: tensor_product
 using TypeParameterAccessors: type_parameters
@@ -207,6 +208,30 @@ function FusionTensor(
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
   return FusionTensor(x, tuplemortar((codomain_legs, domain_legs)))
+end
+
+# specific constructors
+Base.zeros(::Type{T}, fta::FusionTensorAxes) where {T} = FusionTensor(T, fta)
+Base.zeros(fta::FusionTensorAxes) = zeros(Float64, fta)
+
+function Base.randn(::Type{T}, fta::FusionTensorAxes) where {T}
+  ft = FusionTensor(T, fta)
+  for m in eachstoredblock(data_matrix(ft))
+    m = randn!(m)
+  end
+  return ft
+end
+Base.randn(fta::FusionTensorAxes) = randn(Float64, fta)
+
+function FusionTensor(
+  ::UniformScaling, codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
+)
+  fta = FusionTensorAxes(codomain_legs, dual.(codomain_legs))
+  ft = FusionTensor(Float64, fta)
+  for m in eachstoredblock(data_matrix(ft))
+    m .= LinearAlgebra.I(size(m, 1))
+  end
+  return ft
 end
 
 # ================================  BlockArrays interface  =================================
