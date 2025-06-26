@@ -285,6 +285,7 @@ end
   ft1 = randn(ComplexF64, fta)
   @test ft1 isa FusionTensor{ComplexF64,3}
   @test all(data_matrix(ft1)[Block(1, 5)] .!= 0)
+  @test randn(fta) isa FusionTensor{Float64,3}
 
   ft2 = FusionTensor(LinearAlgebra.I, (g1, g2))
   @test ft2 isa FusionTensor{Float64,4}
