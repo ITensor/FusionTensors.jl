@@ -217,7 +217,7 @@ Base.zeros(fta::FusionTensorAxes) = zeros(Float64, fta)
 function Base.randn(::Type{T}, fta::FusionTensorAxes) where {T}
   ft = FusionTensor(T, fta)
   for m in eachstoredblock(data_matrix(ft))
-    m = randn!(m)
+    randn!(m)
   end
   return ft
 end
