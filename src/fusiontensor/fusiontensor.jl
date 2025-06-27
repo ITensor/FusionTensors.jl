@@ -244,8 +244,8 @@ end
 function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   # find outer block corresponding to fusion trees
   @assert typeof((f1, f2)) === keytype(trees_block_mapping(ft))
-  b1 = findfirstblock.(codomain_axes(ft), leaves(f1))
-  b2 = findfirstblock.(domain_axes(ft), leaves(f2))
+  b1 = findfirstblock.(flip_dual.(codomain_axes(ft)), leaves(f1))
+  b2 = findfirstblock.(flip_dual.(domain_axes(ft)), leaves(f2))
   return Block(Int.(b1)..., Int.(b2)...)
 end
 

@@ -2,8 +2,8 @@ using Test: @test, @testset, @test_broken, @test_throws
 
 using FusionTensors:
   FusionTensor,
+  FusionTensorAxes,
   data_matrix,
-  checkaxes,
   codomain_axis,
   domain_axis,
   naive_permutedims,
@@ -40,11 +40,11 @@ include("setup.jl")
       ft3 = permutedims(ft1, (4,), (1, 2, 3))
       @test ft3 !== ft1
       @test ft3 isa FusionTensor{elt,4}
-      @test checkaxes(axes(ft3), tuplemortar(((dual(g4),), (g1, g2, dual(g3)))))
+      @test axes(ft3) == FusionTensorAxes((dual(g4),), (g1, g2, dual(g3)))
       @test isnothing(check_sanity(ft3))
 
       ft4 = permutedims(ft3, (2, 3), (4, 1))
-      @test checkaxes(axes(ft1), axes(ft4))
+      @test axes(ft1) == axes(ft4)
       @test space_isequal(codomain_axis(ft1), codomain_axis(ft4))
       @test space_isequal(domain_axis(ft1), domain_axis(ft4))
       @test ft4 ≈ ft1

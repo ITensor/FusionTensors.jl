@@ -54,7 +54,7 @@ include("setup.jl")
 
   # getters
   @test data_matrix(ft1) == m
-  @test checkspaces(axes(ft1), tuplemortar(((g1,), (g2,))))
+  @test axes(ft1) == FusionTensorAxes((g1,), (g2,))
 
   # misc
   @test checkspaces(codomain_axes(ft1), (g1,))
@@ -269,8 +269,8 @@ end
   @test isnothing(check_sanity(ad))
 
   ft7 = FusionTensor{Float64}(undef, (g1,), (g2, g3, g4))
-  @test_throws DimensionMismatch ft7 + ft3
-  @test_throws DimensionMismatch ft7 - ft3
+  @test_throws ArgumentError ft7 + ft3
+  @test_throws ArgumentError ft7 - ft3
   @test_throws ArgumentError ft7 * ft3
 end
 

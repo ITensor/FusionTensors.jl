@@ -5,7 +5,7 @@ using LinearAlgebra: LinearAlgebra, mul!, norm, tr
 using BlockArrays: Block, blocks
 
 using BlockSparseArrays: eachblockstoredindex
-using GradedArrays: quantum_dimension, sectors
+using GradedArrays: checkspaces, checkspaces_dual, quantum_dimension, sectors
 
 # allow to contract with different eltype and let BlockSparseArray ensure compatibility
 # impose matching type and number of axes at compile time
@@ -27,9 +27,9 @@ function LinearAlgebra.mul!(
   end
 
   # input validation
-  checkaxes_dual(domain_axes(A), codomain_axes(B))
-  checkaxes(codomain_axes(C), codomain_axes(A))
-  checkaxes(domain_axes(C), domain_axes(B))
+  checkspaces_dual(domain_axes(A), codomain_axes(B))
+  checkspaces(codomain_axes(C), codomain_axes(A))
+  checkspaces(domain_axes(C), domain_axes(B))
   mul!(data_matrix(C), data_matrix(A), data_matrix(B), α, β)
   return C
 end

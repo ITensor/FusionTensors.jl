@@ -19,14 +19,14 @@ end
 
 # tensor addition is a block data_matrix add.
 function Base.:+(left::FusionTensor, right::FusionTensor)
-  checkspaces(axes(left), axes(right))
+  axes(left) == axes(right) || throw(ArgumentError("Axes do not match"))
   return set_data_matrix(left, data_matrix(left) + data_matrix(right))
 end
 
 Base.:-(ft::FusionTensor) = set_data_matrix(ft, -data_matrix(ft))
 
 function Base.:-(left::FusionTensor, right::FusionTensor)
-  checkspaces(axes(left), axes(right))
+  axes(left) == axes(right) || throw(ArgumentError("Axes do not match"))
   return set_data_matrix(left, data_matrix(left) - data_matrix(right))
 end
 
