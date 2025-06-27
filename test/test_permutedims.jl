@@ -23,7 +23,7 @@ include("setup.jl")
     g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
 
     for elt in (Float64, ComplexF64)
-      ft1 = FusionTensor(elt, (g1, g2), dual.((g3, g4)))
+      ft1 = FusionTensor{elt}(undef, (g1, g2), dual.((g3, g4)))
       @test isnothing(check_sanity(ft1))
 
       # test permutedims interface

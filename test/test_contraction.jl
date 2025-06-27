@@ -14,10 +14,10 @@ include("setup.jl")
   g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
   g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
 
-  ft1 = FusionTensor(Float64, (g1, g2), (g3, g4))
+  ft1 = FusionTensor{Float64}(undef, (g1, g2), (g3, g4))
   @test isnothing(check_sanity(ft1))
 
-  ft2 = FusionTensor(Float64, dual.((g3, g4)), (g1,))
+  ft2 = FusionTensor{Float64}(undef, dual.((g3, g4)), (g1,))
   @test isnothing(check_sanity(ft2))
 
   ft3 = ft1 * ft2  # tensor contraction
@@ -43,9 +43,9 @@ end
   g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
   g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
 
-  ft1 = FusionTensor(Float64, (g1, g2), (g3, g4))
-  ft2 = FusionTensor(Float64, dual.((g3, g4)), (dual(g1),))
-  ft3 = FusionTensor(Float64, dual.((g3, g4)), dual.((g1, g2)))
+  ft1 = FusionTensor{Float64}(undef, (g1, g2), (g3, g4))
+  ft2 = FusionTensor{Float64}(undef, dual.((g3, g4)), (dual(g1),))
+  ft3 = FusionTensor{Float64}(undef, dual.((g3, g4)), dual.((g1, g2)))
 
   ft4, legs = contract(ft1, (1, 2, 3, 4), ft2, (3, 4, 5))
   @test legs == tuplemortar(((1, 2), (5,)))

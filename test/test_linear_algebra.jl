@@ -23,11 +23,6 @@ include("setup.jl")
   gsu2 = gradedrange([SU2(1 / 2) => 1])
 
   for g in [g0, gu1, gsu2]
-    ft0 = FusionTensor(Float64, (g, g), (dual(g), dual(g)))
-    @test isnothing(check_sanity(ft0))
-    @test norm(ft0) == 0
-    @test tr(ft0) == 0
-
     ft = to_fusiontensor(sdst, (g, g), (dual(g), dual(g)))
     @test isnothing(check_sanity(ft))
     @test norm(ft) ≈ √3 / 2
