@@ -6,13 +6,12 @@ using FusionTensors:
   codomain_axes,
   data_matrix,
   domain_axes,
-  checkaxes,
-  checkaxes_dual,
   domain_axis,
   codomain_axis,
   ndims_codomain,
   ndims_domain
-using GradedArrays: dual, sectors, sector_multiplicities, space_isequal
+using GradedArrays:
+  checkspaces, checkspaces_dual, dual, sectors, sector_multiplicities, space_isequal
 
 function check_sanity(ft::FusionTensor)
   nca = ndims_domain(ft)
@@ -25,8 +24,8 @@ function check_sanity(ft::FusionTensor)
   @assert nda + nca == ndims(ft) "invalid ndims"
 
   @assert length(axes(ft)) == ndims(ft) "ndims does not match axes"
-  checkaxes(axes(ft)[begin:nda], codomain_axes(ft))
-  checkaxes(axes(ft)[(nda + 1):end], domain_axes(ft))
+  checkspaces(axes(ft)[begin:nda], codomain_axes(ft))
+  checkspaces(axes(ft)[(nda + 1):end], domain_axes(ft))
 
   m = data_matrix(ft)
   @assert ndims(m) == 2 "invalid data_matrix ndims"

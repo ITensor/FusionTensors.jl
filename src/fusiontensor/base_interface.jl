@@ -2,6 +2,7 @@
 
 using Accessors: @set
 using BlockSparseArrays: @view!, eachstoredblock
+using GradedArrays: checkspaces, checkspaces_dual
 using TensorAlgebra: BlockedTuple, tuplemortar
 
 set_data_matrix(ft::FusionTensor, data_matrix) = @set ft.data_matrix = data_matrix
@@ -11,21 +12,21 @@ Base.:*(ft::FusionTensor, x::Number) = x * ft
 
 # tensor contraction is a block data_matrix product.
 function Base.:*(left::FusionTensor, right::FusionTensor)
-  checkaxes_dual(domain_axes(left), codomain_axes(right))
+  checkspaces_dual(domain_axes(left), codomain_axes(right))
   new_data_matrix = data_matrix(left) * data_matrix(right)
   return FusionTensor(new_data_matrix, codomain_axes(left), domain_axes(right))
 end
 
 # tensor addition is a block data_matrix add.
 function Base.:+(left::FusionTensor, right::FusionTensor)
-  checkaxes(axes(left), axes(right))
+  checkspaces(axes(left), axes(right))
   return set_data_matrix(left, data_matrix(left) + data_matrix(right))
 end
 
 Base.:-(ft::FusionTensor) = set_data_matrix(ft, -data_matrix(ft))
 
 function Base.:-(left::FusionTensor, right::FusionTensor)
-  checkaxes(axes(left), axes(right))
+  checkspaces(axes(left), axes(right))
   return set_data_matrix(left, data_matrix(left) - data_matrix(right))
 end
 

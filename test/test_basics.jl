@@ -9,8 +9,6 @@ using FusionTensors:
   data_matrix,
   domain_axes,
   FusionTensor,
-  checkaxes,
-  checkaxes_dual,
   codomain_axis,
   domain_axis,
   ndims_domain,
@@ -21,6 +19,8 @@ using GradedArrays:
   SectorProduct,
   TrivialSector,
   Z,
+  checkspaces,
+  checkspaces_dual,
   dual,
   flip,
   gradedrange,
@@ -54,11 +54,11 @@ include("setup.jl")
 
   # getters
   @test data_matrix(ft1) == m
-  @test checkaxes(axes(ft1), tuplemortar(((g1,), (g2,))))
+  @test checkspaces(axes(ft1), tuplemortar(((g1,), (g2,))))
 
   # misc
-  @test checkaxes(codomain_axes(ft1), (g1,))
-  @test checkaxes(domain_axes(ft1), (g2,))
+  @test checkspaces(codomain_axes(ft1), (g1,))
+  @test checkspaces(domain_axes(ft1), (g2,))
   @test ndims_codomain(ft1) == 1
   @test ndims_domain(ft1) == 1
   @test size(data_matrix(ft1)) == (6, 5)
@@ -86,42 +86,42 @@ include("setup.jl")
   @test ft2 !== ft1
   @test data_matrix(ft2) == data_matrix(ft1)
   @test data_matrix(ft2) !== data_matrix(ft1)
-  @test checkaxes(codomain_axes(ft2), codomain_axes(ft1))
-  @test checkaxes(domain_axes(ft2), domain_axes(ft1))
+  @test checkspaces(codomain_axes(ft2), codomain_axes(ft1))
+  @test checkspaces(domain_axes(ft2), domain_axes(ft1))
 
   ft2 = deepcopy(ft1)
   @test ft2 !== ft1
   @test data_matrix(ft2) == data_matrix(ft1)
   @test data_matrix(ft2) !== data_matrix(ft1)
-  @test checkaxes(codomain_axes(ft2), codomain_axes(ft1))
-  @test checkaxes(domain_axes(ft2), domain_axes(ft1))
+  @test checkspaces(codomain_axes(ft2), codomain_axes(ft1))
+  @test checkspaces(domain_axes(ft2), domain_axes(ft1))
 
   # similar
   ft2 = similar(ft1)
   @test isnothing(check_sanity(ft2))
   @test eltype(ft2) == Float64
-  @test checkaxes(codomain_axes(ft2), codomain_axes(ft1))
-  @test checkaxes(domain_axes(ft2), domain_axes(ft1))
+  @test checkspaces(codomain_axes(ft2), codomain_axes(ft1))
+  @test checkspaces(domain_axes(ft2), domain_axes(ft1))
 
   ft3 = similar(ft1, ComplexF64)
   @test isnothing(check_sanity(ft3))
   @test eltype(ft3) == ComplexF64
-  @test checkaxes(codomain_axes(ft3), codomain_axes(ft1))
-  @test checkaxes(domain_axes(ft3), domain_axes(ft1))
+  @test checkspaces(codomain_axes(ft3), codomain_axes(ft1))
+  @test checkspaces(domain_axes(ft3), domain_axes(ft1))
 
   @test_throws AssertionError similar(ft1, Int)
 
   ft5 = similar(ft1, ComplexF32, ((g1, g1), (g2,)))
   @test isnothing(check_sanity(ft5))
   @test eltype(ft5) == ComplexF64
-  @test checkaxes(codomain_axes(ft5), (g1, g1))
-  @test checkaxes(domain_axes(ft5), (g2,))
+  @test checkspaces(codomain_axes(ft5), (g1, g1))
+  @test checkspaces(domain_axes(ft5), (g2,))
 
   ft5 = similar(ft1, ComplexF32, tuplemortar(((g1, g1), (g2,))))
   @test isnothing(check_sanity(ft5))
   @test eltype(ft5) == ComplexF64
-  @test checkaxes(codomain_axes(ft5), (g1, g1))
-  @test checkaxes(domain_axes(ft5), (g2,))
+  @test checkspaces(codomain_axes(ft5), (g1, g1))
+  @test checkspaces(domain_axes(ft5), (g2,))
 end
 
 @testset "More than 2 axes" begin
@@ -135,8 +135,8 @@ end
   ft = FusionTensor(m2, (g1, g2), (g3, g4))
 
   @test data_matrix(ft) == m2
-  @test checkaxes(codomain_axes(ft), (g1, g2))
-  @test checkaxes(domain_axes(ft), (g3, g4))
+  @test checkspaces(codomain_axes(ft), (g1, g2))
+  @test checkspaces(domain_axes(ft), (g3, g4))
 
   @test axes(ft) == FusionTensorAxes(tuplemortar(((g1, g2), (g3, g4))))
   @test ndims_codomain(ft) == 2
@@ -271,7 +271,7 @@ end
   ft7 = FusionTensor{Float64}(undef, (g1,), (g2, g3, g4))
   @test_throws DimensionMismatch ft7 + ft3
   @test_throws DimensionMismatch ft7 - ft3
-  @test_throws DimensionMismatch ft7 * ft3
+  @test_throws ArgumentError ft7 * ft3
 end
 
 @testset "specific constructors" begin

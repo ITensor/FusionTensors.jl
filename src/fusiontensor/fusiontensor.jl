@@ -9,6 +9,7 @@ using GradedArrays:
   SectorProduct,
   TrivialSector,
   dual,
+  findfirstblock,
   flip,
   flip_dual,
   gradedrange,
@@ -26,23 +27,6 @@ using TensorProducts: tensor_product
 using TypeParameterAccessors: type_parameters
 
 # =======================================  Misc  ===========================================
-
-# TBD move to GradedArrays? rename findfirst_sector?
-function find_sector_block(s::AbstractSector, g::AbstractGradedUnitRange)
-  return findfirst(==(s), sectors(flip_dual(g)))
-end
-
-# TBD move to GradedArrays?
-function checkaxes(::Type{Bool}, axes1, axes2)
-  return length(axes1) == length(axes2) && all(space_isequal.(axes1, axes2))
-end
-
-# TBD move to GradedArrays?
-checkaxes_dual(axes1, axes2) = checkaxes(axes1, dual.(axes2))
-function checkaxes(ax1, ax2)
-  return checkaxes(Bool, ax1, ax2) ||
-         throw(DimensionMismatch(lazy"$ax1 does not match $ax2"))
-end
 
 function to_blockindexrange(b1::BlockIndexRange{1}, b2::BlockIndexRange{1})
   t = (b1, b2)
@@ -260,9 +244,9 @@ end
 function BlockArrays.findblock(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionTree)
   # find outer block corresponding to fusion trees
   @assert typeof((f1, f2)) === keytype(trees_block_mapping(ft))
-  b1 = find_sector_block.(leaves(f1), codomain_axes(ft))
-  b2 = find_sector_block.(leaves(f2), domain_axes(ft))
-  return Block(b1..., b2...)
+  b1 = findfirstblock.(codomain_axes(ft), leaves(f1))
+  b2 = findfirstblock.(domain_axes(ft), leaves(f2))
+  return Block(Int.(b1)..., Int.(b2)...)
 end
 
 # ==============================  GradedArrays interface  ==================================
