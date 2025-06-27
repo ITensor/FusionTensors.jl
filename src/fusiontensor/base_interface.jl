@@ -104,7 +104,7 @@ function Base.similar(
   return similar(ft, T, tuplemortar(new_axes))
 end
 function Base.similar(::FusionTensor, ::Type{T}, new_axes::BlockedTuple{2}) where {T}
-  return FusionTensor(T, new_axes)
+  return FusionTensor{T}(undef, new_axes)
 end
 
 Base.show(io::IO, ft::FusionTensor) = print(io, "$(ndims(ft))-dim FusionTensor")

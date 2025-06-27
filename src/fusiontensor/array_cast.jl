@@ -64,7 +64,7 @@ function to_fusiontensor_no_checknorm(
   codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
   domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
 )
-  ft = FusionTensor(eltype(blockarray), codomain_legs, domain_legs)
+  ft = FusionTensor{eltype(blockarray)}(undef, codomain_legs, domain_legs)
   for (f1, f2) in keys(trees_block_mapping(ft))
     b = findblock(ft, f1, f2)
     ft[f1, f2] = contract_fusion_trees(blockarray[b], f1, f2)

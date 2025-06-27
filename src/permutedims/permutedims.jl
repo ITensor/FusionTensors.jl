@@ -38,7 +38,7 @@ function fusiontensor_permutedims(ft, biperm::BlockedPermutation{2})
     end
   end
 
-  new_ft = FusionTensor(eltype(ft), axes(ft)[biperm])
+  new_ft = FusionTensor{eltype(ft)}(undef, axes(ft)[biperm])
   fusiontensor_permutedims!(new_ft, ft, Tuple(biperm))
   return new_ft
 end
@@ -46,6 +46,7 @@ end
 function fusiontensor_permutedims!(
   new_ft::FusionTensor{T,N}, old_ft::FusionTensor{T,N}, flatperm::NTuple{N,Integer}
 ) where {T,N}
+  map(m -> fill!(m, zero(T)), eachstoredblock(data_matrix(new_ft)))
   unitary = compute_unitary(new_ft, old_ft, flatperm)
   for p in unitary
     old_trees, new_trees = first(p)
