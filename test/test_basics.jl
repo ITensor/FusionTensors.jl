@@ -29,6 +29,7 @@ using GradedArrays:
 using TensorAlgebra: tuplemortar
 using TensorProducts: tensor_product
 using LinearAlgebra: LinearAlgebra
+using Random: Random
 
 include("setup.jl")
 
@@ -282,9 +283,13 @@ end
   fta = FusionTensorAxes((g1,), (g2, g3))
   @test zeros(fta) isa FusionTensor{Float64,3}
   @test zeros(ComplexF64, fta) isa FusionTensor{ComplexF64,3}
-  ft1 = randn(ComplexF64, fta)
+
+  rng = Random.default_rng()
+  ft1 = randn(rng, ComplexF64, fta)
   @test ft1 isa FusionTensor{ComplexF64,3}
   @test all(!=(0), data_matrix(ft1)[Block(1, 5)])
+  @test randn(rng, fta) isa FusionTensor{Float64,3}
+  @test randn(ComplexF64, fta) isa FusionTensor{ComplexF64,3}
   @test randn(fta) isa FusionTensor{Float64,3}
 
   ft2 = FusionTensor(LinearAlgebra.I, (g1, g2))
@@ -294,6 +299,15 @@ end
   for i in 1:6
     m = data_matrix(ft2)[Block(i, i)]
     @test m == LinearAlgebra.I(size(m, 1))
+  end
+
+  ft2 = FusionTensor(3 * LinearAlgebra.I, (g1, g2))
+  @test ft2 isa FusionTensor{Float64,4}
+  @test axes(ft2) == FusionTensorAxes((g1, g2), dual.((g1, g2)))
+  @test collect(eachblockstoredindex(data_matrix(ft2))) == map(i -> Block(i, i), 1:6)
+  for i in 1:6
+    m = data_matrix(ft2)[Block(i, i)]
+    @test m == 3 * LinearAlgebra.I(size(m, 1))
   end
 end
 

@@ -1,7 +1,6 @@
 # This files defines Base functions for FusionTensor
 
 using Accessors: @set
-using Random: randn!
 using BlockSparseArrays: @view!, eachstoredblock
 using TensorAlgebra: BlockedTuple, tuplemortar
 

@@ -20,6 +20,7 @@ using GradedArrays:
   sectors,
   space_isequal
 using LinearAlgebra: UniformScaling
+using Random: Random, AbstractRNG, randn!
 using TensorAlgebra: BlockedTuple, trivial_axis, tuplemortar
 using TensorProducts: tensor_product
 using TypeParameterAccessors: type_parameters
@@ -214,24 +215,31 @@ end
 Base.zeros(::Type{T}, fta::FusionTensorAxes) where {T} = FusionTensor(T, fta)
 Base.zeros(fta::FusionTensorAxes) = zeros(Float64, fta)
 
-function Base.randn(::Type{T}, fta::FusionTensorAxes) where {T}
+function Base.randn(rng::AbstractRNG, ::Type{T}, fta::FusionTensorAxes) where {T}
   ft = FusionTensor(T, fta)
   for m in eachstoredblock(data_matrix(ft))
-    randn!(m)
+    randn!(rng, m)
   end
   return ft
 end
+Base.randn(rng::AbstractRNG, fta::FusionTensorAxes) = randn(rng, Float64, fta)
+Base.randn(::Type{T}, fta::FusionTensorAxes) where {T} = randn(Random.default_rng(), T, fta)
 Base.randn(fta::FusionTensorAxes) = randn(Float64, fta)
 
-function FusionTensor(
-  ::UniformScaling, codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
-)
+function FusionTensor{T}(
+  s::UniformScaling, codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
+) where {T}
   fta = FusionTensorAxes(codomain_legs, dual.(codomain_legs))
-  ft = FusionTensor(Float64, fta)
+  ft = FusionTensor(T, fta)
   for m in eachstoredblock(data_matrix(ft))
-    m .= LinearAlgebra.I(size(m, 1))
+    m .= s(size(m, 1))
   end
   return ft
+end
+function FusionTensor(
+  s::UniformScaling, codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
+)
+  return FusionTensor{Float64}(s, codomain_legs)
 end
 
 # ================================  BlockArrays interface  =================================
