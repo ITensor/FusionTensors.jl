@@ -46,12 +46,11 @@ end
 function fusiontensor_permutedims!(
   new_ft::FusionTensor{T,N}, old_ft::FusionTensor{T,N}, flatperm::NTuple{N,Integer}
 ) where {T,N}
-  map(m -> fill!(m, zero(T)), eachstoredblock(data_matrix(new_ft)))
+  foreach(m -> fill!(m, zero(T)), eachstoredblock(data_matrix(new_ft)))
   unitary = compute_unitary(new_ft, old_ft, flatperm)
-  for p in unitary
-    old_trees, new_trees = first(p)
+  for ((old_trees, new_trees), coeff) in unitary
     new_block = view(new_ft, new_trees...)
     old_block = view(old_ft, old_trees...)
-    @strided new_block .+= last(p) .* permutedims(old_block, flatperm)
+    @strided new_block .+= coeff .* permutedims(old_block, flatperm)
   end
 end

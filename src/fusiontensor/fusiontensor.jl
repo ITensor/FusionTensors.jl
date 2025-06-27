@@ -225,14 +225,14 @@ end
 # specific constructors
 function Base.zeros(::Type{T}, fta::FusionTensorAxes) where {T}
   ft = FusionTensor{T}(undef, fta)
-  map(m -> fill!(m, zero(T)), eachstoredblock(data_matrix(ft)))
+  foreach(m -> fill!(m, zero(T)), eachstoredblock(data_matrix(ft)))
   return ft
 end
 Base.zeros(fta::FusionTensorAxes) = zeros(Float64, fta)
 
 function Base.randn(rng::AbstractRNG, ::Type{T}, fta::FusionTensorAxes) where {T}
   ft = FusionTensor{T}(undef, fta)
-  map(m -> randn!(rng, m), eachstoredblock(data_matrix(ft)))
+  foreach(m -> randn!(rng, m), eachstoredblock(data_matrix(ft)))
   return ft
 end
 Base.randn(rng::AbstractRNG, fta::FusionTensorAxes) = randn(rng, Float64, fta)
