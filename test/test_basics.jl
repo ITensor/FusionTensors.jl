@@ -28,7 +28,7 @@ using GradedArrays:
   space_isequal
 using TensorAlgebra: tuplemortar
 using TensorProducts: tensor_product
-using LinearAlgebra: LinearAlgebra
+using LinearAlgebra: LinearAlgebra, norm
 using Random: Random
 
 include("setup.jl")
@@ -184,104 +184,6 @@ end
   @test sector_type(ft3) === TrivialSector
 end
 
-@testset "Base operations" begin
-  g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
-  g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
-  g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
-  g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
-  ft3 = FusionTensor{Float64}(undef, (g1, g2), (g3, g4))
-  @test isnothing(check_sanity(ft3))
-
-  ft4 = +ft3
-  @test ft4 === ft3  # same object
-
-  ft4 = -ft3
-  @test isnothing(check_sanity(ft4))
-  @test codomain_axes(ft4) === codomain_axes(ft3)
-  @test domain_axes(ft4) === domain_axes(ft3)
-
-  ft4 = ft3 + ft3
-  @test codomain_axes(ft4) === codomain_axes(ft3)
-  @test domain_axes(ft4) === domain_axes(ft3)
-  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
-  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
-  @test isnothing(check_sanity(ft4))
-
-  ft4 = ft3 - ft3
-  @test codomain_axes(ft4) === codomain_axes(ft3)
-  @test domain_axes(ft4) === domain_axes(ft3)
-  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
-  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
-  @test isnothing(check_sanity(ft4))
-
-  ft4 = 2 * ft3
-  @test codomain_axes(ft4) === codomain_axes(ft3)
-  @test domain_axes(ft4) === domain_axes(ft3)
-  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
-  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
-  @test isnothing(check_sanity(ft4))
-  @test eltype(ft4) == Float64
-
-  ft4 = 2.0 * ft3
-  @test codomain_axes(ft4) === codomain_axes(ft3)
-  @test domain_axes(ft4) === domain_axes(ft3)
-  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
-  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
-  @test isnothing(check_sanity(ft4))
-  @test eltype(ft4) == Float64
-
-  ft4 = ft3 / 2.0
-  @test codomain_axes(ft4) === codomain_axes(ft3)
-  @test domain_axes(ft4) === domain_axes(ft3)
-  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
-  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
-  @test isnothing(check_sanity(ft4))
-  @test eltype(ft4) == Float64
-
-  ft5 = (1.0 + 2.0im) * ft3
-  @test codomain_axes(ft5) === codomain_axes(ft3)
-  @test domain_axes(ft5) === domain_axes(ft3)
-  @test space_isequal(codomain_axis(ft5), codomain_axis(ft3))
-  @test space_isequal(domain_axis(ft5), domain_axis(ft3))
-  @test isnothing(check_sanity(ft4))
-  @test eltype(ft5) == ComplexF64
-
-  @test conj(ft3) === ft3  # same object
-  @test real(ft3) === ft3
-  @test all(==(0.0), data_matrix(imag(ft3)))
-
-  @test conj(ft5) isa FusionTensor{ComplexF64,4}
-  @test real(ft5) isa FusionTensor{Float64,4}
-  @test imag(ft3) isa FusionTensor{Float64,4}
-  @test conj(ft5) ≈ (1.0 - 2.0im) * ft3
-  @test real(ft5) ≈ ft3
-  @test imag(ft3) ≈ 2ft3
-
-  ft6 = conj(ft5)
-  @test ft6 !== ft5  # different object
-  @test isnothing(check_sanity(ft6))
-  @test codomain_axes(ft6) === codomain_axes(ft5)
-  @test domain_axes(ft6) === domain_axes(ft5)
-  @test space_isequal(codomain_axis(ft6), codomain_axis(ft5))
-  @test space_isequal(domain_axis(ft6), domain_axis(ft5))
-  @test eltype(ft6) == ComplexF64
-
-  ad = adjoint(ft3)
-  @test ad isa FusionTensor
-  @test ndims_codomain(ad) == 2
-  @test ndims_domain(ad) == 2
-  @test space_isequal(dual(g1), domain_axes(ad)[1])
-  @test space_isequal(dual(g2), domain_axes(ad)[2])
-  @test space_isequal(dual(g3), codomain_axes(ad)[1])
-  @test space_isequal(dual(g4), codomain_axes(ad)[2])
-  @test isnothing(check_sanity(ad))
-
-  ft7 = FusionTensor{Float64}(undef, (g1,), (g2, g3, g4))
-  @test_throws ArgumentError ft7 + ft3
-  @test_throws ArgumentError ft7 - ft3
-  @test_throws ArgumentError ft7 * ft3
-end
-
 @testset "specific constructors" begin
   g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
   g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
@@ -319,6 +221,114 @@ end
   end
 
   @test FusionTensor{ComplexF64}(LinearAlgebra.I, (g1, g2)) isa FusionTensor{ComplexF64,4}
+end
+
+@testset "Base operations" begin
+  g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
+  g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
+  g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
+  g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
+  ft3 = randn(FusionTensorAxes((g1, g2), (g3, g4)))
+  @test ft3 isa FusionTensor{Float64,4}
+  @test norm(ft3) ≉ 0
+  @test isnothing(check_sanity(ft3))
+
+  ft4 = +ft3
+  @test ft4 === ft3  # same object
+
+  ft4 = -ft3
+  @test isnothing(check_sanity(ft4))
+  @test codomain_axes(ft4) === codomain_axes(ft3)
+  @test domain_axes(ft4) === domain_axes(ft3)
+  @test norm(ft4) ≈ norm(ft3)
+  @test norm(ft4 + ft3) ≈ 0.0
+
+  ft4 = ft3 + ft3
+  @test codomain_axes(ft4) === codomain_axes(ft3)
+  @test domain_axes(ft4) === domain_axes(ft3)
+  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
+  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
+  @test isnothing(check_sanity(ft4))
+  @test norm(ft4) ≈ 2norm(ft3)
+
+  ft4 = ft3 - ft3
+  @test codomain_axes(ft4) === codomain_axes(ft3)
+  @test domain_axes(ft4) === domain_axes(ft3)
+  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
+  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
+  @test isnothing(check_sanity(ft4))
+  @test norm(ft4) ≈ 0.0
+
+  ft4 = 2 * ft3
+  @test codomain_axes(ft4) === codomain_axes(ft3)
+  @test domain_axes(ft4) === domain_axes(ft3)
+  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
+  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
+  @test isnothing(check_sanity(ft4))
+  @test eltype(ft4) == Float64
+  @test norm(ft4) ≈ 2norm(ft3)
+
+  ft4 = 2.0 * ft3
+  @test codomain_axes(ft4) === codomain_axes(ft3)
+  @test domain_axes(ft4) === domain_axes(ft3)
+  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
+  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
+  @test isnothing(check_sanity(ft4))
+  @test eltype(ft4) == Float64
+
+  ft4 = ft3 / 2.0
+  @test codomain_axes(ft4) === codomain_axes(ft3)
+  @test domain_axes(ft4) === domain_axes(ft3)
+  @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
+  @test space_isequal(domain_axis(ft4), domain_axis(ft3))
+  @test isnothing(check_sanity(ft4))
+  @test eltype(ft4) == Float64
+  @test norm(ft4) ≈ norm(ft3) / 2.0
+
+  ft5 = (1.0 + 2.0im) * ft3
+  @test codomain_axes(ft5) === codomain_axes(ft3)
+  @test domain_axes(ft5) === domain_axes(ft3)
+  @test space_isequal(codomain_axis(ft5), codomain_axis(ft3))
+  @test space_isequal(domain_axis(ft5), domain_axis(ft3))
+  @test isnothing(check_sanity(ft4))
+  @test eltype(ft5) == ComplexF64
+  @test norm(ft5) ≈ √5 * norm(ft3)
+
+  @test conj(ft3) === ft3  # same object
+  @test real(ft3) === ft3
+  @test norm(imag(ft3)) == 0
+
+  @test conj(ft5) isa FusionTensor{ComplexF64,4}
+  @test real(ft5) isa FusionTensor{Float64,4}
+  @test imag(ft3) isa FusionTensor{Float64,4}
+  @test conj(ft5) ≈ (1.0 - 2.0im) * ft3
+  @test real(ft5) ≈ ft3
+  @test imag(ft5) ≈ 2ft3
+
+  ft6 = conj(ft5)
+  @test ft6 !== ft5  # different object
+  @test isnothing(check_sanity(ft6))
+  @test codomain_axes(ft6) === codomain_axes(ft5)
+  @test domain_axes(ft6) === domain_axes(ft5)
+  @test space_isequal(codomain_axis(ft6), codomain_axis(ft5))
+  @test space_isequal(domain_axis(ft6), domain_axis(ft5))
+  @test eltype(ft6) == ComplexF64
+  @test ft6 + ft5 ≈ 2 * real(ft5)
+
+  ad = adjoint(ft3)
+  @test ad isa FusionTensor
+  @test ndims_codomain(ad) == 2
+  @test ndims_domain(ad) == 2
+  @test space_isequal(dual(g1), domain_axes(ad)[1])
+  @test space_isequal(dual(g2), domain_axes(ad)[2])
+  @test space_isequal(dual(g3), codomain_axes(ad)[1])
+  @test space_isequal(dual(g4), codomain_axes(ad)[2])
+  @test isnothing(check_sanity(ad))
+
+  ft7 = FusionTensor{Float64}(undef, (g1,), (g2, g3, g4))
+  @test_throws ArgumentError ft7 + ft3
+  @test_throws ArgumentError ft7 - ft3
+  @test_throws ArgumentError ft7 * ft3
 end
 
 @testset "missing SectorProduct" begin
