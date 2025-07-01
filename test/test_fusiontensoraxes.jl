@@ -1,4 +1,4 @@
-using Test: @test, @testset
+using Test: @test, @test_throws, @testset
 
 using TensorProducts: ⊗
 using BlockArrays: Block, blockedrange, blocklength, blocklengths, blocks
@@ -15,7 +15,16 @@ using FusionTensors:
   promote_sector_type,
   promote_sectors
 using GradedArrays:
-  ×, U1, SectorProduct, TrivialSector, SU2, dual, gradedrange, sector_type, space_isequal
+  ×,
+  U1,
+  SectorProduct,
+  TrivialSector,
+  SU2,
+  checkspaces,
+  dual,
+  gradedrange,
+  sector_type,
+  space_isequal
 
 @testset "misc FusionTensors.jl" begin
   g1 = gradedrange([U1(0) => 1])
@@ -83,6 +92,10 @@ end
   @test fta != FusionTensorAxes(tuplemortar(((g2, g2, g2b), (g2b,))))
 
   @test fta == FusionTensorAxes((g2, g2), (g2b, g2b))
+  @test checkspaces(fta, fta)
+  @test_throws ArgumentError checkspaces(
+    fta, FusionTensorAxes(tuplemortar(((g2, g2), (g2b, g2))))
+  )
 end
 
 @testset "Empty FusionTensorAxes" begin

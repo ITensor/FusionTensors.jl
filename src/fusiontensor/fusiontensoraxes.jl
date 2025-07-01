@@ -110,6 +110,12 @@ function GradedArrays.sector_type(::Type{FTA}) where {BT,FTA<:FusionTensorAxes{B
   return sector_type(type_parameters(type_parameters(BT, 3), 1))
 end
 
+function GradedArrays.checkspaces(
+  ::Type{Bool}, left::FusionTensorAxes, right::FusionTensorAxes
+)
+  return left == right
+end
+
 # ==============================  FusionTensor interface  ==================================
 
 codomain(fta::FusionTensorAxes) = fta[Block(1)]
