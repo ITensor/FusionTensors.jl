@@ -248,7 +248,7 @@ end
 
   @test conj(ft3) === ft3  # same object
   @test real(ft3) === ft3
-  @test norm(imag(ft3)) == 0.0
+  @test all(==(0.0), data_matrix(imag(ft3)))
 
   @test conj(ft5) isa FusionTensor{ComplexF64,4}
   @test real(ft5) isa FusionTensor{Float64,4}
