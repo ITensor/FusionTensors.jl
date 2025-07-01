@@ -73,13 +73,19 @@ function Base.getindex(ft::FusionTensor, f1::SectorFusionTree, f2::SectorFusionT
   return reshape(charge_matrix, charge_block_size(ft, f1, f2))
 end
 
+Base.imag(ft::FusionTensor{<:Real}) = ft   # same object
+Base.imag(ft::FusionTensor) = set_data_matrix(ft, imag(data_matrix(ft)))
+
+Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
+
+Base.real(ft::FusionTensor{<:Real}) = ft   # same object
+Base.real(ft::FusionTensor) = set_data_matrix(ft, real(data_matrix(ft)))
+
 function Base.setindex!(
   ft::FusionTensor, a::AbstractArray, f1::SectorFusionTree, f2::SectorFusionTree
 )
   return view(ft, f1, f2) .= a
 end
-
-Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
 function Base.similar(ft::FusionTensor, T::Type)
   # reuse trees_block_mapping

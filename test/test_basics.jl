@@ -238,7 +238,7 @@ end
   @test isnothing(check_sanity(ft4))
   @test eltype(ft4) == Float64
 
-  ft5 = 2.0im * ft3
+  ft5 = (1.0 + 2.0im) * ft3
   @test codomain_axes(ft5) === codomain_axes(ft3)
   @test domain_axes(ft5) === domain_axes(ft3)
   @test space_isequal(codomain_axis(ft5), codomain_axis(ft3))
@@ -246,8 +246,16 @@ end
   @test isnothing(check_sanity(ft4))
   @test eltype(ft5) == ComplexF64
 
-  ft4 = conj(ft3)
-  @test ft4 === ft3  # same object
+  @test conj(ft3) === ft3  # same object
+  @test real(ft3) === ft3
+  @test norm(imag(ft3)) == 0.0
+
+  @test conj(ft5) isa FusionTensor{ComplexF64,4}
+  @test real(ft5) isa FusionTensor{Float64,4}
+  @test imag(ft3) isa FusionTensor{Float64,4}
+  @test conj(ft5) ≈ (1.0 - 2.0im) * ft3
+  @test real(ft5) ≈ ft3
+  @test imag(ft3) ≈ 2ft3
 
   ft6 = conj(ft5)
   @test ft6 !== ft5  # different object
