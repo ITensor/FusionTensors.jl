@@ -31,9 +31,10 @@ end
     g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
     g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
     g4 = gradedrange([U1(-1) => 1, U1(0) => 1, U1(1) => 1])
+    ftaxes1 = FusionTensorAxes((g1, g2), (dual(g3), dual(g4)))
 
     for elt in (Float64, ComplexF64)
-      ft1 = FusionTensor{elt}(undef, (g1, g2), dual.((g3, g4)))
+      ft1 = randn(elt, ftaxes1)
       @test isnothing(check_sanity(ft1))
 
       # test permutedims interface
@@ -68,8 +69,33 @@ end
       @test space_isequal(domain_axis(ft1), domain_axis(ft4))
       @test ft4 ≈ ft1
 
+      # test permutedims! interface
+      ft2 = randn(elt, axes(ft1))
+      permutedims!(ft2, ft1, (1, 2), (3, 4))
+      @test ft2 ≈ ft1
+      @test data_matrix(ft2) !== data_matrix(ft1)  # check copy
+      @test data_matrix(ft2) == data_matrix(ft1)  # check copy
+
+      ft2 = randn(elt, axes(ft1))
+      permutedims!(ft2, ft1, ((1, 2), (3, 4)))
+      @test ft2 ≈ ft1
+      @test data_matrix(ft2) !== data_matrix(ft1)  # check copy
+      @test data_matrix(ft2) == data_matrix(ft1)  # check copy
+
+      ft2 = randn(elt, axes(ft1))
+      permutedims!(ft2, ft1, biperm)
+      @test ft2 ≈ ft1
+      @test data_matrix(ft2) !== data_matrix(ft1)  # check copy
+      @test data_matrix(ft2) == data_matrix(ft1)  # check copy
+
+      # test clean errors
+      ft2 = randn(elt, axes(ft1))
       @test_throws MethodError permutedims(ft1, (2, 3, 4, 1))
       @test_throws ArgumentError permutedims(ft1, (2, 3), (5, 4, 1))
+      @test_throws MethodError permutedims!(ft2, ft1, (2, 3, 4, 1))
+      @test_throws ArgumentError permutedims!(ft2, ft1, (2, 3), (5, 4, 1))
+      @test_throws ArgumentError permutedims!(ft2, ft1, (1, 2, 3), (4,))
+      @test_throws ArgumentError permutedims!(ft2, ft1, (1, 2), (4, 3))
     end
   end
 
