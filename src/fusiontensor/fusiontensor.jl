@@ -27,12 +27,6 @@ using TensorProducts: tensor_product
 using TypeParameterAccessors: type_parameters
 
 # =======================================  Misc  ===========================================
-
-function to_blockindexrange(b1::BlockIndexRange{1}, b2::BlockIndexRange{1})
-  t = (b1, b2)
-  return Block(Block.(t))[to_block_indices.(t)...]
-end
-
 function flip_domain(nonflipped_col_axis, nonflipped_trees_to_ranges)
   col_axis = dual(nonflipped_col_axis)
   domain_trees_to_ranges_mapping = Dict(
@@ -93,7 +87,7 @@ function intersect_codomain_domain(
         Iterators.product(codomain_trees_to_ranges_mapping, domain_trees_to_ranges_mapping),
       ),
     ) do t
-      return first.(t) => to_blockindexrange(last.(t)...)
+      return first.(t) => BlockIndexRange(last.(t))
     end,
   )
 end
