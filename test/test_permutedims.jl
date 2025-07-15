@@ -1,4 +1,5 @@
 using Test: @test, @testset, @test_broken, @test_throws
+using BlockArrays: blocks
 
 using FusionTensors:
   FusionTensor,
@@ -6,7 +7,6 @@ using FusionTensors:
   data_matrix,
   codomain_axis,
   domain_axis,
-  naive_permutedims,
   ndims_domain,
   ndims_codomain,
   to_fusiontensor
@@ -14,6 +14,16 @@ using GradedArrays: O2, U1, SectorProduct, SU2, dual, gradedrange, space_isequal
 using TensorAlgebra: permmortar, tuplemortar
 
 include("setup.jl")
+
+function naive_permutedims(ft, biperm)
+  @assert ndims(ft) == length(biperm)
+
+  # naive permute: cast to dense, permutedims, cast to FusionTensor
+  arr = Array(ft)
+  permuted_arr = permutedims(arr, Tuple(biperm))
+  permuted = to_fusiontensor(permuted_arr, blocks(axes(ft)[biperm])...)
+  return permuted
+end
 
 @testset "Abelian permutedims" begin
   @testset "dummy" begin
@@ -28,14 +38,23 @@ include("setup.jl")
 
       # test permutedims interface
       ft2 = permutedims(ft1, (1, 2), (3, 4))   # trivial with 2 tuples
-      @test ft2 === ft1  # same object
+      @test ft2 ≈ ft1
+      @test ft2 !== ft1
+      @test data_matrix(ft2) !== data_matrix(ft1)  # check copy
+      @test data_matrix(ft2) == data_matrix(ft1)  # check copy
 
       ft2 = permutedims(ft1, ((1, 2), (3, 4)))   # trivial with tuple of 2 tuples
-      @test ft2 === ft1  # same object
+      @test ft2 ≈ ft1
+      @test ft2 !== ft1
+      @test data_matrix(ft2) !== data_matrix(ft1)  # check copy
+      @test data_matrix(ft2) == data_matrix(ft1)  # check copy
 
       biperm = permmortar(((1, 2), (3, 4)))
       ft2 = permutedims(ft1, biperm)   # trivial with biperm
-      @test ft2 === ft1  # same object
+      @test ft2 ≈ ft1
+      @test ft2 !== ft1
+      @test data_matrix(ft2) !== data_matrix(ft1)  # check copy
+      @test data_matrix(ft2) == data_matrix(ft1)  # check copy
 
       ft3 = permutedims(ft1, (4,), (1, 2, 3))
       @test ft3 !== ft1

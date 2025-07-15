@@ -3,6 +3,7 @@ using GradedArrays:
   GradedArrays,
   AbstractGradedUnitRange,
   AbstractSector,
+  SymmetryStyle,
   TrivialSector,
   dual,
   sector_type,
@@ -108,6 +109,10 @@ end
 
 function GradedArrays.sector_type(::Type{FTA}) where {BT,FTA<:FusionTensorAxes{BT}}
   return sector_type(type_parameters(type_parameters(BT, 3), 1))
+end
+
+function GradedArrays.SymmetryStyle(::Type{FTA}) where {FTA<:FusionTensorAxes}
+  return SymmetryStyle(sector_type(FTA))
 end
 
 function GradedArrays.checkspaces(

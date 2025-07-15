@@ -77,6 +77,10 @@ Base.imag(ft::FusionTensor) = set_data_matrix(ft, imag(data_matrix(ft)))
 
 Base.permutedims(ft::FusionTensor, args...) = fusiontensor_permutedims(ft, args...)
 
+function Base.permutedims!(ftdst::FusionTensor, ftsrc::FusionTensor, args...)
+  return fusiontensor_permutedims!(ftdst, ftsrc, args...)
+end
+
 Base.real(ft::FusionTensor{<:Real}) = ft   # same object
 Base.real(ft::FusionTensor) = set_data_matrix(ft, real(data_matrix(ft)))
 

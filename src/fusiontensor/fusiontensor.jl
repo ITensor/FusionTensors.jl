@@ -249,6 +249,8 @@ function GradedArrays.sector_type(::Type{FT}) where {FT<:FusionTensor}
   return sector_type(type_parameters(FT, 3))
 end
 
+SymmetryStyle(::Type{FT}) where {FT<:FusionTensor} = SymmetryStyle(sector_type(FT))
+
 # ==============================  FusionTensor interface  ==================================
 
 # misc access

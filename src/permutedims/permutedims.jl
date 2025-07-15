@@ -3,21 +3,16 @@
 using BlockArrays: blocklengths
 using Strided: Strided, @strided
 
-using TensorAlgebra: BlockedPermutation, permmortar, blockpermute
-
-function naive_permutedims(ft, biperm::BlockedPermutation{2})
-  @assert ndims(ft) == length(biperm)
-
-  # naive permute: cast to dense, permutedims, cast to FusionTensor
-  arr = Array(ft)
-  permuted_arr = permutedims(arr, Tuple(biperm))
-  permuted = to_fusiontensor(permuted_arr, blocks(axes(ft)[biperm])...)
-  return permuted
-end
+using GradedArrays: AbelianStyle, NotAbelianStyle, SymmetryStyle, checkspaces
+using TensorAlgebra: AbstractBlockPermutation, permmortar
 
 # permutedims with 1 tuple of 2 separate tuples
 function fusiontensor_permutedims(ft, new_leg_indices::Tuple{Tuple,Tuple})
   return fusiontensor_permutedims(ft, new_leg_indices...)
+end
+
+function fusiontensor_permutedims!(ftdst, ftsrc, new_leg_indices::Tuple{Tuple,Tuple})
+  return fusiontensor_permutedims!(ftdst, ftsrc, new_leg_indices...)
 end
 
 # permutedims with 2 separate tuples
@@ -28,29 +23,55 @@ function fusiontensor_permutedims(
   return fusiontensor_permutedims(ft, biperm)
 end
 
-function fusiontensor_permutedims(ft, biperm::BlockedPermutation{2})
-  ndims(ft) == length(biperm) || throw(ArgumentError("Invalid permutation length"))
-
-  # early return for identity operation. Do not copy. Also handle tricky 0-dim case.
-  if ndims_codomain(ft) == first(blocklengths(biperm))  # compile time
-    if Tuple(biperm) == ntuple(identity, ndims(ft))
-      return ft
-    end
-  end
-
-  new_ft = FusionTensor{eltype(ft)}(undef, axes(ft)[biperm])
-  fusiontensor_permutedims!(new_ft, ft, Tuple(biperm))
-  return new_ft
+function fusiontensor_permutedims!(
+  ftdst, ftsrc, new_codomain_indices::Tuple, new_domain_indices::Tuple
+)
+  biperm = permmortar((new_codomain_indices, new_domain_indices))
+  return fusiontensor_permutedims!(ftdst, ftsrc, biperm)
 end
 
-function fusiontensor_permutedims!(
-  new_ft::FusionTensor{T,N}, old_ft::FusionTensor{T,N}, flatperm::NTuple{N,Integer}
-) where {T,N}
-  foreach(m -> fill!(m, zero(T)), eachstoredblock(data_matrix(new_ft)))
-  unitary = compute_unitary(new_ft, old_ft, flatperm)
+# permutedims with BlockedPermutation
+function fusiontensor_permutedims(ft, biperm::AbstractBlockPermutation{2})
+  ndims(ft) == length(biperm) || throw(ArgumentError("Invalid permutation length"))
+  ftdst = FusionTensor{eltype(ft)}(undef, axes(ft)[biperm])
+  fusiontensor_permutedims!(ftdst, ft, biperm)
+  return ftdst
+end
+
+function fusiontensor_permutedims!(ftdst, ftsrc, biperm::AbstractBlockPermutation{2})
+  ndims(ftsrc) == length(biperm) || throw(ArgumentError("Invalid permutation length"))
+  blocklengths(axes(ftdst)) == blocklengths(biperm) ||
+    throw(ArgumentError("Destination tensor does not match bipermutation"))
+  checkspaces(axes(ftdst), axes(ftsrc)[biperm])
+
+  # early return for identity operation. Also handle tricky 0-dim case.
+  if ndims_codomain(ftdst) == ndims_codomain(ftsrc)  # compile time
+    if Tuple(biperm) == ntuple(identity, ndims(ftdst))
+      copy!(data_matrix(ftdst), data_matrix(ftsrc))
+      return nothing
+    end
+  end
+  return permute_data!(SymmetryStyle(ftdst), ftdst, ftsrc, Tuple(biperm))
+end
+
+# ===============================   Internal   =============================================
+function permute_data!(::AbelianStyle, ftdst, ftsrc, flatperm)
+  # abelian case: all unitary blocks are 1x1 identity matrices
+  # compute_unitary is only called to get block positions
+  unitary = compute_unitary(ftdst, ftsrc, flatperm)
+  for ((old_trees, new_trees), _) in unitary
+    new_block = view(ftdst, new_trees...)
+    old_block = view(ftsrc, old_trees...)
+    @strided new_block .= permutedims(old_block, flatperm)
+  end
+end
+
+function permute_data!(::NotAbelianStyle, ftdst, ftsrc, flatperm)
+  foreach(m -> fill!(m, zero(eltype(ftdst))), eachstoredblock(data_matrix(ftdst)))
+  unitary = compute_unitary(ftdst, ftsrc, flatperm)
   for ((old_trees, new_trees), coeff) in unitary
-    new_block = view(new_ft, new_trees...)
-    old_block = view(old_ft, old_trees...)
+    new_block = view(ftdst, new_trees...)
+    old_block = view(ftsrc, old_trees...)
     @strided new_block .+= coeff .* permutedims(old_block, flatperm)
   end
 end
