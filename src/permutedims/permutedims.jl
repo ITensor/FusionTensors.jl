@@ -7,33 +7,31 @@ using GradedArrays: AbelianStyle, NotAbelianStyle, SymmetryStyle, checkspaces
 using TensorAlgebra: AbstractBlockPermutation, permmortar
 
 # permutedims with 1 tuple of 2 separate tuples
-function fusiontensor_permutedims(ft, new_leg_indices::Tuple{Tuple,Tuple})
-  return fusiontensor_permutedims(ft, new_leg_indices...)
+function fusiontensor_permutedims(ft, new_leg_dims::Tuple{Tuple,Tuple})
+  return fusiontensor_permutedims(ft, new_leg_dims...)
 end
 
-function fusiontensor_permutedims!(ftdst, ftsrc, new_leg_indices::Tuple{Tuple,Tuple})
-  return fusiontensor_permutedims!(ftdst, ftsrc, new_leg_indices...)
+function fusiontensor_permutedims!(ftdst, ftsrc, new_leg_dims::Tuple{Tuple,Tuple})
+  return fusiontensor_permutedims!(ftdst, ftsrc, new_leg_dims...)
 end
 
 # permutedims with 2 separate tuples
-function fusiontensor_permutedims(
-  ft, new_codomain_indices::Tuple, new_domain_indices::Tuple
-)
-  biperm = permmortar((new_codomain_indices, new_domain_indices))
+function fusiontensor_permutedims(ft, new_codomain_dims::Tuple, new_domain_dims::Tuple)
+  biperm = permmortar((new_codomain_dims, new_domain_dims))
   return fusiontensor_permutedims(ft, biperm)
 end
 
 function fusiontensor_permutedims!(
-  ftdst, ftsrc, new_codomain_indices::Tuple, new_domain_indices::Tuple
+  ftdst, ftsrc, new_codomain_dims::Tuple, new_domain_dims::Tuple
 )
-  biperm = permmortar((new_codomain_indices, new_domain_indices))
+  biperm = permmortar((new_codomain_dims, new_domain_dims))
   return fusiontensor_permutedims!(ftdst, ftsrc, biperm)
 end
 
 # permutedims with BlockedPermutation
 function fusiontensor_permutedims(ft, biperm::AbstractBlockPermutation{2})
   ndims(ft) == length(biperm) || throw(ArgumentError("Invalid permutation length"))
-  ftdst = FusionTensor{eltype(ft)}(undef, axes(ft)[biperm])
+  ftdst = similar(ft, axes(ft)[biperm])
   fusiontensor_permutedims!(ftdst, ft, biperm)
   return ftdst
 end

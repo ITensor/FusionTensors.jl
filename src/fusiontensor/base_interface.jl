@@ -107,13 +107,18 @@ end
 function Base.similar(::FusionTensor, ::Type, ::Tuple{})
   throw(MethodError(similar, (Tuple{},)))
 end
-
 function Base.similar(
   ft::FusionTensor, ::Type{T}, new_axes::Tuple{<:Tuple,<:Tuple}
 ) where {T}
   return similar(ft, T, tuplemortar(new_axes))
 end
-function Base.similar(::FusionTensor, ::Type{T}, new_axes::BlockedTuple{2}) where {T}
+function Base.similar(ft::FusionTensor, ::Type{T}, new_axes::BlockedTuple{2}) where {T}
+  return similar(ft, T, FusionTensorAxes(new_axes))
+end
+function Base.similar(ft::FusionTensor, new_axes::FusionTensorAxes)
+  return similar(ft, eltype(ft), new_axes)
+end
+function Base.similar(::FusionTensor, ::Type{T}, new_axes::FusionTensorAxes) where {T}
   return FusionTensor{T}(undef, new_axes)
 end
 
