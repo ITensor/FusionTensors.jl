@@ -46,7 +46,7 @@ function fusiontensor_permutedims!(ftdst, ftsrc, biperm::AbstractBlockPermutatio
   if ndims_codomain(ftdst) == ndims_codomain(ftsrc)  # compile time
     if Tuple(biperm) == ntuple(identity, ndims(ftdst))
       copy!(data_matrix(ftdst), data_matrix(ftsrc))
-      return nothing
+      return ftdst
     end
   end
   return permute_data!(SymmetryStyle(ftdst), ftdst, ftsrc, Tuple(biperm))
@@ -62,6 +62,7 @@ function permute_data!(::AbelianStyle, ftdst, ftsrc, flatperm)
     old_block = view(ftsrc, old_trees...)
     @strided new_block .= permutedims(old_block, flatperm)
   end
+  return ftdst
 end
 
 function permute_data!(::NotAbelianStyle, ftdst, ftsrc, flatperm)
@@ -72,4 +73,5 @@ function permute_data!(::NotAbelianStyle, ftdst, ftsrc, flatperm)
     old_block = view(ftsrc, old_trees...)
     @strided new_block .+= coeff .* permutedims(old_block, flatperm)
   end
+  return ftdst
 end
