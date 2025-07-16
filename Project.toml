@@ -1,7 +1,7 @@
 name = "FusionTensors"
 uuid = "e16ca583-1f51-4df0-8e12-57d32947d33e"
 authors = ["ITensor developers <support@itensor.org> and contributors"]
-version = "0.5.3"
+version = "0.5.4"
 
 [deps]
 Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
