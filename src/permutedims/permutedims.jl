@@ -49,7 +49,7 @@ function fusiontensor_permutedims!(ftdst, ftsrc, biperm::AbstractBlockPermutatio
       return ftdst
     end
   end
-  return permute_data!(SymmetryStyle(ftdst), ftdst, ftsrc, Tuple(biperm))
+  return _fusiontensor_permutedims!(SymmetryStyle(ftdst), ftdst, ftsrc, Tuple(biperm))
 end
 
 # ===============================   Internal   =============================================
