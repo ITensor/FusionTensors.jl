@@ -53,7 +53,7 @@ function fusiontensor_permutedims!(ftdst, ftsrc, biperm::AbstractBlockPermutatio
 end
 
 # ===============================   Internal   =============================================
-function permute_data!(::AbelianStyle, ftdst, ftsrc, flatperm)
+function _fusiontensor_permutedims!(::AbelianStyle, ftdst, ftsrc, flatperm)
   # abelian case: all unitary blocks are 1x1 identity matrices
   # compute_unitary is only called to get block positions
   unitary = compute_unitary(ftdst, ftsrc, flatperm)
@@ -65,7 +65,7 @@ function permute_data!(::AbelianStyle, ftdst, ftsrc, flatperm)
   return ftdst
 end
 
-function permute_data!(::NotAbelianStyle, ftdst, ftsrc, flatperm)
+function _fusiontensor_permutedims!(::NotAbelianStyle, ftdst, ftsrc, flatperm)
   foreach(m -> fill!(m, zero(eltype(ftdst))), eachstoredblock(data_matrix(ftdst)))
   unitary = compute_unitary(ftdst, ftsrc, flatperm)
   for ((old_trees, new_trees), coeff) in unitary
