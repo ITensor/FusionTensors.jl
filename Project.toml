@@ -21,7 +21,7 @@ WignerSymbols = "9f57e263-0b3d-5e2e-b1be-24f2bb48858b"
 [compat]
 Accessors = "0.1.42"
 BlockArrays = "1.7"
-BlockSparseArrays = "0.7.4, 0.8"
+BlockSparseArrays = "0.8"
 GradedArrays = "0.4.14"
 HalfIntegers = "1.6"
 LRUCache = "1.6"
