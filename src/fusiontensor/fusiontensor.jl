@@ -134,6 +134,10 @@ struct FusionTensor{T,N,Axes<:FusionTensorAxes,Mat<:AbstractMatrix{T},Mapping} <
   end
 end
 
+const FusionMatrix{T,Axes,Mat,Mapping} = FusionTensor{
+  T,2,Axes,Mapping
+} where {BT<:BlockedTuple{2,(1, 1)},Axes<:FusionTensorAxes{BT}}
+
 # =====================================  Accessors  ========================================
 
 data_matrix(ft::FusionTensor) = ft.data_matrix
