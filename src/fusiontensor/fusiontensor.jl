@@ -22,7 +22,7 @@ using GradedArrays:
   space_isequal
 using LinearAlgebra: UniformScaling
 using Random: Random, AbstractRNG, randn!
-using TensorAlgebra: BlockedTuple, trivial_axis, tuplemortar
+using TensorAlgebra: BlockedTuple, trivial_axis, tuplemortar, length_codomain, length_domain
 using TensorProducts: tensor_product
 using TypeParameterAccessors: type_parameters
 

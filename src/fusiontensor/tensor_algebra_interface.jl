@@ -4,47 +4,78 @@ using LinearAlgebra: mul!
 
 using BlockArrays: Block
 
-using TensorAlgebra: BlockedPermutation, Matricize, TensorAlgebra
+using GradedArrays: space_isequal
+using TensorAlgebra:
+  TensorAlgebra,
+  AbstractBlockPermutation,
+  BlockedTrivialPermutation,
+  BlockedTuple,
+  FusionStyle,
+  Matricize,
+  blockedperm,
+  genperm,
+  unmatricize
 
-# TODO how to deal with inner contraction = no ouput axis?
-# => currently biperm_dest is a BlockedPermutation{0}, change this
-function TensorAlgebra.allocate_output(
+function TensorAlgebra.output_axes(
   ::typeof(contract),
-  biperm_dest::BlockedPermutation{2},
+  biperm_dest::AbstractBlockPermutation{2},
   a1::FusionTensor,
-  biperm1::BlockedPermutation{2},
+  biperm1::AbstractBlockPermutation{2},
   a2::FusionTensor,
-  biperm2::BlockedPermutation{2},
-  α::Number=true,
+  biperm2::AbstractBlockPermutation{2},
+  α::Number=one(Bool),
 )
-  axes_dest = (
-    map(i -> axes(a1)[i], first(blocks(biperm1))),
-    map(i -> axes(a2)[i], last(blocks(biperm2))),
+  axes_codomain, axes_contracted = blocks(axes(a1)[biperm1])
+  axes_contracted2, axes_domain = blocks(axes(a2)[biperm2])
+  @assert all(space_isequal.(dual.(axes_contracted), axes_contracted2))
+  flat_axes = genperm((axes_codomain..., axes_domain...), Tuple(biperm_dest))
+  return FusionTensorAxes(
+    tuplemortar((
+      flat_axes[begin:length_codomain(biperm_dest)],
+      flat_axes[(length_codomain(biperm_dest) + 1):end],
+    )),
   )
-  return similar(a1, promote_type(eltype(a1), eltype(a2), typeof(α)), axes_dest)
 end
 
-# TBD do really I need to define these as I cannot use them in contract! and has to redefine it?
-#TensorAlgebra.fusedims(ft::FusionTensor, perm::BlockedPermutation{2}) = permutedims(ft, perm)
-#function TensorAlgebra.splitdims(ft1::FusionTensor, ft2::FusionTensor, blockedperm::BlockedPermutation)
-#function TensorAlgebra.splitdims!(ft1::FusionTensor, ft2::FusionTensor, blockedperm::BlockedPermutation)
+struct FusionTensorFusionStyle <: FusionStyle end
 
-# I cannot use contract! from TensorAlgebra/src/contract/contract_matricize/contract.jl
-# as it calls _mul!, which I should not overload.
-# TBD define fallback _mul!(::AbstractArray, ::AbstractArray, ::AbstractArray) in TensorAlgebra?
-function TensorAlgebra.contract!(
-  ::Matricize,
-  a_dest::FusionTensor,
-  ::BlockedPermutation{2},
-  a1::FusionTensor,
-  biperm1::BlockedPermutation{2},
-  a2::FusionTensor,
-  biperm2::BlockedPermutation{2},
-  α::Number,
-  β::Number,
+TensorAlgebra.FusionStyle(::Type{<:FusionTensor}) = FusionTensorFusionStyle()
+
+function TensorAlgebra.matricize(
+  ::FusionTensorFusionStyle, ft::AbstractArray, biperm::AbstractBlockPermutation{2}
 )
-  a1_perm = permutedims(a1, biperm1)
-  a2_perm = permutedims(a2, biperm2)
-  mul!(a_dest, a1_perm, a2_perm, α, β)
+  permuted = permutedims(ft, biperm)
+  return FusionTensor(
+    data_matrix(permuted), (codomain_axis(permuted),), (domain_axis(permuted),)
+  )
+end
+
+# lift ambiguity
+function TensorAlgebra.matricize(
+  ::FusionTensorFusionStyle, ft::AbstractArray, biperm::BlockedTrivialPermutation{2}
+)
+  return matricize(FusionTensorFusionStyle(), ft, blockedperm(BlockedTuple(tbp)))
+end
+
+function TensorAlgebra.unmatricize(::FusionTensorFusionStyle, m, blocked_axes)
+  return FusionTensor(data_matrix(m), blocked_axes)
+end
+
+function TensorAlgebra.permuteblockeddims(
+  ft::FusionTensor, biperm::AbstractBlockPermutation
+)
+  return permutedims(ft, biperm)
+end
+
+function TensorAlgebra.permuteblockeddims!(
+  a::FusionTensor, b::FusionTensor, biperm::AbstractBlockPermutation
+)
+  return permutedims!(a, b, biperm)
+end
+
+# TODO define custom broadcast rules
+function TensorAlgebra.unmatricize_add!(a_dest::FusionTensor, a_dest_mat, invbiperm, α, β)
+  a12 = unmatricize(a_dest_mat, axes(a_dest), invbiperm)
+  data_matrix(a_dest) .= α .* data_matrix(a12) .+ β .* data_matrix(a_dest)
   return a_dest
 end

@@ -2,7 +2,7 @@ using Test: @test, @test_throws, @testset
 
 using TensorProducts: ⊗
 using BlockArrays: Block, blockedrange, blocklength, blocklengths, blocks
-using TensorAlgebra: BlockedTuple, trivial_axis, tuplemortar
+using TensorAlgebra: BlockedTuple, length_codomain, trivial_axis, tuplemortar
 
 using FusionTensors:
   FusionTensorAxes,
@@ -75,6 +75,7 @@ end
   @test blocklength(fta) == 2
   @test blocklengths(fta) == (2, 2)
   @test blocks(fta) == blocks(bt)
+  @test length_codomain(fta) == 2
 
   @test sector_type(fta) === sector_type(g2)
   @test length(codomain(fta)) == 2
@@ -107,6 +108,7 @@ end
   @test blocklength(fta) == 2
   @test blocklengths(fta) == (0, 0)
   @test sector_type(fta) == TrivialSector
+  @test length_codomain(fta) == 0
 
   @test codomain(fta) == ()
   @test space_isequal(fused_codomain(fta), trivial_axis(TrivialSector))

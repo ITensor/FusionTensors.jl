@@ -10,9 +10,8 @@ using GradedArrays: checkspaces, checkspaces_dual, quantum_dimension, sectors
 # allow to contract with different eltype and let BlockSparseArray ensure compatibility
 # impose matching type and number of axes at compile time
 # impose matching axes at run time
-# TODO remove this once TensorAlgebra.contract can be used?
 function LinearAlgebra.mul!(
-  C::FusionTensor, A::FusionTensor, B::FusionTensor, α::Number, β::Number
+  C::FusionMatrix, A::FusionMatrix, B::FusionMatrix, α::Number, β::Number
 )
 
   # compile time checks
