@@ -78,8 +78,8 @@ end
 
   ft5 = contract((1, 2, 5), ft1, (1, 2, 3, 4), ft2, (3, 4, 5))
   @test isnothing(check_sanity(ft5))
-  @test ndims_codomain(ft5) === 0
-  @test ndims_domain(ft5) === 3
+  @test ndims_codomain(ft5) === 3
+  @test ndims_domain(ft5) === 0
   @test permutedims(ft5, (1, 2), (3,)) ≈ ft4
 
   ft6 = contract(tuplemortar(((1, 2), (5,))), ft1, (1, 2, 3, 4), ft2, (3, 4, 5))

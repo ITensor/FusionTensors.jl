@@ -71,7 +71,7 @@ TensorAlgebra.BlockedTuple(fta::FusionTensorAxes) = fta.outer_axes
 
 TensorAlgebra.trivial_axis(fta::FusionTensorAxes) = trivial_axis(sector_type(fta))
 
-TensorAlgebra.length_codomain(fta::FusionTensorAxes) = length(codomain(fta))
+TensorAlgebra.length_domain(fta::FusionTensorAxes) = length(domain(fta))
 
 # ==================================  Base interface  ======================================
 
