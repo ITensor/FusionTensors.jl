@@ -15,13 +15,12 @@ function TensorAlgebra.allocate_output(
   biperm1::BlockedPermutation{2},
   a2::FusionTensor,
   biperm2::BlockedPermutation{2},
-  α::Number=true,
 )
   axes_dest = (
     map(i -> axes(a1)[i], first(blocks(biperm1))),
     map(i -> axes(a2)[i], last(blocks(biperm2))),
   )
-  return similar(a1, promote_type(eltype(a1), eltype(a2), typeof(α)), axes_dest)
+  return similar(a1, promote_type(eltype(a1), eltype(a2)), axes_dest)
 end
 
 # TBD do really I need to define these as I cannot use them in contract! and has to redefine it?
@@ -32,7 +31,7 @@ end
 # I cannot use contract! from TensorAlgebra/src/contract/contract_matricize/contract.jl
 # as it calls _mul!, which I should not overload.
 # TBD define fallback _mul!(::AbstractArray, ::AbstractArray, ::AbstractArray) in TensorAlgebra?
-function TensorAlgebra.contract!(
+function TensorAlgebra.contractadd!(
   ::Matricize,
   a_dest::FusionTensor,
   ::BlockedPermutation{2},
