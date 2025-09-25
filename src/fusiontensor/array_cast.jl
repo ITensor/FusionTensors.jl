@@ -151,14 +151,16 @@ function contract_fusion_trees(
   #                           \___________|                              \___________|
   #                                        \                                         |
   #                                         \----------------dim_sec---------------- /
-  return contract(
+  res = contract(
     ntuple(i -> 2 * i - 1, N),
     split_array_block,
     ntuple(identity, 2 * N),
     p,
     ntuple(i -> 2 * i, N),
-    1 / dim_sec,  # normalization factor
   )
+  # normalization factor
+  res ./= dim_sec
+  return res
 end
 
 function contract_singlet_projector(f1::SectorFusionTree, f2::SectorFusionTree)
