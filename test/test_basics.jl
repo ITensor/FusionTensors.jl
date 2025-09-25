@@ -3,6 +3,7 @@ using Test: @test, @test_throws, @testset
 using BlockArrays: Block
 using BlockSparseArrays: BlockSparseArray, eachblockstoredindex
 using FusionTensors:
+  FusionMatrix,
   FusionTensor,
   FusionTensorAxes,
   codomain_axes,
@@ -40,6 +41,7 @@ include("setup.jl")
   fta = FusionTensorAxes((g1,), (g2,))
   ft0 = FusionTensor{Float64}(undef, fta)
   @test ft0 isa FusionTensor
+  @test ft0 isa FusionMatrix
   @test space_isequal(codomain_axis(ft0), g1)
   @test space_isequal(domain_axis(ft0), g2)
 
@@ -134,6 +136,8 @@ end
   m2 = BlockSparseArray{Float64}(undef, gr, gc)
   ft = FusionTensor(m2, (g1, g2), (g3, g4))
 
+  @test ft isa FusionTensor
+  @test !(ft isa FusionMatrix)
   @test data_matrix(ft) == m2
   @test checkspaces(codomain_axes(ft), (g1, g2))
   @test checkspaces(domain_axes(ft), (g3, g4))
@@ -155,6 +159,8 @@ end
 
   # one row axis
   ft1 = FusionTensor{Float64}(undef, (g1,), ())
+  @test ft1 isa FusionTensor
+  @test !(ft1 isa FusionMatrix)
   @test ndims_codomain(ft1) == 1
   @test ndims_domain(ft1) == 0
   @test ndims(ft1) == 1
@@ -165,6 +171,8 @@ end
 
   # one column axis
   ft2 = FusionTensor{Float64}(undef, (), (g1,))
+  @test ft2 isa FusionTensor
+  @test !(ft2 isa FusionMatrix)
   @test ndims_codomain(ft2) == 0
   @test ndims_domain(ft2) == 1
   @test ndims(ft2) == 1
@@ -175,6 +183,8 @@ end
 
   # zero axis
   ft3 = FusionTensor{Float64}(undef, (), ())
+  @test ft3 isa FusionTensor
+  @test !(ft3 isa FusionMatrix)
   @test ndims_codomain(ft3) == 0
   @test ndims_domain(ft3) == 0
   @test ndims(ft3) == 0
@@ -182,6 +192,13 @@ end
   @test size(data_matrix(ft3)) == (1, 1)
   @test isnothing(check_sanity(ft3))
   @test sector_type(ft3) === TrivialSector
+
+  ft4 = FusionTensor{Float64}(undef, (g1, g1), ())
+  @test ft4 isa FusionTensor
+  @test !(ft4 isa FusionMatrix)
+  ft5 = FusionTensor{Float64}(undef, (), (g1, g1))
+  @test ft5 isa FusionTensor
+  @test !(ft5 isa FusionMatrix)
 end
 
 @testset "specific constructors" begin

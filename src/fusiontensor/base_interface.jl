@@ -122,10 +122,13 @@ function Base.similar(::FusionTensor, ::Type{T}, new_axes::FusionTensorAxes) whe
   return FusionTensor{T}(undef, new_axes)
 end
 
-Base.show(io::IO, ft::FusionTensor) = print(io, "$(ndims(ft))-dim FusionTensor")
+function Base.show(io::IO, ft::FusionTensor)
+  return print(io, "$(ndims(ft))-dim FusionTensor with size $(size(ft))")
+end
 
 function Base.show(io::IO, ::MIME"text/plain", ft::FusionTensor)
-  print(io, "$(ndims(ft))-dim FusionTensor with axes:")
+  print(io, ft)
+  print(" and axes:")
   for ax in axes(ft)
     print(io, "\n", ax)
   end
