@@ -3,7 +3,7 @@ using Test: @test, @testset, @test_broken
 
 using BlockSparseArrays: BlockSparseArray
 using FusionTensors: FusionTensor, FusionTensorAxes, domain_axes, codomain_axes
-using GradedArrays: U1, dual, gradedrange
+using GradedArrays: SU2, U1, dual, gradedrange
 using TensorAlgebra: contract, matricize, permmortar, tuplemortar, unmatricize, unmatricize!
 
 include("setup.jl")
