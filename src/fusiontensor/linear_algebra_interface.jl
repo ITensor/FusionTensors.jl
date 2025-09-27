@@ -42,25 +42,17 @@ function LinearAlgebra.norm(ft::FusionTensor)
   return sqrt(n2)
 end
 
+LinearAlgebra.normalize(ft::FusionTensor) = set_data_matrix(ft, data_matrix(ft) / norm(ft))
+
+function LinearAlgebra.normalize!(ft::FusionTensor)
+  data_matrix(ft) ./= norm(ft)
+  return ft
+end
+
 function LinearAlgebra.tr(ft::FusionTensor)
   m = data_matrix(ft)
   row_sectors = sectors(codomain_axis(ft))
   return sum(eachblockstoredindex(m); init=zero(eltype(ft))) do b
     return quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * tr(m[b])
   end
-end
-
-function LinearAlgebra.qr(ft::FusionTensor)
-  qmat, rmat = block_qr(data_matrix(ft))
-  qtens = FusionTensor(qmat, codomain_axes(ft), (axes(qmat, 2),))
-  rtens = FusionTensor(rmat, (axes(rmat, 1),), domain_axes(ft))
-  return qtens, rtens
-end
-
-function LinearAlgebra.svd(ft::FusionTensor)
-  umat, s, vmat = block_svd(data_matrix(ft))
-  utens = FusionTensor(umat, codomain_axes(ft), (axes(umat, 2),))
-  stens = FusionTensor(s, (axes(umat, 1),), (axes(vmat, 2),))
-  vtens = FusionTensor(vmat, (axes(vmat, 1),), domain_axes(ft))
-  return utens, stens, vtens
 end

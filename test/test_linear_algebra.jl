@@ -27,5 +27,10 @@ include("setup.jl")
     @test isnothing(check_sanity(ft))
     @test norm(ft) ≈ √3 / 2
     @test isapprox(tr(ft), 0; atol=eps(Float64))
+
+    @test norm(normalize(ft)) ≈ 1.0
+    @test norm(ft) ≈ √3 / 2  # unaffected by normalize
+    normalize!(ft)
+    @test norm(ft) ≈ 1.0
   end
 end
