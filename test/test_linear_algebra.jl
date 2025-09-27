@@ -28,8 +28,10 @@ include("setup.jl")
     @test norm(ft) ≈ √3 / 2
     @test isapprox(tr(ft), 0; atol=eps(Float64))
 
-    @test norm(normalize(ft)) ≈ 1.0
+    ft2 = normalize(ft)
+    @test norm(ft2) ≈ 1.0
     @test norm(ft) ≈ √3 / 2  # unaffected by normalize
+    @test ft ≈ √3 / 2 * ft2
     normalize!(ft)
     @test norm(ft) ≈ 1.0
   end
