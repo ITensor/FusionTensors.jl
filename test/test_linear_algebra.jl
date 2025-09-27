@@ -1,4 +1,4 @@
-using LinearAlgebra: norm, tr
+using LinearAlgebra: norm, normalize, normalize!, tr
 using Test: @test, @testset
 
 using BlockArrays: BlockArrays
