@@ -76,7 +76,7 @@ end
   ]
     t2 = @eval reshape(Base.$f(sds22), (2, 2, 2, 2))
     ft2 = to_fusiontensor(t2, (g2, g2), (dual(g2), dual(g2)))
-    @test (@eval TensorAlgebra.$f(ft, (1, 2, 3, 4), (1, 2), (3, 4))) ≈ ft2
+    @test (@eval TensorAlgebra.$f)(ft, (1, 2, 3, 4), (1, 2), (3, 4)) ≈ ft2
   end
   @test_throws ArgumentError TensorAlgebra.exp(ft, (1, 2, 3, 4), (1, 2, 3), (4,))
   @test_throws ArgumentError TensorAlgebra.exp(ft, (1, 2, 3, 4), (1, 3), (2, 4))
@@ -108,7 +108,7 @@ end
   @test m3 ≈ 2m1 * m2
 end
 
-@testset "TensorAlgebra interface" begin
+@testset "TensorAlgebra.contract interface" begin
   g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
   g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
   g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
