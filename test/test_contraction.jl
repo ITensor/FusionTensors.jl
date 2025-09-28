@@ -1,11 +1,12 @@
 using LinearAlgebra: mul!
-using Test: @test, @testset, @test_broken
+using Test: @test, @testset, @test_broken, @test_throws
 
 using BlockSparseArrays: BlockSparseArray
 using FusionTensors:
-  FusionMatrix, FusionTensor, FusionTensorAxes, domain_axes, codomain_axes
-using GradedArrays: U1, dual, gradedrange
-using TensorAlgebra: contract, matricize, permmortar, tuplemortar, unmatricize, unmatricize!
+  FusionMatrix, FusionTensor, FusionTensorAxes, domain_axes, codomain_axes, to_fusiontensor
+using GradedArrays: SU2, U1, dual, gradedrange
+using TensorAlgebra:
+  TensorAlgebra, contract, matricize, permmortar, tuplemortar, unmatricize, unmatricize!
 
 include("setup.jl")
 
@@ -31,6 +32,54 @@ include("setup.jl")
   ft2 = similar(ft1)
   unmatricize!(ft2, m2, biperm)
   @test ft1 ≈ ft2
+end
+
+@testset "Matrix functions" begin
+  sds22 = [
+    0.25 0.0 0.0 0.0
+    0.0 -0.25 0.5 0.0
+    0.0 0.5 -0.25 0.0
+    0.0 0.0 0.0 0.25
+  ]
+  t = reshape(sds22, (2, 2, 2, 2))
+  g2 = gradedrange([SU2(1//2) => 1])
+  ft = to_fusiontensor(t, (g2, g2), (dual(g2), dual(g2)))
+  for f in [
+    :exp,
+    :cis,
+    :log,
+    :sqrt,
+    :cbrt,
+    :cos,
+    :sin,
+    :tan,
+    :csc,
+    :sec,
+    :cot,
+    :cosh,
+    :sinh,
+    :tanh,
+    :csch,
+    :sech,
+    :coth,
+    :acos,
+    :asin,
+    :atan,
+    :acsc,
+    :asec,
+    :acot,
+    :acosh,
+    :asinh,
+    :atanh,
+    :acsch,
+    :asech,
+  ]
+    t2 = @eval reshape(Base.$f(sds22), (2, 2, 2, 2))
+    ft2 = to_fusiontensor(t2, (g2, g2), (dual(g2), dual(g2)))
+    @test (@eval TensorAlgebra.$f(ft, (1, 2, 3, 4), (1, 2), (3, 4))) ≈ ft2
+  end
+  @test_throws ArgumentError TensorAlgebra.exp(ft, (1, 2, 3, 4), (1, 2, 3), (4,))
+  @test_throws ArgumentError TensorAlgebra.exp(ft, (1, 2, 3, 4), (1, 3), (2, 4))
 end
 
 @testset "contraction" begin
