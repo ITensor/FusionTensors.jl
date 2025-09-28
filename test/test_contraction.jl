@@ -74,7 +74,7 @@ end
     :acsch,
     :asech,
   ]
-    t2 = @eval reshape(Base.$f(sds22), (2, 2, 2, 2))
+    t2 = reshape((@eval Base.$f)(sds22), (2, 2, 2, 2))
     ft2 = to_fusiontensor(t2, (g2, g2), (dual(g2), dual(g2)))
     @test (@eval TensorAlgebra.$f)(ft, (1, 2, 3, 4), (1, 2), (3, 4)) ≈ ft2
   end
