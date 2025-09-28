@@ -49,7 +49,6 @@ end
     :cis,
     :log,
     :sqrt,
-    :cbrt,
     :cos,
     :sin,
     :tan,
