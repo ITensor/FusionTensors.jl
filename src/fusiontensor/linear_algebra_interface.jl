@@ -42,10 +42,10 @@ function LinearAlgebra.norm(ft::FusionTensor)
   return sqrt(n2)
 end
 
-LinearAlgebra.normalize(ft::FusionTensor) = set_data_matrix(ft, data_matrix(ft) / norm(ft))
+LinearAlgebra.normalize(ft::FusionTensor, p::Real=2) = ft / norm(ft, p)
 
-function LinearAlgebra.normalize!(ft::FusionTensor)
-  data_matrix(ft) ./= norm(ft)
+function LinearAlgebra.normalize!(ft::FusionTensor, p::Real=2)
+  data_matrix(ft) ./= norm(ft, p)
   return ft
 end
 
