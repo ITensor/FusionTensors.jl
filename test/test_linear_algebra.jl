@@ -26,6 +26,9 @@ include("setup.jl")
     ft = to_fusiontensor(sdst, (g, g), (dual(g), dual(g)))
     @test isnothing(check_sanity(ft))
     @test norm(ft) ≈ √3 / 2
+    @test norm(ft, 2) ≈ √3 / 2
+    @test norm(ft, 2.0) ≈ √3 / 2
+    @test norm(ft, 1) ≈ 1.5
     @test isapprox(tr(ft), 0; atol=eps(Float64))
 
     ft2 = normalize(ft)

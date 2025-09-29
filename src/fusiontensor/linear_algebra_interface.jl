@@ -33,13 +33,13 @@ function LinearAlgebra.mul!(
   return C
 end
 
-function LinearAlgebra.norm(ft::FusionTensor)
+function LinearAlgebra.norm(ft::FusionTensor, p::Real=2)
   m = data_matrix(ft)
   row_sectors = sectors(codomain_axis(ft))
   n2 = sum(eachblockstoredindex(m); init=zero(real(eltype(ft)))) do b
-    return quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * norm(m[b])^2
+    return quantum_dimension(row_sectors[Int(first(Tuple(b)))]) * norm(m[b], p)^p
   end
-  return sqrt(n2)
+  return n2^(1 / p)
 end
 
 LinearAlgebra.normalize(ft::FusionTensor, p::Real=2) = ft / norm(ft, p)
