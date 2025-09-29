@@ -44,35 +44,7 @@ end
   t = reshape(sds22, (2, 2, 2, 2))
   g2 = gradedrange([SU2(1//2) => 1])
   ft = to_fusiontensor(t, (g2, g2), (dual(g2), dual(g2)))
-  for f in [
-    :exp,
-    :cis,
-    :log,
-    :sqrt,
-    :cos,
-    :sin,
-    :tan,
-    :csc,
-    :sec,
-    :cot,
-    :cosh,
-    :sinh,
-    :tanh,
-    :csch,
-    :sech,
-    :coth,
-    :acos,
-    :asin,
-    :atan,
-    :acsc,
-    :asec,
-    :acot,
-    :acosh,
-    :asinh,
-    :atanh,
-    :acsch,
-    :asech,
-  ]
+  for f in setdiff(FusionTensors.MATRIX_FUNCTIONS, [:acoth, :cbrt])
     t2 = reshape((@eval Base.$f)(sds22), (2, 2, 2, 2))
     ft2 = to_fusiontensor(t2, (g2, g2), (dual(g2), dual(g2)))
     @test (@eval TensorAlgebra.$f)(ft, (1, 2, 3, 4), (1, 2), (3, 4)) ≈ ft2

@@ -17,6 +17,38 @@ using TensorAlgebra:
   matricize,
   unmatricize
 
+const MATRIX_FUNCTIONS = [
+  :exp,
+  :cis,
+  :log,
+  :sqrt,
+  :cbrt,
+  :cos,
+  :sin,
+  :tan,
+  :csc,
+  :sec,
+  :cot,
+  :cosh,
+  :sinh,
+  :tanh,
+  :csch,
+  :sech,
+  :coth,
+  :acos,
+  :asin,
+  :atan,
+  :acsc,
+  :asec,
+  :acot,
+  :acosh,
+  :asinh,
+  :atanh,
+  :acsch,
+  :asech,
+  :acoth,
+]
+
 function TensorAlgebra.output_axes(
   ::typeof(contract),
   biperm_dest::AbstractBlockPermutation{2},
@@ -72,7 +104,7 @@ function TensorAlgebra.unmatricizeadd!(a_dest::FusionTensor, a_dest_mat, invbipe
   return a_dest
 end
 
-for f in TensorAlgebra.MATRIX_FUNCTIONS
+for f in MATRIX_FUNCTIONS
   @eval begin
     function TensorAlgebra.$f(
       a::FusionTensor, biperm::AbstractBlockPermutation{2}; kwargs...
