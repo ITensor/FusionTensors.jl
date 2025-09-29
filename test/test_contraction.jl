@@ -2,7 +2,8 @@ using LinearAlgebra: mul!
 using Test: @test, @testset, @test_broken, @test_throws
 
 using BlockSparseArrays: BlockSparseArray
-using FusionTensors: FusionTensor, FusionTensorAxes, domain_axes, codomain_axes
+using FusionTensors:
+  FusionTensor, FusionTensorAxes, domain_axes, codomain_axes, to_fusiontensor
 using GradedArrays: SU2, U1, dual, gradedrange
 using TensorAlgebra:
   TensorAlgebra, contract, matricize, permmortar, tuplemortar, unmatricize, unmatricize!
