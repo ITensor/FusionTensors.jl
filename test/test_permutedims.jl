@@ -10,7 +10,7 @@ using FusionTensors:
   ndims_domain,
   ndims_codomain,
   to_fusiontensor
-using GradedArrays: O2, U1, SectorProduct, SU2, dual, gradedrange, space_isequal
+using GradedArrays: ×, O2, U1, SectorProduct, SU2, dual, gradedrange, space_isequal
 using TensorAlgebra: permmortar, tuplemortar
 
 include("setup.jl")
@@ -178,8 +178,6 @@ end
     dual(gradedrange([O2(1//2) => 1])),
     gradedrange([SU2(1//2) => 1]),
     dual(gradedrange([SU2(1//2) => 1])),
-    gradedrange([SectorProduct(SU2(1//2), U1(0)) => 1]),
-    gradedrange([SectorProduct(SU2(1//2), SU2(0)) => 1]),
   )
     g2b = dual(g2)
     for biperm in [
@@ -199,5 +197,31 @@ end
       ft = to_fusiontensor(sds22, (g2, g2), (g2b, g2b))
       @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
     end
+  end
+end
+
+@testset "SectorProduct permutedims" begin
+  d = 2
+  D = 3
+  tRVB = zeros((d, D, D, D, D))  # tensor RVB SU(2) for spin s
+  for i in 1:d
+    tRVB[i, i + 1, 1, 1, 1] = 1.0
+    tRVB[i, 1, i + 1, 1, 1] = 1.0
+    tRVB[i, 1, 1, i + 1, 1] = 1.0
+    tRVB[i, 1, 1, 1, i + 1] = 1.0
+  end
+
+  gd = gradedrange([SU2(1//2) × U1(3) => 1])
+  gD = dual(gradedrange([SU2(0) × U1(1) => 1, SU2(1//2) × U1(0) => 1]))
+  ft = to_fusiontensor(tRVB, (gd,), (gD, gD, gD, gD))
+  @test Array(ft) ≈ tRVB
+  for biperm in [
+    permmortar(((1,), (2, 3, 4, 5))),
+    permmortar(((1, 2, 3), (4, 5))),
+    permmortar(((3, 1, 4), (2, 5))),
+    permmortar(((), (2, 4, 1, 5, 3))),
+    permmortar(((2, 4, 1, 5, 3), ())),
+  ]
+    @test permutedims(ft, biperm) ≈ naive_permutedims(ft, biperm)
   end
 end
