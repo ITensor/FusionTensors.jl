@@ -2,14 +2,13 @@ using LinearAlgebra: mul!
 using Test: @test, @testset, @test_broken
 
 using BlockSparseArrays: BlockSparseArray
-using FusionTensors:
-  FusionMatrix, FusionTensor, FusionTensorAxes, domain_axes, codomain_axes
-using GradedArrays: U1, dual, gradedrange
+using FusionTensors: FusionTensor, FusionTensorAxes, domain_axes, codomain_axes
+using GradedArrays: SU2, U1, dual, gradedrange
 using TensorAlgebra: contract, matricize, permmortar, tuplemortar, unmatricize, unmatricize!
 
 include("setup.jl")
 
-@testset "matricize" begin
+@testset "abelian matricize" begin
   g1 = gradedrange([U1(0) => 1, U1(1) => 2, U1(2) => 3])
   g2 = gradedrange([U1(0) => 2, U1(1) => 2, U1(3) => 1])
   g3 = gradedrange([U1(-1) => 1, U1(0) => 2, U1(1) => 1])
@@ -17,15 +16,35 @@ include("setup.jl")
 
   ft1 = randn(FusionTensorAxes((g1, g2), (dual(g3), dual(g4))))
   m = matricize(ft1, (1, 2), (3, 4))
-  @test m isa FusionMatrix
   ft2 = unmatricize(m, axes(ft1))
   @test ft1 ≈ ft2
 
   biperm = permmortar(((3,), (1, 2, 4)))
   m2 = matricize(ft1, biperm)
-  ft_dest = FusionTensor{eltype(ft1)}(undef, axes(ft1)[biperm])
+  ft_dest = similar(ft1, axes(ft1)[biperm])
   unmatricize!(ft_dest, m2, permmortar(((1,), (2, 3, 4))))
   @test ft_dest ≈ permutedims(ft1, biperm)
+
+  ft2 = similar(ft1)
+  unmatricize!(ft2, m2, biperm)
+  @test ft1 ≈ ft2
+end
+
+@testset "non-abelian matricize" begin
+  g1 = gradedrange([SU2(0) => 1, SU2(1//2) => 2, SU2(1) => 3])
+  g2 = gradedrange([SU2(0) => 2, SU2(1//2) => 2, SU2(3//2) => 1])
+  g3 = gradedrange([SU2(1//2) => 1, SU2(1) => 2, SU2(2) => 1])
+  g4 = gradedrange([SU2(0) => 1, SU2(1) => 1, SU2(3//2) => 1])
+
+  ft1 = randn(FusionTensorAxes((g1, g2), (dual(g3), dual(g4))))
+  m = matricize(ft1, (1, 2), (3, 4))
+  ft2 = unmatricize(m, axes(ft1))
+  @test ft1 ≈ ft2
+
+  biperm = permmortar(((3,), (1, 2, 4)))
+  m2 = matricize(ft1, biperm)
+  ft_dest = similar(ft1, axes(ft1)[biperm])
+  unmatricize!(ft_dest, m2, permmortar(((1,), (2, 3, 4))))
   @test ft_dest ≈ permutedims(ft1, biperm)
 
   ft2 = similar(ft1)
