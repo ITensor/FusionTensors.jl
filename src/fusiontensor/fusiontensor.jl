@@ -6,7 +6,7 @@ using BlockSparseArrays:
     AbstractBlockSparseMatrix, BlockSparseArray, eachblockstoredindex, to_block_indices
 using GradedArrays:
     AbstractGradedUnitRange,
-    SectorProduct,
+    SymmetryStyle,
     TrivialSector,
     dual,
     findfirstblock,
@@ -35,7 +35,7 @@ function flip_domain(nonflipped_col_axis, nonflipped_trees_to_ranges)
     return col_axis, domain_trees_to_ranges_mapping
 end
 
-function fuse_axes(::Type{S}, ::Tuple{}) where {S <: AbstractSector}
+function fuse_axes(::Type{S}, ::Tuple{}) where {S <: SectorRange}
     fused_axis = trivial_axis(S)
     trees_to_ranges_mapping = Dict([SectorFusionTree{S}() => Block(1)[1:1]])
     return fused_axis, trees_to_ranges_mapping
@@ -253,7 +253,9 @@ function GradedArrays.sector_type(::Type{FT}) where {FT <: FusionTensor}
     return sector_type(type_parameters(FT, 3))
 end
 
-SymmetryStyle(::Type{FT}) where {FT <: FusionTensor} = SymmetryStyle(sector_type(FT))
+function GradedArrays.SymmetryStyle(::Type{FT}) where {FT <: FusionTensor}
+    return SymmetryStyle(sector_type(FT))
+end
 
 # ==============================  FusionTensor interface  ==================================
 

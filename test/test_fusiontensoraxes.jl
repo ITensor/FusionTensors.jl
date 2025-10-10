@@ -17,12 +17,12 @@ using FusionTensors:
 using GradedArrays:
     ×,
     U1,
-    SectorProduct,
     TrivialSector,
     SU2,
     checkspaces,
     dual,
     gradedrange,
+    sectorproduct,
     sector_type,
     space_isequal
 
@@ -33,7 +33,7 @@ using GradedArrays:
     @test promote_sector_type(g1, g1) === typeof(U1(1))
     @test promote_sector_type((g1, g1)) === typeof(U1(1))
 
-    sNS = SectorProduct(; N = U1(1), S = SU2(1 / 2))
+    sNS = sectorproduct((; N = U1(1), S = SU2(1 / 2)))
     gN = gradedrange([(; N = U1(1)) => 1])
     gS = gradedrange([(; S = SU2(1 / 2)) => 1])
     @test promote_sector_type(gN, gS) == typeof(sNS)

@@ -7,10 +7,10 @@ using WignerSymbols: clebschgordan
 
 using GradedArrays:
     AbelianStyle,
-    AbstractSector,
     NotAbelianStyle,
     O2,
-    SU,
+    SU2,
+    SectorRange,
     SymmetryStyle,
     dual,
     istrivial,
@@ -22,15 +22,15 @@ using GradedArrays:
 using TensorAlgebra: contract
 using TensorProducts: ⊗
 
-function symbol_1j(s::AbstractSector)
+function symbol_1j(s::SectorRange)
     cgt = clebsch_gordan_tensor(s, dual(s), trivial(s), 1)
     return sqrt(quantum_dimension(s)) * cgt[:, :, 1]
 end
 
 function clebsch_gordan_tensor(
-        s1::AbstractSector,
-        s2::AbstractSector,
-        s3::AbstractSector,
+        s1::SectorRange,
+        s2::SectorRange,
+        s3::SectorRange,
         arrow1::Bool,
         arrow2::Bool,
         inner_mult_index::Int,
@@ -104,11 +104,11 @@ function clebsch_gordan_tensor(s1::O2, s2::O2, s3::O2)
     return cgt
 end
 
-function clebsch_gordan_tensor(::NotAbelianStyle, s1::SU{2}, s2::SU{2}, s3::SU{2}, ::Int)
+function clebsch_gordan_tensor(::NotAbelianStyle, s1::SU2, s2::SU2, s3::SU2, ::Int)
     return clebsch_gordan_tensor(s1, s2, s3)  # no outer multiplicity
 end
 
-function clebsch_gordan_tensor(s1::SU{2}, s2::SU{2}, s3::SU{2})
+function clebsch_gordan_tensor(s1::SU2, s2::SU2, s3::SU2)
     d1 = quantum_dimension(s1)
     d2 = quantum_dimension(s2)
     d3 = quantum_dimension(s3)
@@ -125,13 +125,14 @@ function clebsch_gordan_tensor(s1::SU{2}, s2::SU{2}, s3::SU{2})
     return cgtensor
 end
 
-function clebsch_gordan_tensor(
-        ::NotAbelianStyle, s1::SU{3}, s2::SU{3}, s3::SU{3}, outer_mult_index::Int
-    )
-    d1 = quantum_dimension(s1)
-    d2 = quantum_dimension(s2)
-    d3 = quantum_dimension(s3)
-    cgtensor = zeros(d1, d2, d3)
-    # dummy
-    return cgtensor
-end
+## TODO: Implement and move to `FusionTensorsSUNRepresentationsExt`.
+## function clebsch_gordan_tensor(
+##         ::NotAbelianStyle, s1::SU{3}, s2::SU{3}, s3::SU{3}, outer_mult_index::Int
+##     )
+##     d1 = quantum_dimension(s1)
+##     d2 = quantum_dimension(s2)
+##     d3 = quantum_dimension(s3)
+##     cgtensor = zeros(d1, d2, d3)
+##     # dummy
+##     return cgtensor
+## end

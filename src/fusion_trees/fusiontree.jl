@@ -5,10 +5,10 @@
 
 using GradedArrays:
     GradedArrays,
-    ×,
     AbstractGradedUnitRange,
-    AbstractSector,
-    SectorProduct,
+    SectorProductRange,
+    SectorRange,
+    ×,
     arguments,
     flip,
     flip_dual,
@@ -16,6 +16,7 @@ using GradedArrays:
     nsymbol,
     sector_multiplicities,
     sector_type,
+    sectorproduct,
     sectors,
     to_gradedrange,
     trivial
@@ -125,7 +126,7 @@ function GradedArrays.:×(f1::SectorFusionTree, f2::SectorFusionTree)
     )
 end
 
-function GradedArrays.arguments(f::SectorFusionTree{<:SectorProduct})
+function GradedArrays.arguments(f::SectorFusionTree{<:SectorProductRange})
     transposed_indices = outer_multiplicity_split.(
         Base.tail(leaves(f)),
         branch_sectors(f),
@@ -136,7 +137,7 @@ function GradedArrays.arguments(f::SectorFusionTree{<:SectorProduct})
     arguments_leaves = arguments.(leaves(f))
     arguments_branch_sectors = arguments.(branch_sectors(f))
     # TODO way to avoid explicit ntuple?
-    # works fine for Tuple and NamedTuple SectorProduct
+    # works fine for Tuple and NamedTuple SectorProductRange
     return ntuple(
         i -> SectorFusionTree(
             getindex.(arguments_leaves, i),
@@ -149,21 +150,21 @@ function GradedArrays.arguments(f::SectorFusionTree{<:SectorProduct})
     )
 end
 
-function GradedArrays.arguments(f::SectorFusionTree{<:SectorProduct, 0})
+function GradedArrays.arguments(f::SectorFusionTree{<:SectorProductRange, 0})
     return map(arg -> SectorFusionTree((), (), arg, (), ()), arguments(root_sector(f)))
 end
 
-function GradedArrays.arguments(f::SectorFusionTree{<:SectorProduct, 1})
+function GradedArrays.arguments(f::SectorFusionTree{<:SectorProductRange, 1})
     arguments_root = arguments(root_sector(f))
     arguments_leave = arguments(only(leaves(f)))
-    # use map(keys) to stay agnostic with respect to SectorProduct implementation
+    # use map(keys) to stay agnostic with respect to SectorProductRange implementation
     return map(keys(arguments_root)) do k
         return SectorFusionTree((arguments_leave[k],), arrows(f), arguments_root[k], (), ())
     end
 end
 
 # TBD change type depending on AbelianStyle?
-fusiontree_eltype(::Type{<:AbstractSector}) = Float64
+fusiontree_eltype(::Type{<:SectorRange}) = Float64
 
 # constructors
 function build_trees(legs::Vararg{AbstractGradedUnitRange})
@@ -175,7 +176,7 @@ function build_trees(legs::Vararg{AbstractGradedUnitRange})
 end
 
 function build_trees(
-        sectors_to_fuse::NTuple{N, <:AbstractSector}, arrows_to_fuse::NTuple{N, Bool}
+        sectors_to_fuse::NTuple{N, <:SectorRange}, arrows_to_fuse::NTuple{N, Bool}
     ) where {N}
     # construct all authorized trees with fixed outer sectors
     trees = [SectorFusionTree(first(sectors_to_fuse), first(arrows_to_fuse))]
@@ -186,18 +187,18 @@ end
 # =====================================  Internals  ========================================
 #
 
-# --------------- SectorProduct helper functions  ---------------
+# --------------- SectorProductRange helper functions  ---------------
 function outer_multiplicity_kron(
         sec1, sec2, fused, outer_multiplicity1, outer_multiplicity2
     )
-    n = nsymbol(sec1, sec2, fused)
+    n = Int(nsymbol(sec1, sec2, fused))
     linear_inds = LinearIndices((n, outer_multiplicity2))
     return linear_inds[outer_multiplicity1, outer_multiplicity2]
 end
 
 function outer_multiplicity_split(
         sec1::S, sec2::S, fused::S, outer_mult_index::Integer
-    ) where {S <: SectorProduct}
+    ) where {S <: SectorProductRange}
     args1 = arguments(sec1)
     args2 = arguments(sec2)
     args12 = arguments(fused)
@@ -207,15 +208,15 @@ end
 
 # --------------- Build trees  ---------------
 # zero leg: need S to get sector type information
-function SectorFusionTree{S}() where {S <: AbstractSector}
+function SectorFusionTree{S}() where {S <: SectorRange}
     return SectorFusionTree((), (), trivial(S), (), ())
 end
-function SectorFusionTree{S}(::Tuple{}, ::Tuple{}) where {S <: AbstractSector}
+function SectorFusionTree{S}(::Tuple{}, ::Tuple{}) where {S <: SectorRange}
     return SectorFusionTree((), (), trivial(S), (), ())
 end
 
 # one leg
-function SectorFusionTree(sect::AbstractSector, arrow::Bool)
+function SectorFusionTree(sect::SectorRange, arrow::Bool)
     return SectorFusionTree((sect,), (arrow,), sect, (), ())
 end
 
@@ -227,7 +228,7 @@ end
 
 function append_tree_leave(
         parent_tree::SectorFusionTree,
-        branch_sector::AbstractSector,
+        branch_sector::SectorRange,
         level_arrow::Bool,
         child_root_sector,
         outer_mult,
@@ -242,7 +243,7 @@ function append_tree_leave(
 end
 
 function fuse_next_sector(
-        parent_tree::SectorFusionTree, branch_sector::AbstractSector, level_arrow::Bool
+        parent_tree::SectorFusionTree, branch_sector::SectorRange, level_arrow::Bool
     )
     new_space = to_gradedrange(root_sector(parent_tree) ⊗ branch_sector)
     return mapreduce(
@@ -282,7 +283,7 @@ function to_array(f::SectorFusionTree)
     return grow_tensor_tree(tree_tensor, f)
 end
 
-function to_array(f::SectorFusionTree{<:SectorProduct})
+function to_array(f::SectorFusionTree{<:SectorProductRange})
     args = convert.(Array, arguments(f))
     return reduce(_tensor_kron, args)
 end

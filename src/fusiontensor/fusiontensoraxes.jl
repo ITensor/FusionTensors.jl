@@ -2,7 +2,6 @@ using BlockArrays: BlockArrays
 using GradedArrays:
     GradedArrays,
     AbstractGradedUnitRange,
-    AbstractSector,
     SymmetryStyle,
     TrivialSector,
     dual,

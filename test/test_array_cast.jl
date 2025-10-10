@@ -4,7 +4,7 @@ using Test: @test, @test_throws, @testset
 using BlockArrays: Block, BlockedArray, blocksize
 
 using FusionTensors: FusionTensor, data_matrix, to_fusiontensor
-using GradedArrays: O2, SectorProduct, SU2, TrivialSector, U1, dual, gradedrange
+using GradedArrays: O2, SU2, TrivialSector, U1, dual, gradedrange, sectorproduct
 using TensorProducts: tensor_product
 
 include("setup.jl")
@@ -389,20 +389,21 @@ end
             tRVB[i, 1, 1, 1, i + 1] = 1.0
         end
 
-        gd = gradedrange([SectorProduct(s, U1(3)) => 1])
+        gd = gradedrange([sectorproduct(s, U1(3)) => 1])
         codomain_legs = (dual(gd),)
-        gD = gradedrange([SectorProduct(SU2(0), U1(1)) => 1, SectorProduct(s, U1(0)) => 1])
+        gD = gradedrange([sectorproduct(SU2(0), U1(1)) => 1, sectorproduct(s, U1(0)) => 1])
         domain_legs = (gD, gD, gD, gD)
         ft = to_fusiontensor(tRVB, codomain_legs, domain_legs)
         @test isnothing(check_sanity(ft))
         @test Array(ft) ≈ tRVB
 
         # same with NamedTuples
-        gd_nt = gradedrange([SectorProduct(; S = s, N = U1(3)) => 1])
+        gd_nt = gradedrange([sectorproduct((; S = s, N = U1(3))) => 1])
         codomain_legs_nt = (dual(gd_nt),)
         gD_nt = gradedrange(
             [
-                SectorProduct(; S = SU2(0), N = U1(1)) => 1, SectorProduct(; S = s, N = U1(0)) => 1,
+                sectorproduct((; S = SU2(0), N = U1(1))) => 1,
+                sectorproduct((; S = s, N = U1(0))) => 1,
             ]
         )
         domain_legs_nt = (gD_nt, gD_nt, gD_nt, gD_nt)
