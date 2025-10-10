@@ -17,7 +17,6 @@ using FusionTensors:
 using GradedArrays:
     U1,
     SU2,
-    SectorProduct,
     TrivialSector,
     Z,
     checkspaces,
@@ -26,6 +25,7 @@ using GradedArrays:
     flip,
     gradedrange,
     sector_type,
+    sectorproduct,
     space_isequal
 using TensorAlgebra: tuplemortar
 using TensorProducts: tensor_product
@@ -68,15 +68,15 @@ include("setup.jl")
     @test space_isequal(domain_axis(ft1), g2)
     @test isnothing(check_sanity(ft0))
     @test isnothing(check_sanity(ft1))
-    @test sector_type(ft1) === U1{Int}
-    @test sector_type(typeof(ft1)) === U1{Int}
+    @test sector_type(ft1) ≡ U1
+    @test sector_type(typeof(ft1)) ≡ U1
 
     m1 = BlockSparseArray{Float64}(undef, g1, g2)
     m1[Block(2, 1)] = ones(2, 2)  # forbidden
     @test_throws ArgumentError FusionTensor(m1, (g1,), (g2,))
 
     # Base methods
-    @test eltype(ft1) === Float64
+    @test eltype(ft1) ≡ Float64
     @test length(ft1) == 30
     @test ndims(ft1) == 2
     @test size(ft1) == tuplemortar(((6,), (5,)))
@@ -167,7 +167,7 @@ end
     @test size(ft1) == tuplemortar(((6,), ()))
     @test size(data_matrix(ft1)) == (6, 1)
     @test isnothing(check_sanity(ft1))
-    @test sector_type(ft1) === sector_type(g1)
+    @test sector_type(ft1) ≡ sector_type(g1)
 
     # one column axis
     ft2 = FusionTensor{Float64}(undef, (), (g1,))
@@ -179,7 +179,7 @@ end
     @test size(ft2) == tuplemortar(((), (6,)))
     @test size(data_matrix(ft2)) == (1, 6)
     @test isnothing(check_sanity(ft2))
-    @test sector_type(ft2) === sector_type(g1)
+    @test sector_type(ft2) ≡ sector_type(g1)
 
     # zero axis
     ft3 = FusionTensor{Float64}(undef, (), ())
@@ -191,7 +191,7 @@ end
     @test size(ft3) == tuplemortar(((), ()))
     @test size(data_matrix(ft3)) == (1, 1)
     @test isnothing(check_sanity(ft3))
-    @test sector_type(ft3) === TrivialSector
+    @test sector_type(ft3) ≡ TrivialSector
 
     ft4 = FusionTensor{Float64}(undef, (g1, g1), ())
     @test ft4 isa FusionTensor
@@ -251,34 +251,34 @@ end
     @test isnothing(check_sanity(ft3))
 
     ft4 = +ft3
-    @test ft4 === ft3  # same object
+    @test ft4 ≡ ft3  # same object
 
     ft4 = -ft3
     @test isnothing(check_sanity(ft4))
-    @test codomain_axes(ft4) === codomain_axes(ft3)
-    @test domain_axes(ft4) === domain_axes(ft3)
+    @test codomain_axes(ft4) ≡ codomain_axes(ft3)
+    @test domain_axes(ft4) ≡ domain_axes(ft3)
     @test norm(ft4) ≈ norm(ft3)
     @test norm(ft4 + ft3) ≈ 0.0
 
     ft4 = ft3 + ft3
-    @test codomain_axes(ft4) === codomain_axes(ft3)
-    @test domain_axes(ft4) === domain_axes(ft3)
+    @test codomain_axes(ft4) ≡ codomain_axes(ft3)
+    @test domain_axes(ft4) ≡ domain_axes(ft3)
     @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
     @test space_isequal(domain_axis(ft4), domain_axis(ft3))
     @test isnothing(check_sanity(ft4))
     @test norm(ft4) ≈ 2norm(ft3)
 
     ft4 = ft3 - ft3
-    @test codomain_axes(ft4) === codomain_axes(ft3)
-    @test domain_axes(ft4) === domain_axes(ft3)
+    @test codomain_axes(ft4) ≡ codomain_axes(ft3)
+    @test domain_axes(ft4) ≡ domain_axes(ft3)
     @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
     @test space_isequal(domain_axis(ft4), domain_axis(ft3))
     @test isnothing(check_sanity(ft4))
     @test norm(ft4) ≈ 0.0
 
     ft4 = 2 * ft3
-    @test codomain_axes(ft4) === codomain_axes(ft3)
-    @test domain_axes(ft4) === domain_axes(ft3)
+    @test codomain_axes(ft4) ≡ codomain_axes(ft3)
+    @test domain_axes(ft4) ≡ domain_axes(ft3)
     @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
     @test space_isequal(domain_axis(ft4), domain_axis(ft3))
     @test isnothing(check_sanity(ft4))
@@ -286,16 +286,16 @@ end
     @test norm(ft4) ≈ 2norm(ft3)
 
     ft4 = 2.0 * ft3
-    @test codomain_axes(ft4) === codomain_axes(ft3)
-    @test domain_axes(ft4) === domain_axes(ft3)
+    @test codomain_axes(ft4) ≡ codomain_axes(ft3)
+    @test domain_axes(ft4) ≡ domain_axes(ft3)
     @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
     @test space_isequal(domain_axis(ft4), domain_axis(ft3))
     @test isnothing(check_sanity(ft4))
     @test eltype(ft4) == Float64
 
     ft4 = ft3 / 2.0
-    @test codomain_axes(ft4) === codomain_axes(ft3)
-    @test domain_axes(ft4) === domain_axes(ft3)
+    @test codomain_axes(ft4) ≡ codomain_axes(ft3)
+    @test domain_axes(ft4) ≡ domain_axes(ft3)
     @test space_isequal(codomain_axis(ft4), codomain_axis(ft3))
     @test space_isequal(domain_axis(ft4), domain_axis(ft3))
     @test isnothing(check_sanity(ft4))
@@ -303,16 +303,16 @@ end
     @test norm(ft4) ≈ norm(ft3) / 2.0
 
     ft5 = (1.0 + 2.0im) * ft3
-    @test codomain_axes(ft5) === codomain_axes(ft3)
-    @test domain_axes(ft5) === domain_axes(ft3)
+    @test codomain_axes(ft5) ≡ codomain_axes(ft3)
+    @test domain_axes(ft5) ≡ domain_axes(ft3)
     @test space_isequal(codomain_axis(ft5), codomain_axis(ft3))
     @test space_isequal(domain_axis(ft5), domain_axis(ft3))
     @test isnothing(check_sanity(ft4))
     @test eltype(ft5) == ComplexF64
     @test norm(ft5) ≈ √5 * norm(ft3)
 
-    @test conj(ft3) === ft3  # same object
-    @test real(ft3) === ft3
+    @test conj(ft3) ≡ ft3  # same object
+    @test real(ft3) ≡ ft3
     @test norm(imag(ft3)) == 0
 
     @test conj(ft5) isa FusionTensor{ComplexF64, 4}
@@ -325,8 +325,8 @@ end
     ft6 = conj(ft5)
     @test ft6 !== ft5  # different object
     @test isnothing(check_sanity(ft6))
-    @test codomain_axes(ft6) === codomain_axes(ft5)
-    @test domain_axes(ft6) === domain_axes(ft5)
+    @test codomain_axes(ft6) ≡ codomain_axes(ft5)
+    @test domain_axes(ft6) ≡ domain_axes(ft5)
     @test space_isequal(codomain_axis(ft6), codomain_axis(ft5))
     @test space_isequal(domain_axis(ft6), domain_axis(ft5))
     @test eltype(ft6) == ComplexF64
@@ -348,31 +348,31 @@ end
     @test_throws ArgumentError ft7 * ft3
 end
 
-@testset "missing SectorProduct" begin
-    g1 = gradedrange([SectorProduct(U1(1)) => 1])
-    g2 = gradedrange([SectorProduct(U1(1), SU2(1 // 2)) => 1])
-    g3 = gradedrange([SectorProduct(U1(1), SU2(1 // 2), Z{2}(1)) => 1])
+@testset "missing sectorproduct" begin
+    g1 = gradedrange([sectorproduct(U1(1)) => 1])
+    g2 = gradedrange([sectorproduct(U1(1), SU2(1 // 2)) => 1])
+    g3 = gradedrange([sectorproduct(U1(1), SU2(1 // 2), Z{2}(1)) => 1])
     S = sector_type(g3)
 
     ft = FusionTensor{Float64}(undef, (g1,), (dual(g2), dual(g3)))
-    @test sector_type(ft) === S
-    gr = gradedrange([SectorProduct(U1(1), SU2(0), Z{2}(0)) => 1])
+    @test sector_type(ft) ≡ S
+    gr = gradedrange([sectorproduct(U1(1), SU2(0), Z{2}(0)) => 1])
     @test space_isequal(codomain_axis(ft), gr)
     gc = gradedrange(
         [
-            SectorProduct(U1(2), SU2(0), Z{2}(1)) => 1, SectorProduct(U1(2), SU2(1), Z{2}(1)) => 1,
+            sectorproduct(U1(2), SU2(0), Z{2}(1)) => 1, sectorproduct(U1(2), SU2(1), Z{2}(1)) => 1,
         ]
     )
     @test space_isequal(domain_axis(ft), dual(gc))
 
-    gA = gradedrange([SectorProduct(; A = U1(1)) => 1])
-    gB = gradedrange([SectorProduct(; B = SU2(1 // 2)) => 1])
-    gC = gradedrange([SectorProduct(; C = Z{2}(0)) => 1])
+    gA = gradedrange([sectorproduct((; A = U1(1))) => 1])
+    gB = gradedrange([sectorproduct((; B = SU2(1 // 2))) => 1])
+    gC = gradedrange([sectorproduct((; C = Z{2}(0))) => 1])
     gABC = tensor_product(gA, gB, gC)
     S = sector_type(gABC)
 
     ft = FusionTensor{Float64}(undef, (gA, gB), (dual(gA), dual(gB), gC))
-    @test sector_type(ft) === S
+    @test sector_type(ft) ≡ S
     @test space_isequal(codomain_axis(ft), gABC)
     @test space_isequal(domain_axis(ft), dual(gABC))
 end
