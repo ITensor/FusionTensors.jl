@@ -133,14 +133,14 @@ end
     @test root_sector(f) == SU{3}((0, 0))
     @test sector_type(f) == typeof(a8)
 
-    f8a = trees[2]
-    f8b = trees[3]
-    @test_broken root_sector(f8a) == a8
-    @test_broken root_sector(f8b) == a8
+    f8a = trees[4]
+    f8b = trees[5]
+    @test root_sector(f8a) == a8
+    @test root_sector(f8b) == a8
     @test branch_sectors(f8a) == (a8,)
     @test branch_sectors(f8b) == (a8,)
     @test outer_multiplicity_indices(f8a) == (1,)
-    @test_broken outer_multiplicity_indices(f8b) == (2,)
+    @test outer_multiplicity_indices(f8b) == (2,)
 end
 
 @testset "SU(2)×SU(3) SectorFusionTree" begin
