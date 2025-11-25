@@ -4,7 +4,7 @@ using BlockArrays: Block
 using GradedArrays: space_isequal
 using LinearAlgebra: mul!
 using TensorAlgebra: TensorAlgebra, AbstractBlockPermutation, FusionStyle, blockedperm,
-    genperm, matricize, unmatricize
+    blockedtrivialperm, genperm, matricize, unmatricize
 
 function TensorAlgebra.output_axes(
         ::typeof(contract),
@@ -52,7 +52,7 @@ function TensorAlgebra.unmatricize(
     return FusionTensor(data_matrix(m), codomain_axes, domain_axes)
 end
 
-function TensorAlgebra.permuteblockeddims(
+function TensorAlgebra.bipermutedims(
         ft::FusionTensor,
         codomain_perm::Tuple{Vararg{Int}},
         domain_perm::Tuple{Vararg{Int}},
@@ -60,7 +60,7 @@ function TensorAlgebra.permuteblockeddims(
     return permutedims(ft, permmortar((codomain_perm, domain_perm)))
 end
 
-function TensorAlgebra.permuteblockeddims!(
+function TensorAlgebra.bipermutedims!(
         a_dest::FusionTensor,
         a_src::FusionTensor,
         codomain_perm::Tuple{Vararg{Int}},
@@ -69,7 +69,8 @@ function TensorAlgebra.permuteblockeddims!(
     return permutedims!(a_dest, a_src, permmortar((codomain_perm, domain_perm)))
 end
 
-# TODO define custom broadcast rules
+# TODO: Define custom broadcast rules for FusionTensors so that we can delete
+# this method.
 function TensorAlgebra.unmatricizeadd!(
         style::FusionTensorFusionStyle,
         a_dest::AbstractArray,
@@ -119,11 +120,11 @@ for f in MATRIX_FUNCTIONS
     @eval begin
         function TensorAlgebra.$f(
                 a::FusionTensor,
-                codomain_perm::Tuple{Vararg{Int}}, domain_perm::Tuple{Vararg{Int}};
+                codomain_length::Val, domain_length::Val;
                 kwargs...,
             )
-            a_mat = matricize(a, codomain_perm, domain_perm)
-            biperm = permmortar((codomain_perm, domain_perm))
+            a_mat = matricize(a, codomain_length, domain_length)
+            biperm = blockedtrivialperm((codomain_length, domain_length))
             permuted_axes = axes(a)[biperm]
             checkspaces_dual(codomain(permuted_axes), domain(permuted_axes))
             fa_mat = set_data_matrix(a_mat, Base.$f(data_matrix(a_mat); kwargs...))
