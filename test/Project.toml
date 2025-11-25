@@ -13,6 +13,9 @@ TensorAlgebra = "68bd88dc-f39d-4e12-b2ca-f046b68fcc6a"
 TensorProducts = "decf83d6-1968-43f4-96dc-fdb3fe15fc6d"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[sources]
+FusionTensors = {path = ".."}
+
 [compat]
 Aqua = "0.8.11"
 BlockArrays = "1.6"
@@ -24,6 +27,6 @@ Random = "1.10"
 SUNRepresentations = "0.3.1"
 SafeTestsets = "0.1.0"
 Suppressor = "0.2.8"
-TensorAlgebra = "0.4"
+TensorAlgebra = "0.5"
 TensorProducts = "0.1"
 Test = "1.10.0"
