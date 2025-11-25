@@ -14,8 +14,7 @@ TensorProducts = "decf83d6-1968-43f4-96dc-fdb3fe15fc6d"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [sources]
-FusionTensors = {path = "/Users/mfishman/.julia/dev/FusionTensors"}
-TensorAlgebra = {path = "/Users/mfishman/.julia/dev/TensorAlgebra"}
+FusionTensors = {path = ".."}
 
 [compat]
 Aqua = "0.8.11"
