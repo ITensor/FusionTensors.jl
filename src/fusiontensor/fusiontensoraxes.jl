@@ -44,7 +44,7 @@ end
 # ====================================  Definitions  =======================================
 
 # TBD explicit axis type as type parameters?
-struct FusionTensorAxes{BT <: BlockedTuple{2}}
+struct FusionTensorAxes{BT <: AbstractBlockTuple{2}} <: AbstractBlockTuple{2}
     outer_axes::BT
 
     function FusionTensorAxes{BT}(bt) where {BT}
@@ -75,18 +75,18 @@ TensorAlgebra.length_domain(fta::FusionTensorAxes) = length(domain(fta))
 # ==================================  Base interface  ======================================
 
 for f in [
-        :(broadcastable), :(Tuple), :(axes), :(firstindex), :(lastindex), :(iterate), :(length),
+        :(broadcastable), :(Tuple), :(axes), :(firstindex), :(lastindex), :(length),
     ]
     @eval Base.$f(fta::FusionTensorAxes) = Base.$f(BlockedTuple(fta))
 end
 
-for f in [:(getindex), :(iterate)]
-    @eval Base.$f(fta::FusionTensorAxes, i) = $f(BlockedTuple(fta), i)
-end
-
+Base.getindex(fta::FusionTensorAxes, i::Int) = BlockedTuple(fta)[i]
 function Base.getindex(fta::FusionTensorAxes, bp::AbstractBlockPermutation)
     return FusionTensorAxes(BlockedTuple(fta)[bp])
 end
+
+Base.iterate(fta::FusionTensorAxes) = iterate(BlockedTuple(fta))
+Base.iterate(fta::FusionTensorAxes, state::Int) = iterate(BlockedTuple(fta), state)
 
 Base.copy(fta::FusionTensorAxes) = FusionTensorAxes(copy.(BlockedTuple(fta)))
 
