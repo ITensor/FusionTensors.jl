@@ -1,6 +1,5 @@
 using Test: @test, @test_throws, @testset
 
-using TensorProducts: ⊗
 using BlockArrays: Block, blockedrange, blocklength, blocklengths, blocks
 using TensorAlgebra: BlockedTuple, length_codomain, trivial_axis, tuplemortar
 
@@ -15,6 +14,7 @@ using FusionTensors:
     promote_sector_type,
     promote_sectors
 using GradedArrays:
+    ⊗,
     ×,
     U1,
     TrivialSector,

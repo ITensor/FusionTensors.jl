@@ -21,7 +21,6 @@ using GradedArrays:
     trivial,
     zero_odd
 using TensorAlgebra: contract
-using TensorProducts: ⊗
 import TensorKitSectors as TKS
 
 function symbol_1j(s::SectorRange)

@@ -19,11 +19,11 @@ using GradedArrays:
     sector_type,
     sectormergesort,
     sectors,
-    space_isequal
+    space_isequal,
+    trivial_gradedrange
 using LinearAlgebra: UniformScaling
 using Random: Random, AbstractRNG, randn!
-using TensorAlgebra: BlockedTuple, trivial_axis, tuplemortar, length_codomain, length_domain
-using TensorProducts: tensor_product
+using TensorAlgebra: BlockedTuple, tuplemortar, length_codomain, length_domain
 using TypeParameterAccessors: type_parameters
 
 # =======================================  Misc  ===========================================
@@ -36,7 +36,7 @@ function flip_domain(nonflipped_col_axis, nonflipped_trees_to_ranges)
 end
 
 function fuse_axes(::Type{S}, ::Tuple{}) where {S <: SectorRange}
-    fused_axis = trivial_axis(S)
+    fused_axis = trivial_gradedrange(S)
     trees_to_ranges_mapping = Dict([SectorFusionTree{S}() => Block(1)[1:1]])
     return fused_axis, trees_to_ranges_mapping
 end

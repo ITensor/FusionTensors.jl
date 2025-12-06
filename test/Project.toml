@@ -10,11 +10,11 @@ SUNRepresentations = "1a50b95c-7aac-476d-a9ce-2bfc675fc617"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 TensorAlgebra = "68bd88dc-f39d-4e12-b2ca-f046b68fcc6a"
-TensorProducts = "decf83d6-1968-43f4-96dc-fdb3fe15fc6d"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [sources]
 FusionTensors = {path = ".."}
+TensorAlgebra = {path = "/Users/mfishman/.julia/dev/TensorAlgebra"}
 
 [compat]
 Aqua = "0.8.11"
@@ -27,6 +27,5 @@ Random = "1.10"
 SUNRepresentations = "0.3.1"
 SafeTestsets = "0.1.0"
 Suppressor = "0.2.8"
-TensorAlgebra = "0.5"
-TensorProducts = "0.1"
+TensorAlgebra = "0.6"
 Test = "1.10.0"
