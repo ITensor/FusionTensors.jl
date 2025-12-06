@@ -35,10 +35,9 @@ TensorAlgebra.FusionStyle(::Type{<:FusionTensor}) = FusionTensorFusionStyle()
 unval(::Val{x}) where {x} = x
 
 function TensorAlgebra.matricize(
-        ::FusionTensorFusionStyle, ft::AbstractArray,
-        codomain_length::Val, domain_length::Val
+        ::FusionTensorFusionStyle, ft::AbstractArray, length_codomain::Val
     )
-    blocklengths(axes(ft)) == unval.((codomain_length, domain_length)) ||
+    first(blocklengths(axes(ft))) == unval(length_codomain) ||
         throw(ArgumentError("Invalid trivial biperm"))
     return FusionTensor(data_matrix(ft), (codomain_axis(ft),), (domain_axis(ft),))
 end

@@ -24,7 +24,8 @@ using GradedArrays:
     gradedrange,
     sectorproduct,
     sector_type,
-    space_isequal
+    space_isequal,
+    trivial_gradedrange
 
 @testset "misc FusionTensors.jl" begin
     g1 = gradedrange([U1(0) => 1])
@@ -84,7 +85,7 @@ end
     @test all(map(r -> space_isequal(r, g2b), domain(fta)))
     @test space_isequal(fused_codomain(fta), g2 ⊗ g2)
     @test space_isequal(fused_domain(fta), dual(g2 ⊗ g2))
-    @test space_isequal(trivial_axis(fta), trivial_axis(typeof(s2)))
+    @test space_isequal(trivial_gradedrange(fta), trivial_gradedrange(typeof(s2)))
 
     @test fta == fta
     @test copy(fta) == fta
@@ -111,7 +112,7 @@ end
     @test length_codomain(fta) == 0
 
     @test codomain(fta) == ()
-    @test space_isequal(fused_codomain(fta), trivial_axis(TrivialSector))
+    @test space_isequal(fused_codomain(fta), trivial_gradedrange(TrivialSector))
     @test domain(fta) == ()
-    @test space_isequal(fused_domain(fta), dual(trivial_axis(TrivialSector)))
+    @test space_isequal(fused_domain(fta), dual(trivial_gradedrange(TrivialSector)))
 end
