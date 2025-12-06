@@ -4,9 +4,12 @@ using GradedArrays:
     AbstractGradedUnitRange,
     SymmetryStyle,
     TrivialSector,
+    ⊗,
     dual,
     sector_type,
-    trivial
+    tensor_product,
+    trivial,
+    trivial_gradedrange
 using TensorAlgebra:
     TensorAlgebra,
     AbstractBlockPermutation,
@@ -14,7 +17,6 @@ using TensorAlgebra:
     BlockedTuple,
     length_codomain,
     length_domain
-using TensorProducts: ⊗
 using TypeParameterAccessors: type_parameters
 
 # =======================================  Misc  ===========================================
@@ -68,7 +70,9 @@ end
 
 TensorAlgebra.BlockedTuple(fta::FusionTensorAxes) = fta.outer_axes
 
-TensorAlgebra.trivial_axis(fta::FusionTensorAxes) = trivial_axis(sector_type(fta))
+function GradedArrays.trivial_gradedrange(fta::FusionTensorAxes)
+    return trivial_gradedrange(sector_type(fta))
+end
 
 TensorAlgebra.length_domain(fta::FusionTensorAxes) = length(domain(fta))
 
@@ -136,14 +140,14 @@ domain(fta::FusionTensorAxes) = fta[Block(2)]
 
 function fused_codomain(fta::FusionTensorAxes)
     if length_codomain(fta) == 0
-        return trivial_axis(fta)
+        return trivial_gradedrange(fta)
     end
     return ⊗(codomain(fta)...)
 end
 
 function fused_domain(fta::FusionTensorAxes)
     if length_domain(fta) == 0
-        return dual(trivial_axis(fta))
+        return dual(trivial_gradedrange(fta))
     end
     return dual(⊗(dual.(domain(fta))...))
 end

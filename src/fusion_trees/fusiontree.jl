@@ -8,6 +8,7 @@ using GradedArrays:
     AbstractGradedUnitRange,
     SectorProductRange,
     SectorRange,
+    ⊗,
     ×,
     arguments,
     flip,
@@ -21,7 +22,6 @@ using GradedArrays:
     to_gradedrange,
     trivial
 using TensorAlgebra: flatten_tuples
-using TensorProducts: ⊗
 
 #
 # A fusion tree fuses N sectors sec1, secN  onto one sector fused_sec. A given set of

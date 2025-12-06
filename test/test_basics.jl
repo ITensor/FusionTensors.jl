@@ -26,9 +26,9 @@ using GradedArrays:
     gradedrange,
     sector_type,
     sectorproduct,
-    space_isequal
+    space_isequal,
+    tensor_product
 using TensorAlgebra: tuplemortar
-using TensorProducts: tensor_product
 using LinearAlgebra: LinearAlgebra, norm
 using Random: Random
 
