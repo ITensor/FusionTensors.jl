@@ -4,7 +4,7 @@ using BlockArrays: Block
 using GradedArrays: space_isequal
 using LinearAlgebra: mul!
 using TensorAlgebra: TensorAlgebra, AbstractBlockPermutation, FusionStyle, blockedperm,
-    blockedtrivialperm, genperm, matricize, unmatricize
+    genperm, matricize, trivialbiperm, unmatricize
 
 function TensorAlgebra.output_axes(
         ::typeof(contract),
@@ -117,13 +117,9 @@ const MATRIX_FUNCTIONS = [
 
 for f in MATRIX_FUNCTIONS
     @eval begin
-        function TensorAlgebra.$f(
-                a::FusionTensor,
-                codomain_length::Val, domain_length::Val;
-                kwargs...,
-            )
-            a_mat = matricize(a, codomain_length, domain_length)
-            biperm = blockedtrivialperm((codomain_length, domain_length))
+        function TensorAlgebra.$f(a::FusionTensor, length_codomain::Val; kwargs...)
+            a_mat = matricize(a, length_codomain)
+            biperm = trivialbiperm(length_codomain, Val(ndims(a)))
             permuted_axes = axes(a)[biperm]
             checkspaces_dual(codomain(permuted_axes), domain(permuted_axes))
             fa_mat = set_data_matrix(a_mat, Base.$f(data_matrix(a_mat); kwargs...))
