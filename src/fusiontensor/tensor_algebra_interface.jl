@@ -117,13 +117,16 @@ const MATRIX_FUNCTIONS = [
 
 for f in MATRIX_FUNCTIONS
     @eval begin
-        function TensorAlgebra.$f(a::FusionTensor, length_codomain::Val; kwargs...)
-            a_mat = matricize(a, length_codomain)
+        function TensorAlgebra.$f(
+                style::FusionTensorFusionStyle, a::AbstractArray,
+                length_codomain::Val; kwargs...,
+            )
+            a_mat = matricize(style, a, length_codomain)
             biperm = trivialbiperm(length_codomain, Val(ndims(a)))
             permuted_axes = axes(a)[biperm]
             checkspaces_dual(codomain(permuted_axes), domain(permuted_axes))
             fa_mat = set_data_matrix(a_mat, Base.$f(data_matrix(a_mat); kwargs...))
-            return unmatricize(fa_mat, permuted_axes)
+            return unmatricize(style, fa_mat, permuted_axes)
         end
     end
 end
