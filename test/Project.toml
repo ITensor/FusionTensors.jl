@@ -12,8 +12,8 @@ Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 TensorAlgebra = "68bd88dc-f39d-4e12-b2ca-f046b68fcc6a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-[sources]
-FusionTensors = {path = ".."}
+[sources.FusionTensors]
+path = ".."
 
 [compat]
 Aqua = "0.8.11"
@@ -26,5 +26,5 @@ Random = "1.10"
 SUNRepresentations = "0.3.1"
 SafeTestsets = "0.1.0"
 Suppressor = "0.2.8"
-TensorAlgebra = "0.6"
+TensorAlgebra = "0.6, 0.7"
 Test = "1.10.0"
