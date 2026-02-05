@@ -100,7 +100,7 @@ function Base.similar(ft::FusionTensor, T::Type)
 end
 
 function Base.similar(
-        ::FusionTensor, ::Type, t::Tuple{AbstractGradedUnitRange, Vararg{AbstractGradedUnitRange}}
+        ::FusionTensor, ::Type, t::Tuple{GradedUnitRange, Vararg{GradedUnitRange}}
     )
     throw(MethodError(similar, (typeof(t),)))
 end
