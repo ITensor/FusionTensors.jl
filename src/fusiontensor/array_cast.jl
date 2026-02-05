@@ -3,7 +3,7 @@
 using BlockArrays: AbstractBlockArray, BlockedArray, blockedrange, blocklengths, findblock
 
 using BlockSparseArrays: BlockSparseArrays, BlockSparseArray
-using GradedArrays: AbstractGradedUnitRange, quantum_dimension
+using GradedArrays: GradedUnitRange, quantum_dimension
 using TensorAlgebra: contract
 
 # =================================  High level interface  =================================
@@ -18,8 +18,8 @@ end
 # =================================  Low level interface  ==================================
 function to_fusiontensor(
         array::AbstractArray,
-        codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}};
+        codomain_legs::Tuple{Vararg{GradedUnitRange}},
+        domain_legs::Tuple{Vararg{GradedUnitRange}};
         atol::Real = 0,
         rtol::Real = rtoldefault(array),
     )
@@ -39,8 +39,8 @@ end
 
 function to_fusiontensor(
         blockarray::AbstractBlockArray,
-        codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}};
+        codomain_legs::Tuple{Vararg{GradedUnitRange}},
+        domain_legs::Tuple{Vararg{GradedUnitRange}};
         atol::Real = 0,
         rtol::Real = rtoldefault(blockarray),
     )
@@ -61,8 +61,8 @@ end
 
 function to_fusiontensor_no_checknorm(
         blockarray::AbstractBlockArray,
-        codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+        codomain_legs::Tuple{Vararg{GradedUnitRange}},
+        domain_legs::Tuple{Vararg{GradedUnitRange}},
     )
     ft = FusionTensor{eltype(blockarray)}(undef, codomain_legs, domain_legs)
     for (f1, f2) in keys(trees_block_mapping(ft))

@@ -5,7 +5,7 @@
 
 using GradedArrays:
     GradedArrays,
-    AbstractGradedUnitRange,
+    GradedUnitRange,
     SectorProductRange,
     SectorRange,
     ⊗,
@@ -167,7 +167,7 @@ end
 fusiontree_eltype(::Type{<:SectorRange}) = Float64
 
 # constructors
-function build_trees(legs::Vararg{AbstractGradedUnitRange})
+function build_trees(legs::Vararg{GradedUnitRange})
     # construct all authorized trees for each outer block in legs
     tree_arrows = isdual.(legs)
     return mapreduce(vcat, Iterators.product(sectors.(flip_dual.(legs))...)) do it

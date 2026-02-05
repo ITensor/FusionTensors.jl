@@ -5,7 +5,7 @@ using BlockArrays: AbstractBlockMatrix, BlockArrays, BlockIndexRange, blocklengt
 using BlockSparseArrays:
     AbstractBlockSparseMatrix, BlockSparseArray, eachblockstoredindex, to_block_indices
 using GradedArrays:
-    AbstractGradedUnitRange,
+    GradedUnitRange,
     SymmetryStyle,
     TrivialSector,
     dual,
@@ -40,14 +40,14 @@ function fuse_axes(::Type{S}, ::Tuple{}) where {S <: SectorRange}
     trees_to_ranges_mapping = Dict([SectorFusionTree{S}() => Block(1)[1:1]])
     return fused_axis, trees_to_ranges_mapping
 end
-function fuse_axes(::Type, outer_legs::Tuple{Vararg{AbstractGradedUnitRange}})
+function fuse_axes(::Type, outer_legs::Tuple{Vararg{GradedUnitRange}})
     fusion_trees_mult = fusion_trees_external_multiplicities(outer_legs)
     fused_leg, trees_to_ranges_mapping = compute_inner_ranges(fusion_trees_mult)
     return fused_leg, trees_to_ranges_mapping
 end
 
 function fusion_trees_external_multiplicities(
-        outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
+        outer_legs::Tuple{Vararg{GradedUnitRange}}
     )
     return Iterators.flatten(
         block_fusion_trees_external_multiplicities.(Iterators.product(blocks.(outer_legs)...))
@@ -94,8 +94,8 @@ end
 
 function initialize_data_matrix(
         elt::Type{<:Number},
-        codomain_axis::AbstractGradedUnitRange,
-        domain_axis::AbstractGradedUnitRange,
+        codomain_axis::GradedUnitRange,
+        domain_axis::GradedUnitRange,
     )
     @assert sector_type(codomain_axis) == sector_type(domain_axis)
     # non-abelian fusion trees have float eltype: need compatible type
@@ -190,16 +190,16 @@ end
 # constructor from split axes
 function FusionTensor(
         x,
-        codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+        codomain_legs::Tuple{Vararg{GradedUnitRange}},
+        domain_legs::Tuple{Vararg{GradedUnitRange}},
     )
     return FusionTensor(x, tuplemortar((codomain_legs, domain_legs)))
 end
 
 function FusionTensor{T}(
         x,
-        codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+        codomain_legs::Tuple{Vararg{GradedUnitRange}},
+        domain_legs::Tuple{Vararg{GradedUnitRange}},
     ) where {T}
     return FusionTensor{T}(x, tuplemortar((codomain_legs, domain_legs)))
 end
@@ -222,7 +222,7 @@ Base.randn(::Type{T}, fta::FusionTensorAxes) where {T} = randn(Random.default_rn
 Base.randn(fta::FusionTensorAxes) = randn(Float64, fta)
 
 function FusionTensor{T}(
-        s::UniformScaling, codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
+        s::UniformScaling, codomain_legs::Tuple{Vararg{GradedUnitRange}}
     ) where {T}
     fta = FusionTensorAxes(codomain_legs, dual.(codomain_legs))
     ft = FusionTensor{T}(undef, fta)
@@ -232,7 +232,7 @@ function FusionTensor{T}(
     return ft
 end
 function FusionTensor(
-        s::UniformScaling, codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
+        s::UniformScaling, codomain_legs::Tuple{Vararg{GradedUnitRange}}
     )
     return FusionTensor{Float64}(s, codomain_legs)
 end

@@ -1,7 +1,7 @@
 using BlockArrays: BlockArrays
 using GradedArrays:
     GradedArrays,
-    AbstractGradedUnitRange,
+    GradedUnitRange,
     SymmetryStyle,
     TrivialSector,
     ⊗,
@@ -29,7 +29,7 @@ function promote_sector_type(legs...)
     return sector_type(⊗(trivial.(legs)...))
 end
 
-promote_sectors(legs::NTuple{<:Any, <:AbstractGradedUnitRange}) = legs # nothing to do
+promote_sectors(legs::NTuple{<:Any, <:GradedUnitRange}) = legs # nothing to do
 
 function promote_sectors(legs)
     T = promote_sector_type(legs)
@@ -107,7 +107,7 @@ end
 # ================================  BlockArrays interface  =================================
 
 for f in [:(blocklength), :(blocklengths), :(blocks)]
-    @eval BlockArrays.$f(fta::FusionTensorAxes) = $f(BlockedTuple(fta))
+    @eval TensorAlgebra.$f(fta::FusionTensorAxes) = $f(BlockedTuple(fta))
 end
 
 # ==============================  GradedArrays interface  ==================================
@@ -126,11 +126,12 @@ function GradedArrays.SymmetryStyle(::Type{FTA}) where {FTA <: FusionTensorAxes}
     return SymmetryStyle(sector_type(FTA))
 end
 
-function GradedArrays.checkspaces(
-        ::Type{Bool}, left::FusionTensorAxes, right::FusionTensorAxes
-    )
-    return left == right
-end
+## TODO: FIXME: Upgrade this.
+## function GradedArrays.checkspaces(
+##         ::Type{Bool}, left::FusionTensorAxes, right::FusionTensorAxes
+##     )
+##     return left == right
+## end
 
 # ==============================  FusionTensor interface  ==================================
 
