@@ -2,26 +2,11 @@
 # one tensor is defined from 3 simple objects s1, s2 and s3
 # and contains the coefficients fusing s1 ⊗ s2 -> s3
 
-using HalfIntegers: half
-using WignerSymbols: clebschgordan
-
-using GradedArrays:
-    AbelianStyle,
-    NotAbelianStyle,
-    O2,
-    SU2,
-    SectorRange,
-    SymmetryStyle,
-    TrivialSector,
-    dual,
-    istrivial,
-    quantum_dimension,
-    sector_label,
-    sectors,
-    trivial,
-    zero_odd
-using TensorAlgebra: contract
 import TensorKitSectors as TKS
+using GradedArrays: AbelianStyle, NotAbelianStyle, O2, SU2, SectorRange, SymmetryStyle, TrivialSector, dual, istrivial, quantum_dimension, sector_label, sectors, trivial, zero_odd
+using HalfIntegers: half
+using TensorAlgebra: contract
+using WignerSymbols: clebschgordan
 
 function symbol_1j(s::SectorRange)
     cgt = clebsch_gordan_tensor(s, dual(s), trivial(s), 1)

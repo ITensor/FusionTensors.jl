@@ -1,5 +1,5 @@
-using FusionTensors: FusionTensors
 using Documenter: Documenter, DocMeta, deploydocs, makedocs
+using FusionTensors: FusionTensors
 
 DocMeta.setdocmeta!(FusionTensors, :DocTestSetup, :(using FusionTensors); recursive = true)
 
