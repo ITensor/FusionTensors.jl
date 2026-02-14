@@ -1,11 +1,9 @@
 # This file defines linalg for FusionTensor
 
-using LinearAlgebra: LinearAlgebra, mul!, norm, tr
-
 using BlockArrays: Block, blocks
-
 using BlockSparseArrays: eachblockstoredindex
 using GradedArrays: checkspaces, checkspaces_dual, quantum_dimension, sectors
+using LinearAlgebra: LinearAlgebra, mul!, norm, tr
 
 # allow to contract with different eltype and let BlockSparseArray ensure compatibility
 # impose matching type and number of axes at compile time

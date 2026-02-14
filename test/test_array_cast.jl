@@ -1,11 +1,9 @@
+using BlockArrays: Block, BlockedArray, blocksize
+using FusionTensors: FusionTensor, data_matrix, to_fusiontensor
+using GradedArrays:
+    O2, SU2, TrivialSector, U1, dual, gradedrange, sectorproduct, tensor_product
 using LinearAlgebra: LinearAlgebra, norm
 using Test: @test, @test_throws, @testset
-
-using BlockArrays: Block, BlockedArray, blocksize
-
-using FusionTensors: FusionTensor, data_matrix, to_fusiontensor
-using GradedArrays: O2, SU2, TrivialSector, U1, dual, gradedrange, sectorproduct,
-    tensor_product
 
 include("setup.jl")
 
@@ -244,7 +242,7 @@ end
                 [0.0, 0.5, -0.25, 0.0]
                 [0.0, 0.0, 0.0, 0.25]
             ],
-            (2, 2, 2, 2),
+            (2, 2, 2, 2)
         )
         dense, codomain_legs, domain_legs = sds22, (g2, g2), (g2b, g2b)
         ft = to_fusiontensor(dense, codomain_legs, domain_legs)
@@ -261,7 +259,7 @@ end
                 [0.0, 0.0, 0.25, 0.0]
                 [-0.5, 0.0, 0.0, -0.25]
             ],
-            (2, 2, 2, 2),
+            (2, 2, 2, 2)
         )
         sds22b_codomain_legs = (g2, g2b)
         dense, codomain_legs, domain_legs = sds22b, (g2, g2b), (g2b, g2)
@@ -321,7 +319,7 @@ end
                 [0.0, 0.5, -0.25, 0.0]
                 [0.0, 0.0, 0.0, 0.25]
             ],
-            (2, 2, 2, 2),
+            (2, 2, 2, 2)
         )
         dense, codomain_legs, domain_legs = sds22, (g2, g2), (g2b, g2b)
         ft = to_fusiontensor(dense, codomain_legs, domain_legs)
@@ -338,7 +336,7 @@ end
                 [0.0, 0.0, 0.25, 0.0]
                 [-0.5, 0.0, 0.0, -0.25]
             ],
-            (2, 2, 2, 2),
+            (2, 2, 2, 2)
         )
         sds22b_codomain_legs = (g2, g2b)
         dense, codomain_legs, domain_legs = sds22b, (g2, g2b), (g2b, g2)

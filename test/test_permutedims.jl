@@ -1,17 +1,9 @@
-using Test: @test, @testset, @test_broken, @test_throws
 using BlockArrays: blocks
-
-using FusionTensors:
-    FusionTensor,
-    FusionTensorAxes,
-    data_matrix,
-    codomain_axis,
-    domain_axis,
-    ndims_domain,
-    ndims_codomain,
-    to_fusiontensor
-using GradedArrays: ×, O2, U1, SectorProduct, SU2, dual, gradedrange, space_isequal
+using FusionTensors: FusionTensor, FusionTensorAxes, codomain_axis, data_matrix,
+    domain_axis, ndims_codomain, ndims_domain, to_fusiontensor
+using GradedArrays: O2, SU2, SectorProduct, U1, dual, gradedrange, space_isequal, ×
 using TensorAlgebra: permmortar, tuplemortar
+using Test: @test, @test_broken, @test_throws, @testset
 
 include("setup.jl")
 
@@ -160,7 +152,7 @@ end
             [0.0, 0.5, -0.25, 0.0]
             [0.0, 0.0, 0.0, 0.25]
         ],
-        (2, 2, 2, 2),
+        (2, 2, 2, 2)
     )
 
     sds22b = reshape(
@@ -170,7 +162,7 @@ end
             [0.0, 0.0, 0.25, 0.0]
             [-0.5, 0.0, 0.0, -0.25]
         ],
-        (2, 2, 2, 2),
+        (2, 2, 2, 2)
     )
 
     for g2 in (

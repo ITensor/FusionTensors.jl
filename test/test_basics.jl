@@ -1,36 +1,13 @@
-using Test: @test, @test_throws, @testset
-
 using BlockArrays: Block
 using BlockSparseArrays: BlockSparseArray, eachblockstoredindex
-using FusionTensors:
-    FusionMatrix,
-    FusionTensor,
-    FusionTensorAxes,
-    codomain_axes,
-    data_matrix,
-    domain_axes,
-    FusionTensor,
-    codomain_axis,
-    domain_axis,
-    ndims_domain,
-    ndims_codomain
-using GradedArrays:
-    U1,
-    SU2,
-    TrivialSector,
-    Z,
-    checkspaces,
-    checkspaces_dual,
-    dual,
-    flip,
-    gradedrange,
-    sector_type,
-    sectorproduct,
-    space_isequal,
-    tensor_product
-using TensorAlgebra: tuplemortar
+using FusionTensors: FusionMatrix, FusionTensor, FusionTensorAxes, codomain_axes,
+    codomain_axis, data_matrix, domain_axes, domain_axis, ndims_codomain, ndims_domain
+using GradedArrays: SU2, TrivialSector, U1, Z, checkspaces, checkspaces_dual, dual, flip,
+    gradedrange, sector_type, sectorproduct, space_isequal, tensor_product
 using LinearAlgebra: LinearAlgebra, norm
 using Random: Random
+using TensorAlgebra: tuplemortar
+using Test: @test, @test_throws, @testset
 
 include("setup.jl")
 
@@ -237,7 +214,8 @@ end
         @test m == 3 * LinearAlgebra.I(size(m, 1))
     end
 
-    @test FusionTensor{ComplexF64}(LinearAlgebra.I, (g1, g2)) isa FusionTensor{ComplexF64, 4}
+    @test FusionTensor{ComplexF64}(LinearAlgebra.I, (g1, g2)) isa
+        FusionTensor{ComplexF64, 4}
 end
 
 @testset "Base operations" begin
@@ -360,7 +338,8 @@ end
     @test space_isequal(codomain_axis(ft), gr)
     gc = gradedrange(
         [
-            sectorproduct(U1(2), SU2(0), Z{2}(1)) => 1, sectorproduct(U1(2), SU2(1), Z{2}(1)) => 1,
+            sectorproduct(U1(2), SU2(0), Z{2}(1)) => 1,
+            sectorproduct(U1(2), SU2(1), Z{2}(1)) => 1,
         ]
     )
     @test space_isequal(domain_axis(ft), dual(gc))

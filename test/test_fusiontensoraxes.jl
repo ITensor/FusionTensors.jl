@@ -1,31 +1,10 @@
-using Test: @test, @test_throws, @testset
-
 using BlockArrays: Block, blockedrange, blocklength, blocklengths, blocks
+using FusionTensors: FusionTensorAxes, codomain, domain, fused_codomain, fused_domain,
+    ndims_codomain, ndims_domain, promote_sector_type, promote_sectors
+using GradedArrays: SU2, TrivialSector, U1, checkspaces, dual, gradedrange, sector_type,
+    sectorproduct, space_isequal, trivial_gradedrange, ×, ⊗
 using TensorAlgebra: BlockedTuple, length_codomain, trivial_axis, tuplemortar
-
-using FusionTensors:
-    FusionTensorAxes,
-    ndims_domain,
-    ndims_codomain,
-    codomain,
-    domain,
-    fused_codomain,
-    fused_domain,
-    promote_sector_type,
-    promote_sectors
-using GradedArrays:
-    ⊗,
-    ×,
-    U1,
-    TrivialSector,
-    SU2,
-    checkspaces,
-    dual,
-    gradedrange,
-    sectorproduct,
-    sector_type,
-    space_isequal,
-    trivial_gradedrange
+using Test: @test, @test_throws, @testset
 
 @testset "misc FusionTensors.jl" begin
     g1 = gradedrange([U1(0) => 1])

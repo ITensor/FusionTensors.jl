@@ -1,22 +1,8 @@
 using BlockArrays: BlockArrays
-using GradedArrays:
-    GradedArrays,
-    AbstractGradedUnitRange,
-    SymmetryStyle,
-    TrivialSector,
-    ⊗,
-    dual,
-    sector_type,
-    tensor_product,
-    trivial,
-    trivial_gradedrange
-using TensorAlgebra:
-    TensorAlgebra,
-    AbstractBlockPermutation,
-    AbstractBlockTuple,
-    BlockedTuple,
-    length_codomain,
-    length_domain
+using GradedArrays: GradedArrays, AbstractGradedUnitRange, SymmetryStyle, TrivialSector,
+    dual, sector_type, tensor_product, trivial, trivial_gradedrange, ⊗
+using TensorAlgebra: TensorAlgebra, AbstractBlockPermutation, AbstractBlockTuple,
+    BlockedTuple, length_codomain, length_domain
 using TypeParameterAccessors: type_parameters
 
 # =======================================  Misc  ===========================================

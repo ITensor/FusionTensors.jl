@@ -1,17 +1,10 @@
-using LinearAlgebra: Adjoint
 using BlockArrays: blocklengths
 using BlockSparseArrays: BlockSparseMatrix, eachblockstoredindex
-using FusionTensors:
-    FusionTensor,
-    codomain_axes,
-    data_matrix,
-    domain_axes,
-    domain_axis,
-    codomain_axis,
-    ndims_codomain,
-    ndims_domain
+using FusionTensors: FusionTensor, codomain_axes, codomain_axis, data_matrix, domain_axes,
+    domain_axis, ndims_codomain, ndims_domain
 using GradedArrays:
-    checkspaces, checkspaces_dual, dual, sectors, sector_multiplicities, space_isequal
+    checkspaces, checkspaces_dual, dual, sector_multiplicities, sectors, space_isequal
+using LinearAlgebra: Adjoint
 
 function check_sanity(ft::FusionTensor)
     nca = ndims_domain(ft)
