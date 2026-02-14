@@ -2,26 +2,13 @@
 # one tensor is defined from 3 simple objects s1, s2 and s3
 # and contains the coefficients fusing s1 ⊗ s2 -> s3
 
-using HalfIntegers: half
-using WignerSymbols: clebschgordan
-
-using GradedArrays:
-    AbelianStyle,
-    NotAbelianStyle,
-    O2,
-    SU2,
-    SectorRange,
-    SymmetryStyle,
-    TrivialSector,
-    dual,
-    istrivial,
-    quantum_dimension,
-    sector_label,
-    sectors,
-    trivial,
-    zero_odd
-using TensorAlgebra: contract
 import TensorKitSectors as TKS
+using GradedArrays: AbelianStyle, NotAbelianStyle, O2, SU2, SectorRange, SymmetryStyle,
+    TrivialSector, dual, istrivial, quantum_dimension, sector_label, sectors, trivial,
+    zero_odd
+using HalfIntegers: half
+using TensorAlgebra: contract
+using WignerSymbols: clebschgordan
 
 function symbol_1j(s::SectorRange)
     cgt = clebsch_gordan_tensor(s, dual(s), trivial(s), 1)
@@ -34,7 +21,7 @@ function clebsch_gordan_tensor(
         s3::SectorRange,
         arrow1::Bool,
         arrow2::Bool,
-        inner_mult_index::Int,
+        inner_mult_index::Int
     )
     cgt = clebsch_gordan_tensor(s1, s2, s3, inner_mult_index)
     if arrow1
@@ -50,7 +37,8 @@ end
 
 function clebsch_gordan_tensor(s1::S, s2::S, s3::S, outer_mult_index::Int = 1) where {S}
     CGC = TKS.fusiontensor(GradedArrays.label.((s1, s2, s3))...)
-    outer_mult_index ∈ axes(CGC, 4) || throw(ArgumentError("invalid outer multiplicity index"))
+    outer_mult_index ∈ axes(CGC, 4) ||
+        throw(ArgumentError("invalid outer multiplicity index"))
     if TKS.FusionStyle(S) === TKS.GenericFusion()
         # TODO: do we want a view here?
         return CGC[:, :, :, outer_mult_index]
@@ -60,7 +48,12 @@ function clebsch_gordan_tensor(s1::S, s2::S, s3::S, outer_mult_index::Int = 1) w
 end
 
 # TODO: remove once TensorKitSectors fixes this
-function clebsch_gordan_tensor(s1::TrivialSector, s2::TrivialSector, s3::TrivialSector, outer_mult_index::Int = 1)
+function clebsch_gordan_tensor(
+        s1::TrivialSector,
+        s2::TrivialSector,
+        s3::TrivialSector,
+        outer_mult_index::Int = 1
+    )
     outer_mult_index == 1 || throw(ArgumentError("invalid outer multiplicity index"))
     return fill(1, (1, 1, 1))
 end

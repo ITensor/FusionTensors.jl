@@ -1,11 +1,9 @@
-using LinearAlgebra: norm, normalize, normalize!, tr
-using Test: @test, @testset
-
 using BlockArrays: BlockArrays
-
 using BlockSparseArrays: BlockSparseArrays
 using FusionTensors: FusionTensor, to_fusiontensor
 using GradedArrays: O2, SU2, TrivialSector, U1, dual, gradedrange
+using LinearAlgebra: norm, normalize, normalize!, tr
+using Test: @test, @testset
 
 include("setup.jl")
 

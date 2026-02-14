@@ -1,13 +1,11 @@
-using Test: @test, @testset
-using LinearAlgebra: I
-
 using BlockArrays: BlockArrays
-
 using FusionTensors: SectorFusionTree, arrows, branch_sectors, build_trees,
     fusiontree_eltype, leaves, outer_multiplicity_indices, root_sector
-using GradedArrays: ×, SectorProduct, SectorRange, SU2, TrivialSector, arguments, dual,
-    flip, gradedrange, sector_type
+using GradedArrays: SU2, SectorProduct, SectorRange, TrivialSector, arguments, dual, flip,
+    gradedrange, sector_type, ×
+using LinearAlgebra: I
 using SUNRepresentations: SUNRepresentations
+using Test: @test, @testset
 
 const SU{N} = SectorRange{SUNRepresentations.SUNIrrep{N}}
 

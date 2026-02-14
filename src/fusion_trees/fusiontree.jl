@@ -3,24 +3,9 @@
 # TBD
 # compatibility with TensorKit conventions?
 
-using GradedArrays:
-    GradedArrays,
-    AbstractGradedUnitRange,
-    SectorProductRange,
-    SectorRange,
-    ⊗,
-    ×,
-    arguments,
-    flip,
-    flip_dual,
-    isdual,
-    nsymbol,
-    sector_multiplicities,
-    sector_type,
-    sectorproduct,
-    sectors,
-    to_gradedrange,
-    trivial
+using GradedArrays: GradedArrays, AbstractGradedUnitRange, SectorProductRange, SectorRange,
+    arguments, flip, flip_dual, isdual, nsymbol, sector_multiplicities, sector_type,
+    sectorproduct, sectors, to_gradedrange, trivial, ×, ⊗
 using TensorAlgebra: flatten_tuples
 
 #
@@ -101,7 +86,7 @@ function GradedArrays.flip(f::SectorFusionTree)
         .!arrows(f),
         dual(root_sector(f)),
         dual.(branch_sectors(f)),
-        outer_multiplicity_indices(f),
+        outer_multiplicity_indices(f)
     )
 end
 
@@ -115,14 +100,14 @@ function GradedArrays.:×(f1::SectorFusionTree, f2::SectorFusionTree)
         branch_sectors(f1),
         (Base.tail(branch_sectors(f1))..., root_sector(f1)),
         outer_multiplicity_indices(f1),
-        outer_multiplicity_indices(f2),
+        outer_multiplicity_indices(f2)
     )
     return SectorFusionTree(
         product_leaves,
         arrows(f1),
         product_root_sector,
         product_branch_sectors,
-        product_outer_multiplicity_indices,
+        product_outer_multiplicity_indices
     )
 end
 
@@ -131,7 +116,7 @@ function GradedArrays.arguments(f::SectorFusionTree{<:SectorProductRange})
         Base.tail(leaves(f)),
         branch_sectors(f),
         (Base.tail(branch_sectors(f))..., root_sector(f)),
-        outer_multiplicity_indices(f),
+        outer_multiplicity_indices(f)
     )
     arguments_root = arguments(root_sector(f))
     arguments_leaves = arguments.(leaves(f))
@@ -144,9 +129,9 @@ function GradedArrays.arguments(f::SectorFusionTree{<:SectorProductRange})
             arrows(f),
             arguments_root[i],
             getindex.(arguments_branch_sectors, i),
-            getindex.(transposed_indices, i),
+            getindex.(transposed_indices, i)
         ),
-        length(arguments_root),
+        length(arguments_root)
     )
 end
 
@@ -180,7 +165,11 @@ function build_trees(
     ) where {N}
     # construct all authorized trees with fixed outer sectors
     trees = [SectorFusionTree(first(sectors_to_fuse), first(arrows_to_fuse))]
-    return recursive_build_trees(trees, Base.tail(sectors_to_fuse), Base.tail(arrows_to_fuse))
+    return recursive_build_trees(
+        trees,
+        Base.tail(sectors_to_fuse),
+        Base.tail(arrows_to_fuse)
+    )
 end
 
 #
@@ -231,7 +220,7 @@ function append_tree_leave(
         branch_sector::SectorRange,
         level_arrow::Bool,
         child_root_sector,
-        outer_mult,
+        outer_mult
     )
     child_leaves = (leaves(parent_tree)..., branch_sector)
     child_arrows = (arrows(parent_tree)..., level_arrow)
@@ -277,7 +266,8 @@ to_array(::SectorFusionTree{<:Any, 0}) = ones(1)
 function to_array(f::SectorFusionTree)
     # init with dummy trivial leg to get arrow correct and deal with size-1 case
     cgt1 = clebsch_gordan_tensor(
-        trivial(sector_type(f)), first(leaves(f)), first(leaves(f)), false, first(arrows(f)), 1
+        trivial(sector_type(f)), first(leaves(f)), first(leaves(f)), false,
+        first(arrows(f)), 1
     )
     tree_tensor = cgt1[1, :, :]
     return grow_tensor_tree(tree_tensor, f)
@@ -304,12 +294,15 @@ function contract_clebsch_gordan(tree_tensor::AbstractArray, cgt::AbstractArray)
         tree_tensor,
         ntuple(identity, N),
         cgt,
-        (N, N + 1, N + 2),
+        (N, N + 1, N + 2)
     )
 end
 
 # specialized code when branch_sector is empty
-function grow_tensor_tree(tree_tensor::AbstractArray{<:Real, 2}, ::SectorFusionTree{<:Any, 1})
+function grow_tensor_tree(
+        tree_tensor::AbstractArray{<:Real, 2},
+        ::SectorFusionTree{<:Any, 1}
+    )
     return tree_tensor
 end
 
@@ -322,7 +315,7 @@ function grow_tensor_tree(
         branch_sectors(f)[N],
         false,
         arrows(f)[N],
-        outer_multiplicity_indices(f)[N - 1],
+        outer_multiplicity_indices(f)[N - 1]
     )
     next_level_tree = contract_clebsch_gordan(tree_tensor, cgt)
     return grow_tensor_tree(next_level_tree, f)
@@ -337,7 +330,7 @@ function grow_tensor_tree(
         root_sector(f),
         false,
         last(arrows(f)),
-        last(outer_multiplicity_indices(f)),
+        last(outer_multiplicity_indices(f))
     )
     return contract_clebsch_gordan(tree_tensor, cgt)
 end

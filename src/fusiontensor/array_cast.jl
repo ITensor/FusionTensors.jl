@@ -1,7 +1,6 @@
 # This file defines interface to cast from and to generic array
 
 using BlockArrays: AbstractBlockArray, BlockedArray, blockedrange, blocklengths, findblock
-
 using BlockSparseArrays: BlockSparseArrays, BlockSparseArray
 using GradedArrays: AbstractGradedUnitRange, quantum_dimension
 using TensorAlgebra: contract
@@ -21,7 +20,7 @@ function to_fusiontensor(
         codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
         domain_legs::Tuple{Vararg{AbstractGradedUnitRange}};
         atol::Real = 0,
-        rtol::Real = rtoldefault(array),
+        rtol::Real = rtoldefault(array)
     )
     bounds = blocklengths.((codomain_legs..., domain_legs...))
     blockarray = BlockedArray(array, bounds...)
@@ -42,7 +41,7 @@ function to_fusiontensor(
         codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
         domain_legs::Tuple{Vararg{AbstractGradedUnitRange}};
         atol::Real = 0,
-        rtol::Real = rtoldefault(blockarray),
+        rtol::Real = rtoldefault(blockarray)
     )
     # input validation
     if length(codomain_legs) + length(domain_legs) != ndims(blockarray)  # compile time
@@ -62,7 +61,7 @@ end
 function to_fusiontensor_no_checknorm(
         blockarray::AbstractBlockArray,
         codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
     )
     ft = FusionTensor{eltype(blockarray)}(undef, codomain_legs, domain_legs)
     for (f1, f2) in keys(trees_block_mapping(ft))
@@ -156,7 +155,7 @@ function contract_fusion_trees(
         split_array_block,
         ntuple(identity, 2 * N),
         p,
-        ntuple(i -> 2 * i, N),
+        ntuple(i -> 2 * i, N)
     )
     # normalization factor
     res ./= dim_sec
@@ -173,7 +172,7 @@ function contract_singlet_projector(f1::SectorFusionTree, f2::SectorFusionTree)
         f1_array,
         (ntuple(identity, N_CO)..., N_CO + N_DO + 1),
         f2_array,
-        (ntuple(i -> i + N_CO, N_DO)..., N_CO + N_DO + 1),
+        (ntuple(i -> i + N_CO, N_DO)..., N_CO + N_DO + 1)
     )
 end
 

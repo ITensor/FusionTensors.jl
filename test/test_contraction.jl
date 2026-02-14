@@ -1,12 +1,11 @@
-using LinearAlgebra: mul!
-using Test: @test, @testset, @test_broken, @test_throws
-
 using BlockSparseArrays: BlockSparseArray
-using FusionTensors:
-    FusionTensors, FusionTensor, FusionTensorAxes, domain_axes, codomain_axes, to_fusiontensor
+using FusionTensors: FusionTensors, FusionTensor, FusionTensorAxes, codomain_axes,
+    domain_axes, to_fusiontensor
 using GradedArrays: SU2, U1, dual, gradedrange
+using LinearAlgebra: mul!
 using TensorAlgebra:
     TensorAlgebra, contract, matricize, permmortar, tuplemortar, unmatricize, unmatricize!
+using Test: @test, @test_broken, @test_throws, @testset
 
 include("setup.jl")
 

@@ -1,9 +1,8 @@
 # This file defines permutedims for a FusionTensor
 
 using BlockArrays: blocklengths
-using Strided: Strided, @strided
-
 using GradedArrays: AbelianStyle, NotAbelianStyle, SymmetryStyle, checkspaces
+using Strided: Strided, @strided
 using TensorAlgebra: AbstractBlockPermutation, permmortar
 
 # permutedims with 1 tuple of 2 separate tuples

@@ -1,9 +1,8 @@
 # This file defines unitaries to be used in permutedims
 
 using BlockArrays: Block, findblock
-using LRUCache: LRU
-
 using GradedArrays: quantum_dimension
+using LRUCache: LRU
 
 const unitary_cache = LRU{Any, Float64}(; maxsize = 10000)  # TBD size
 
@@ -18,7 +17,7 @@ end
 function overlap_fusion_trees(
         old_trees::Tuple{SectorFusionTree{S}, SectorFusionTree{S}},
         new_trees::Tuple{SectorFusionTree{S}, SectorFusionTree{S}},
-        flatperm::Tuple{Vararg{Integer}},
+        flatperm::Tuple{Vararg{Integer}}
     ) where {S}
     old_proj = contract_singlet_projector(old_trees...)
     new_proj = contract_singlet_projector(new_trees...)
@@ -29,10 +28,10 @@ end
 function cached_unitary_coeff(
         old_trees::Tuple{SectorFusionTree{S}, SectorFusionTree{S}},
         new_trees::Tuple{SectorFusionTree{S}, SectorFusionTree{S}},
-        flatperm::Tuple{Vararg{Integer}},
+        flatperm::Tuple{Vararg{Integer}}
     ) where {S}
     return get!(unitary_cache, (old_trees..., new_trees..., flatperm)) do
-        overlap_fusion_trees(old_trees, new_trees, flatperm)
+        return overlap_fusion_trees(old_trees, new_trees, flatperm)
     end
 end
 
@@ -47,7 +46,8 @@ function compute_unitary_clebsch_gordan(
         swapped_old_block = Block(getindex.(Ref(Tuple(old_outer)), flatperm))
         for new_trees in keys(trees_block_mapping(new_ft))
             swapped_old_block != findblock(new_ft, new_trees...) && continue
-            unitary[old_trees, new_trees] = cached_unitary_coeff(old_trees, new_trees, flatperm)
+            unitary[old_trees, new_trees] =
+                cached_unitary_coeff(old_trees, new_trees, flatperm)
         end
     end
     return unitary

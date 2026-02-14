@@ -57,7 +57,11 @@ Base.conj(ft::FusionTensor{<:Real}) = ft   # same object for real element type
 Base.conj(ft::FusionTensor) = set_data_matrix(ft, conj(data_matrix(ft)))
 
 function Base.copy(ft::FusionTensor)
-    return FusionTensor(copy(data_matrix(ft)), copy(axes(ft)), copy(trees_block_mapping(ft)))
+    return FusionTensor(
+        copy(data_matrix(ft)),
+        copy(axes(ft)),
+        copy(trees_block_mapping(ft))
+    )
 end
 
 function Base.deepcopy(ft::FusionTensor)
@@ -100,7 +104,8 @@ function Base.similar(ft::FusionTensor, T::Type)
 end
 
 function Base.similar(
-        ::FusionTensor, ::Type, t::Tuple{AbstractGradedUnitRange, Vararg{AbstractGradedUnitRange}}
+        ::FusionTensor, ::Type,
+        t::Tuple{AbstractGradedUnitRange, Vararg{AbstractGradedUnitRange}}
     )
     throw(MethodError(similar, (typeof(t),)))
 end

@@ -12,7 +12,7 @@ function TensorAlgebra.output_axes(
         a1::FusionTensor,
         biperm1::AbstractBlockPermutation{2},
         a2::FusionTensor,
-        biperm2::AbstractBlockPermutation{2},
+        biperm2::AbstractBlockPermutation{2}
     )
     axes_codomain, axes_contracted = blocks(axes(a1)[biperm1])
     axes_contracted2, axes_domain = blocks(axes(a2)[biperm2])
@@ -24,7 +24,7 @@ function TensorAlgebra.output_axes(
                 flat_axes[begin:length_codomain(biperm_dest)],
                 flat_axes[(length_codomain(biperm_dest) + 1):end],
             )
-        ),
+        )
     )
 end
 
@@ -46,7 +46,7 @@ function TensorAlgebra.unmatricize(
         ::FusionTensorFusionStyle,
         m::AbstractMatrix,
         codomain_axes::Tuple{Vararg{AbstractUnitRange}},
-        domain_axes::Tuple{Vararg{AbstractUnitRange}},
+        domain_axes::Tuple{Vararg{AbstractUnitRange}}
     )
     return FusionTensor(data_matrix(m), codomain_axes, domain_axes)
 end
@@ -54,7 +54,7 @@ end
 function TensorAlgebra.bipermutedims(
         ft::FusionTensor,
         codomain_perm::Tuple{Vararg{Int}},
-        domain_perm::Tuple{Vararg{Int}},
+        domain_perm::Tuple{Vararg{Int}}
     )
     return permutedims(ft, permmortar((codomain_perm, domain_perm)))
 end
@@ -63,7 +63,7 @@ function TensorAlgebra.bipermutedims!(
         a_dest::FusionTensor,
         a_src::FusionTensor,
         codomain_perm::Tuple{Vararg{Int}},
-        domain_perm::Tuple{Vararg{Int}},
+        domain_perm::Tuple{Vararg{Int}}
     )
     return permutedims!(a_dest, a_src, permmortar((codomain_perm, domain_perm)))
 end
@@ -76,7 +76,7 @@ function TensorAlgebra.unmatricizeadd!(
         a_dest_mat::AbstractMatrix,
         codomain_perm::Tuple{Vararg{Int}},
         domain_perm::Tuple{Vararg{Int}},
-        α::Number, β::Number,
+        α::Number, β::Number
     )
     a12 = unmatricize(a_dest_mat, axes(a_dest), codomain_perm, domain_perm)
     data_matrix(a_dest) .= α .* data_matrix(a12) .+ β .* data_matrix(a_dest)
@@ -119,7 +119,7 @@ for f in MATRIX_FUNCTIONS
     @eval begin
         function TensorAlgebra.$f(
                 style::FusionTensorFusionStyle, a::AbstractArray,
-                length_codomain::Val; kwargs...,
+                length_codomain::Val; kwargs...
             )
             a_mat = matricize(style, a, length_codomain)
             biperm = trivialbiperm(length_codomain, Val(ndims(a)))

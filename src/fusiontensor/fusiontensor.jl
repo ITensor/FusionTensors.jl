@@ -1,29 +1,14 @@
 # This file defines struct FusionTensor and constructors
 
-using BlockArrays: AbstractBlockMatrix, BlockArrays, BlockIndexRange, blocklength, findblock
-
+using BlockArrays: BlockArrays, AbstractBlockMatrix, BlockIndexRange, blocklength, findblock
 using BlockSparseArrays:
     AbstractBlockSparseMatrix, BlockSparseArray, eachblockstoredindex, to_block_indices
-using GradedArrays:
-    AbstractGradedUnitRange,
-    SymmetryStyle,
-    TrivialSector,
-    dual,
-    findfirstblock,
-    flip,
-    flip_dual,
-    gradedrange,
-    isdual,
-    map_sectors,
-    sector_multiplicity,
-    sector_type,
-    sectormergesort,
-    sectors,
-    space_isequal,
-    trivial_gradedrange
+using GradedArrays: AbstractGradedUnitRange, SymmetryStyle, TrivialSector, dual,
+    findfirstblock, flip, flip_dual, gradedrange, isdual, map_sectors, sector_multiplicity,
+    sector_type, sectormergesort, sectors, space_isequal, trivial_gradedrange
 using LinearAlgebra: UniformScaling
 using Random: Random, AbstractRNG, randn!
-using TensorAlgebra: BlockedTuple, tuplemortar, length_codomain, length_domain
+using TensorAlgebra: BlockedTuple, length_codomain, length_domain, tuplemortar
 using TypeParameterAccessors: type_parameters
 
 # =======================================  Misc  ===========================================
@@ -50,7 +35,9 @@ function fusion_trees_external_multiplicities(
         outer_legs::Tuple{Vararg{AbstractGradedUnitRange}}
     )
     return Iterators.flatten(
-        block_fusion_trees_external_multiplicities.(Iterators.product(blocks.(outer_legs)...))
+        block_fusion_trees_external_multiplicities.(
+            Iterators.product(blocks.(outer_legs)...)
+        )
     )
 end
 
@@ -64,7 +51,8 @@ function compute_inner_ranges(fusion_trees_mult)
     fused_leg = sectormergesort(
         gradedrange(root_sector.(first.(fusion_trees_mult)) .=> last.(fusion_trees_mult))
     )
-    range_mapping = Dict{type_parameters(eltype(fusion_trees_mult), 1), typeof(Block(1)[1:1])}()
+    range_mapping =
+        Dict{type_parameters(eltype(fusion_trees_mult), 1), typeof(Block(1)[1:1])}()
     fused_sectors = sectors(fused_leg)
     shifts = ones(Int, blocklength(fused_leg))
     for (f, m) in fusion_trees_mult
@@ -78,24 +66,27 @@ end
 
 function intersect_codomain_domain(
         codomain_trees_to_ranges_mapping::Dict{<:SectorFusionTree, <:BlockIndexRange{1}},
-        domain_trees_to_ranges_mapping::Dict{<:SectorFusionTree, <:BlockIndexRange{1}},
+        domain_trees_to_ranges_mapping::Dict{<:SectorFusionTree, <:BlockIndexRange{1}}
     )
     return Dict(
         map(
             Iterators.filter(
                 t -> root_sector(first(first(t))) == dual(root_sector(first(t[2]))),
-                Iterators.product(codomain_trees_to_ranges_mapping, domain_trees_to_ranges_mapping),
-            ),
+                Iterators.product(
+                    codomain_trees_to_ranges_mapping,
+                    domain_trees_to_ranges_mapping
+                )
+            )
         ) do t
             return first.(t) => BlockIndexRange(last.(t))
-        end,
+        end
     )
 end
 
 function initialize_data_matrix(
         elt::Type{<:Number},
         codomain_axis::AbstractGradedUnitRange,
-        domain_axis::AbstractGradedUnitRange,
+        domain_axis::AbstractGradedUnitRange
     )
     @assert sector_type(codomain_axis) == sector_type(domain_axis)
     # non-abelian fusion trees have float eltype: need compatible type
@@ -103,7 +94,7 @@ function initialize_data_matrix(
     mat = BlockSparseArray{promoted}(
         undef,
         blockedrange(sector_multiplicities(codomain_axis)),
-        blockedrange(sector_multiplicities(domain_axis)),
+        blockedrange(sector_multiplicities(domain_axis))
     )
     row_sectors = sectors(codomain_axis)
     col_sectors = sectors(domain_axis)
@@ -148,7 +139,7 @@ trees_block_mapping(ft::FusionTensor) = ft.trees_block_mapping
 function FusionTensor(
         mat::AbstractMatrix,
         legs::FusionTensorAxes,
-        trees_block_mapping::Dict{<:Tuple{<:SectorFusionTree, <:SectorFusionTree}},
+        trees_block_mapping::Dict{<:Tuple{<:SectorFusionTree, <:SectorFusionTree}}
     )
     return FusionTensor{
         eltype(mat), length(legs), typeof(legs), typeof(mat), typeof(trees_block_mapping),
@@ -191,7 +182,7 @@ end
 function FusionTensor(
         x,
         codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
     )
     return FusionTensor(x, tuplemortar((codomain_legs, domain_legs)))
 end
@@ -199,7 +190,7 @@ end
 function FusionTensor{T}(
         x,
         codomain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
-        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}},
+        domain_legs::Tuple{Vararg{AbstractGradedUnitRange}}
     ) where {T}
     return FusionTensor{T}(x, tuplemortar((codomain_legs, domain_legs)))
 end

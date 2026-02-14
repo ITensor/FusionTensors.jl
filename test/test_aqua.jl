@@ -1,5 +1,5 @@
-using FusionTensors: FusionTensors
 using Aqua: Aqua
+using FusionTensors: FusionTensors
 using Test: @testset
 
 @testset "Code quality (Aqua.jl)" begin
