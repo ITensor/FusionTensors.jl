@@ -1,21 +1,19 @@
-name: Register Package
+name: "Register Package"
 on:
-  workflow_dispatch:
+  workflow_dispatch: ~
   push:
     branches:
-      - 'master'
-      - 'main'
+      - "master"
+      - "main"
     paths:
-      - 'Project.toml'
-
+      - "Project.toml"
 permissions:
-  contents: write
-  pull-requests: write
-
+  contents: "write"
+  pull-requests: "write"
 jobs:
   Register:
     uses: "ITensor/ITensorActions/.github/workflows/Registrator.yml@main"
     with:
-      localregistry: ITensor/ITensorRegistry
+      localregistry: "ITensor/ITensorRegistry"
     secrets:
-      REGISTRATOR_KEY: ${{ secrets.REGISTRATOR_KEY }}
+      REGISTRATOR_KEY: "${{ secrets.REGISTRATOR_KEY }}"
