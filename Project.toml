@@ -1,6 +1,6 @@
 name = "FusionTensors"
 uuid = "e16ca583-1f51-4df0-8e12-57d32947d33e"
-version = "0.5.21"
+version = "0.5.22"
 authors = ["ITensor developers <support@itensor.org> and contributors"]
 
 [workspace]
