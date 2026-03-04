@@ -1,9 +1,10 @@
 using Documenter: Documenter, DocMeta, deploydocs, makedocs
 using FusionTensors: FusionTensors
+using ITensorFormatter: ITensorFormatter
 
 DocMeta.setdocmeta!(FusionTensors, :DocTestSetup, :(using FusionTensors); recursive = true)
 
-include("make_index.jl")
+ITensorFormatter.make_index!(pkgdir(FusionTensors))
 
 makedocs(;
     modules = [FusionTensors],
